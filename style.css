@@ -1,0 +1,1431 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background: #f1f6ec;
+    color: #263238;
+    min-height: 100vh;
+}
+
+/* Navbar */
+.navbar {
+    background-color: #1f5130;
+    color: #ffffff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 24px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.nav-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+/* 3-Line Hamburger Menu Button */
+.hamburger-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    padding: 6px;
+    border-radius: 8px;
+    transition: background 0.2s;
+}
+
+.hamburger-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.hamburger-btn .bar {
+    width: 24px;
+    height: 2.5px;
+    background-color: #ffffff;
+    border-radius: 2px;
+    transition: all 0.2s ease-in-out;
+}
+
+.navbar .logo {
+    font-size: 21px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    user-select: none;
+}
+
+.navbar .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.btn-nav-attach {
+    background: #e8b931;
+    color: #1f5130;
+    border: none;
+    font-weight: 700;
+    font-size: 13.5px;
+    padding: 8px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.btn-nav-attach:hover {
+    background: #d4a726;
+    transform: translateY(-1px);
+}
+
+.nav-call-icon {
+    background: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 16px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.nav-call-icon:hover {
+    background: #25d366;
+}
+
+/* =========================================
+   Side Drawer (3-Line Slide-out App Menu)
+   ========================================= */
+.drawer-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(10, 25, 15, 0.65);
+    backdrop-filter: blur(4px);
+    z-index: 9998;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.drawer-overlay.open {
+    opacity: 1;
+    visibility: visible;
+}
+
+.side-drawer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 320px;
+    max-width: 85vw;
+    height: 100vh;
+    background: #ffffff;
+    z-index: 9999;
+    box-shadow: 5px 0 25px rgba(0, 0, 0, 0.25);
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+.side-drawer.open {
+    transform: translateX(0);
+}
+
+.drawer-header {
+    background: linear-gradient(135deg, #1f5130 0%, #296d42 100%);
+    color: #ffffff;
+    padding: 24px 20px 20px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.drawer-user-info {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.drawer-real-avatar {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2.5px solid #ffd966;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.drawer-user-meta h3 {
+    font-size: 16px;
+    color: #ffffff;
+    margin-bottom: 4px;
+}
+
+.user-badge {
+    background: #e8b931;
+    color: #1f5130;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+.drawer-close-btn {
+    background: rgba(255, 255, 255, 0.15);
+    border: none;
+    color: #ffffff;
+    font-size: 22px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.drawer-close-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.drawer-menu {
+    padding: 12px 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.drawer-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 20px;
+    color: #2e4d36;
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 600;
+    border: none;
+    background: transparent;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.2s, padding-left 0.2s;
+    border-bottom: 1px solid #f2f6ee;
+}
+
+.drawer-item:hover {
+    background: #f4f9f1;
+    padding-left: 24px;
+    color: #1f5130;
+}
+
+.drawer-item.active {
+    background: #eaf4e6;
+    color: #1f5130;
+    border-left: 4px solid #1f5130;
+}
+
+.drawer-item.highlight-item {
+    background: #fffdf5;
+    border-left: 4px solid #e8b931;
+}
+
+.drawer-item.highlight-item:hover {
+    background: #fff9e6;
+}
+
+.drawer-item-icon {
+    font-size: 20px;
+    width: 26px;
+    text-align: center;
+}
+
+.item-text-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.item-title {
+    font-size: 15px;
+    color: #1f5130;
+}
+
+.item-sub {
+    font-size: 11px;
+    color: #8c731f;
+    font-weight: normal;
+}
+
+.drawer-footer {
+    padding: 18px 20px;
+    background: #fbfdf9;
+    border-top: 1px solid #edf4ea;
+    font-size: 12px;
+    color: #607d8b;
+    text-align: center;
+}
+
+.drawer-footer-tag {
+    color: #2e7d32;
+    margin-top: 2px;
+}
+
+/* =========================================
+   Main Dashboard / Index Styles
+   ========================================= */
+.main-content {
+    max-width: 1140px;
+    margin: 25px auto 50px auto;
+    padding: 0 20px;
+}
+
+/* Hero Banner with Real Photo Farm Texture */
+.hero-banner {
+    background: linear-gradient(135deg, rgba(31, 81, 48, 0.94) 0%, rgba(41, 109, 66, 0.92) 100%),
+                url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat;
+    color: #ffffff;
+    padding: 38px 30px;
+    border-radius: 18px;
+    box-shadow: 0 8px 24px rgba(31, 81, 48, 0.2);
+    margin-bottom: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.hero-tag {
+    display: inline-block;
+    background: rgba(232, 185, 49, 0.25);
+    color: #ffd966;
+    border: 1px solid rgba(232, 185, 49, 0.4);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+
+.hero-text h1 {
+    font-size: 28px;
+    line-height: 1.3;
+    margin-bottom: 10px;
+    color: #ffffff;
+}
+
+.hero-text .tagline {
+    font-size: 16px;
+    color: #e0ece4;
+    line-height: 1.5;
+    max-width: 800px;
+}
+
+.hero-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    padding-top: 20px;
+}
+
+.stat-card {
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 12px 16px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    backdrop-filter: blur(4px);
+}
+
+.stat-number {
+    font-size: 22px;
+    font-weight: 800;
+    color: #ffd966;
+}
+
+.stat-label {
+    font-size: 13px;
+    color: #e0ece4;
+}
+
+/* Crop & Need Filter Section with Real Crop Thumbnails */
+.crop-filter-section {
+    background: #ffffff;
+    padding: 24px 22px;
+    border-radius: 16px;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.04);
+    margin-bottom: 30px;
+    border-top: 5px solid #e8b931;
+}
+
+.section-header h2 {
+    color: #1f5130;
+    font-size: 22px;
+    margin-bottom: 6px;
+}
+
+.section-header p {
+    color: #607d8b;
+    font-size: 14px;
+    margin-bottom: 18px;
+}
+
+.crop-pills-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.crop-pill {
+    background: #f7faf4;
+    border: 1.5px solid #c8e0be;
+    color: #2e4d36;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: 30px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.2s ease;
+}
+
+.crop-pill:hover {
+    background: #eef7eb;
+    border-color: #1f5130;
+    transform: translateY(-2px);
+}
+
+.crop-pill.active {
+    background: #1f5130;
+    color: #ffffff;
+    border-color: #1f5130;
+    box-shadow: 0 4px 12px rgba(31, 81, 48, 0.25);
+}
+
+.crop-pill-img {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1.5px solid #e8b931;
+    flex-shrink: 0;
+}
+
+/* Fleet Section */
+.fleet-section {
+    margin-bottom: 35px;
+}
+
+.fleet-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.fleet-header h3 {
+    color: #1f5130;
+    font-size: 20px;
+}
+
+.fleet-count {
+    background: #e8f3e5;
+    color: #1f5130;
+    padding: 4px 12px;
+    border-radius: 14px;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.fleet-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 24px;
+}
+
+/* Machine Card with Real Photographs */
+.machine-card {
+    background: #ffffff;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    border: 1.5px solid #e2ebd8;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    position: relative;
+}
+
+.machine-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 28px rgba(31, 81, 48, 0.15);
+    border-color: #1f5130;
+}
+
+.card-top-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: #e8b931;
+    color: #1f5130;
+    font-size: 11px;
+    font-weight: 800;
+    padding: 4px 10px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+    z-index: 2;
+}
+
+.machine-card-image {
+    position: relative;
+    width: 100%;
+    height: 205px;
+    overflow: hidden;
+    background: #e3ede0;
+    border-bottom: 1px solid #dce8d5;
+}
+
+.machine-real-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+    transition: transform 0.4s ease;
+}
+
+.machine-card:hover .machine-real-photo {
+    transform: scale(1.06);
+}
+
+.machine-card-body {
+    padding: 20px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.machine-title {
+    font-size: 19px;
+    color: #1f5130;
+    margin-bottom: 4px;
+}
+
+.machine-subtitle {
+    font-size: 13px;
+    color: #607d8b;
+    margin-bottom: 14px;
+}
+
+.specs-list {
+    background: #fbfdf9;
+    border: 1px solid #edf4ea;
+    border-radius: 10px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    margin-bottom: 18px;
+    font-size: 13px;
+}
+
+.spec-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #37474f;
+}
+
+.spec-item strong {
+    color: #1f5130;
+}
+
+.machine-card-footer {
+    margin-top: auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 12px;
+    border-top: 1px solid #edf4ea;
+}
+
+.price-box {
+    display: flex;
+    flex-direction: column;
+}
+
+.price-title {
+    font-size: 11px;
+    color: #78909c;
+}
+
+.price-val {
+    font-size: 20px;
+    font-weight: 800;
+    color: #2e7d32;
+}
+
+.price-unit {
+    font-size: 12px;
+    color: #546e7a;
+    font-weight: normal;
+}
+
+.btn-book-card {
+    background: #e8b931;
+    color: #1f5130;
+    border: none;
+    font-weight: 700;
+    font-size: 14px;
+    padding: 10px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+}
+
+.btn-book-card:hover {
+    background: #d4a726;
+    transform: scale(1.03);
+}
+
+/* Callout Section */
+.help-callout-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.04);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    border-left: 6px solid #25d366;
+}
+
+.callout-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.callout-icon {
+    font-size: 40px;
+}
+
+.callout-content h3 {
+    color: #1f5130;
+    font-size: 18px;
+    margin-bottom: 4px;
+}
+
+.callout-content p {
+    color: #607d8b;
+    font-size: 13px;
+}
+
+.callout-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.btn-call {
+    background: #1f5130;
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 11px 18px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-whatsapp {
+    background: #25d366;
+    color: #ffffff;
+    border: none;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 11px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.2s;
+}
+
+.btn-whatsapp:hover {
+    background: #20ba59;
+}
+
+/* =========================================
+   Modal Overlays & Cards
+   ========================================= */
+.modal-overlay,
+.lang-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(15, 34, 21, 0.72);
+    backdrop-filter: blur(5px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 20px;
+    animation: fadeIn 0.25s ease-out;
+}
+
+.modal-card {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 28px;
+    max-width: 540px;
+    width: 100%;
+    box-shadow: 0 16px 45px rgba(0, 0, 0, 0.25);
+    position: relative;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: scaleIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.modal-close-btn {
+    position: absolute;
+    top: 14px;
+    right: 18px;
+    background: #eceff1;
+    border: none;
+    font-size: 24px;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #546e7a;
+    transition: background 0.2s;
+    z-index: 5;
+}
+
+.modal-close-btn:hover {
+    background: #cfd8dc;
+    color: #263238;
+}
+
+/* Booking Modal Photo Preview */
+.modal-photo-wrap {
+    width: 100%;
+    height: 170px;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 14px;
+    background: #e3ede0;
+}
+
+.modal-real-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+}
+
+.booking-modal-header {
+    margin-bottom: 18px;
+}
+
+.modal-badge {
+    background: #eef7eb;
+    color: #1f5130;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 10px;
+    display: inline-block;
+    margin-bottom: 6px;
+}
+
+.booking-modal-header h2 {
+    color: #1f5130;
+    font-size: 22px;
+}
+
+.booking-modal-header p {
+    color: #607d8b;
+    font-size: 13px;
+}
+
+.booking-rate-box {
+    background: #f7faf4;
+    border: 1.5px solid #d4e7cc;
+    border-radius: 12px;
+    padding: 12px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.rate-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.rate-label {
+    font-size: 12px;
+    color: #607d8b;
+}
+
+.rate-value {
+    font-size: 16px;
+    font-weight: 700;
+    color: #37474f;
+}
+
+.rate-total {
+    font-size: 22px;
+    font-weight: 800;
+    color: #2e7d32;
+}
+
+/* Forms */
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    font-size: 13px;
+    color: #37474f;
+}
+
+.form-group input,
+.form-select {
+    width: 100%;
+    padding: 11px 13px;
+    border: 1.5px solid #cfd8dc;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    background: #ffffff;
+}
+
+.form-group input:focus,
+.form-select:focus {
+    border-color: #1f5130;
+    box-shadow: 0 0 0 3px rgba(31, 81, 48, 0.15);
+}
+
+.modal-action-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 18px;
+}
+
+.btn-confirm-booking {
+    width: 100%;
+    padding: 12px;
+    font-size: 15px;
+}
+
+/* =========================================
+   Tractor Registration Modal
+   ========================================= */
+.reg-modal-card {
+    max-width: 620px;
+}
+
+.reg-modal-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.reg-icon {
+    font-size: 42px;
+    margin-bottom: 6px;
+}
+
+.reg-modal-header h2 {
+    color: #1f5130;
+    font-size: 22px;
+}
+
+.reg-modal-header p {
+    color: #607d8b;
+    font-size: 13px;
+    margin-top: 4px;
+}
+
+.form-section-heading {
+    color: #1f5130;
+    font-size: 14px;
+    font-weight: 700;
+    margin: 18px 0 10px 0;
+    padding-bottom: 4px;
+    border-bottom: 1px solid #edf4ea;
+}
+
+.checkbox-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.check-box-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13.5px;
+    color: #37474f;
+    cursor: pointer;
+}
+
+.terms-agree-box {
+    background: #f7faf4;
+    border: 1px solid #d4e7cc;
+    padding: 10px 14px;
+    border-radius: 8px;
+    margin-bottom: 18px;
+}
+
+.terms-agree-box a {
+    color: #1f5130;
+    font-weight: 700;
+    text-decoration: underline;
+}
+
+.btn-submit-reg {
+    width: 100%;
+    padding: 13px;
+    font-size: 16px;
+}
+
+/* =========================================
+   Terms & Policy Modal
+   ========================================= */
+.terms-modal-card {
+    max-width: 600px;
+}
+
+.terms-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.terms-icon {
+    font-size: 42px;
+    margin-bottom: 6px;
+}
+
+.terms-header h2 {
+    color: #1f5130;
+    font-size: 20px;
+}
+
+.terms-header p {
+    color: #607d8b;
+    font-size: 13px;
+    margin-top: 4px;
+}
+
+.terms-content-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.term-card {
+    background: #fbfdf9;
+    border: 1px solid #e1edd8;
+    border-radius: 10px;
+    padding: 12px 14px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.term-number {
+    background: #1f5130;
+    color: #ffffff;
+    font-weight: 800;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    flex-shrink: 0;
+}
+
+.term-text h4 {
+    color: #1f5130;
+    font-size: 14.5px;
+    margin-bottom: 4px;
+}
+
+.term-text p {
+    color: #546e7a;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+/* Receipt Modal */
+.receipt-card {
+    text-align: center;
+    max-width: 460px;
+}
+
+.receipt-success-icon {
+    font-size: 46px;
+    margin-bottom: 8px;
+}
+
+.receipt-card h2 {
+    color: #1f5130;
+    font-size: 22px;
+    margin-bottom: 6px;
+}
+
+.receipt-sub {
+    color: #607d8b;
+    font-size: 13px;
+    margin-bottom: 18px;
+}
+
+.receipt-details {
+    background: #fbfdfa;
+    border: 2px dashed #b7d6ac;
+    border-radius: 12px;
+    padding: 18px;
+    text-align: left;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-size: 14px;
+}
+
+.receipt-row {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid #edf4ea;
+    padding-bottom: 6px;
+}
+
+.receipt-row:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: #2e7d32;
+    padding-top: 4px;
+}
+
+.receipt-row span:first-child {
+    color: #607d8b;
+}
+
+/* Login Page specific */
+.login-body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    position: relative;
+    min-height: 100vh;
+    background: linear-gradient(rgba(241, 246, 236, 0.92), rgba(241, 246, 236, 0.92)),
+                url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat;
+}
+
+.login-topbar {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+}
+
+.login-wrapper {
+    width: 100%;
+    max-width: 440px;
+    margin: auto;
+}
+
+.login-card {
+    background: #ffffff;
+    padding: 35px 30px;
+    border-radius: 16px;
+    box-shadow: 0 10px 35px rgba(31, 81, 48, 0.16);
+    border-top: 6px solid #1f5130;
+}
+
+.brand-header {
+    text-align: center;
+    margin-bottom: 28px;
+}
+
+.login-brand-real-photo {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin: 0 auto 10px auto;
+    border: 3px solid #e8b931;
+    box-shadow: 0 4px 12px rgba(31, 81, 48, 0.2);
+    display: block;
+}
+
+.brand-header h1 {
+    color: #1f5130;
+    font-size: 26px;
+    font-weight: 700;
+}
+
+.brand-header .subtitle {
+    color: #607d8b;
+    font-size: 14px;
+    margin-top: 4px;
+}
+
+.form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    font-size: 13px;
+}
+
+.remember-me {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #546e7a;
+    cursor: pointer;
+}
+
+.forgot-link {
+    color: #1f5130;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.forgot-link:hover {
+    text-decoration: underline;
+}
+
+.btn {
+    display: inline-block;
+    width: 100%;
+    border: none;
+    padding: 13px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform 0.1s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+    text-align: center;
+}
+
+.btn:active {
+    transform: scale(0.98);
+}
+
+.btn-primary {
+    background: #e8b931;
+    color: #1f5130;
+    box-shadow: 0 4px 12px rgba(232, 185, 49, 0.3);
+}
+
+.btn-primary:hover {
+    background: #d9aa25;
+}
+
+.btn-guest {
+    background: #eef5ea;
+    color: #1f5130;
+    border: 1.5px solid #c8e0be;
+}
+
+.btn-guest:hover {
+    background: #e2edd9;
+}
+
+.divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 20px 0;
+    color: #90a4ae;
+    font-size: 12px;
+}
+
+.divider::before,
+.divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid #eceff1;
+}
+
+.divider span {
+    padding: 0 10px;
+    font-weight: 600;
+}
+
+.login-footer {
+    text-align: center;
+    margin-top: 24px;
+    font-size: 14px;
+    color: #546e7a;
+}
+
+.login-footer a {
+    color: #1f5130;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.login-footer a:hover {
+    text-decoration: underline;
+}
+
+.message-box {
+    display: none;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+.message-box.error {
+    background-color: #ffebee;
+    color: #c62828;
+    border: 1px solid #ffcdd2;
+}
+
+.message-box.success {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #c8e6c9;
+}
+
+/* Language Selection Modal */
+.lang-modal-card {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 35px 30px;
+    max-width: 440px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 16px 45px rgba(0, 0, 0, 0.25);
+    border-top: 6px solid #1f5130;
+    animation: scaleIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.lang-modal-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+}
+
+.lang-modal-card h2 {
+    color: #1f5130;
+    font-size: 22px;
+    margin-bottom: 8px;
+}
+
+.lang-modal-card p {
+    color: #607d8b;
+    font-size: 14px;
+    margin-bottom: 24px;
+    line-height: 1.5;
+}
+
+.lang-buttons-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.lang-choice-btn {
+    background: #f7faf4;
+    border: 2px solid #c8e0be;
+    border-radius: 14px;
+    padding: 18px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.lang-choice-btn:hover {
+    background: #eef7eb;
+    border-color: #1f5130;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 18px rgba(31, 81, 48, 0.18);
+}
+
+.lang-choice-btn .flag {
+    font-size: 36px;
+}
+
+.lang-choice-btn .lang-name {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1f5130;
+}
+
+.lang-choice-btn .lang-hint {
+    font-size: 12px;
+    color: #78909c;
+    font-weight: 600;
+}
+
+/* Lang Switch Buttons */
+.lang-switch-btn {
+    background: #ffffff;
+    border: 1.5px solid #1f5130;
+    color: #1f5130;
+    font-size: 13.5px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+}
+
+.nav-lang-btn {
+    background: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+.nav-lang-btn:hover {
+    background: #ffffff;
+    color: #1f5130;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+    from { transform: scale(0.92); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+/* Responsive Media Queries */
+@media (max-width: 768px) {
+    .navbar {
+        padding: 10px 16px;
+    }
+
+    .navbar .logo {
+        font-size: 18px;
+    }
+
+    .btn-nav-attach span {
+        display: none;
+    }
+
+    .btn-nav-attach {
+        padding: 6px 10px;
+        font-size: 16px;
+    }
+
+    .hero-banner {
+        padding: 24px 20px;
+    }
+
+    .hero-text h1 {
+        font-size: 22px;
+    }
+
+    .form-row,
+    .checkbox-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .modal-action-buttons {
+        grid-template-columns: 1fr;
+    }
+
+    .help-callout-card {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .callout-content {
+        flex-direction: column;
+    }
+    
+    .callout-actions {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .callout-actions .btn-call,
+    .callout-actions .btn-whatsapp {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .crop-pill {
+        padding: 6px 12px;
+        font-size: 13px;
+    }
+
+    .machine-card-image {
+        height: 180px;
+    }
+}
