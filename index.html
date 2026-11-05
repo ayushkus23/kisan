@@ -65,10 +65,10 @@
                 <span class="drawer-item-icon">📜</span>
                 <span data-i18n="menuTerms">नियम व नीतियां (Terms & Policy)</span>
             </button>
-            <a href="tel:18001234567" class="drawer-item">
+            <button type="button" class="drawer-item" onclick="handleCallSupport(); closeDrawer();">
                 <span class="drawer-item-icon">📞</span>
-                <span data-i18n="menuHelpline">किसान सहायता केंद्र (24x7)</span>
-            </a>
+                <span data-i18n="menuHelpline">किसान सहायता केंद्र (Call & WhatsApp)</span>
+            </button>
             <button type="button" class="drawer-item" id="drawerAuthBtn" onclick="handleDrawerAuth()">
                 <span class="drawer-item-icon">🚪</span>
                 <span id="drawerAuthText" data-i18n="navLogin">लॉगिन</span>
@@ -98,9 +98,9 @@
             <button type="button" class="btn-nav-attach" onclick="openTractorRegModal()">
                 🚜 <span data-i18n="navAttachBtn">ट्रैक्टर जोड़ें</span>
             </button>
-            <a href="tel:18001234567" class="nav-call-icon" title="Kisan Helpline">
+            <button type="button" class="nav-call-icon" onclick="handleCallSupport()" title="Call & WhatsApp Support">
                 📞
-            </a>
+            </button>
         </div>
     </header>
 
@@ -179,21 +179,21 @@
             </div>
         </section>
 
-        <!-- Quick Help & WhatsApp Callout -->
+        <!-- Quick Help & Support Callout (Clean Call & WhatsApp options without hardcoded toll numbers) -->
         <section class="help-callout-card">
             <div class="callout-content">
                 <div class="callout-icon">📞</div>
                 <div>
-                    <h3 data-i18n="calloutTitle">फोन या व्हाट्सएप पर सीधे ट्रैक्टर मंगाएं</h3>
-                    <p data-i18n="calloutDesc">अगर फॉर्म भरने में परेशानी हो, तो हमारे किसान नंबर पर कॉल या व्हाट्सएप करें — हमारी टीम तुरंत आपके खेत पर ट्रैक्टर भेजेगी।</p>
+                    <h3 data-i18n="calloutTitle">फोन या व्हाट्सएप पर सीधे सहायता पाएं</h3>
+                    <p data-i18n="calloutDesc">अगर फॉर्म भरने में परेशानी हो, तो हमें कॉल या व्हाट्सएप करें — हमारी टीम तुरंत आपके खेत पर ट्रैक्टर भेजने में मदद करेगी।</p>
                 </div>
             </div>
             <div class="callout-actions">
-                <a href="tel:18001234567" class="btn btn-call">
-                    📞 <span data-i18n="btnCallNow">1800-123-4567 (टोल फ्री)</span>
-                </a>
+                <button type="button" class="btn btn-call" onclick="handleCallSupport()">
+                    📞 <span data-i18n="btnCallNow">कॉल सहायता (Call Support)</span>
+                </button>
                 <button type="button" class="btn btn-whatsapp" onclick="openDirectWhatsApp()">
-                    💬 <span data-i18n="btnWhatsAppNow">व्हाट्सएप पर बात करें</span>
+                    💬 <span data-i18n="btnWhatsAppNow">व्हाट्सएप सहायता</span>
                 </button>
             </div>
         </section>
@@ -444,6 +444,37 @@
             <div class="receipt-actions">
                 <button type="button" class="btn btn-primary" onclick="closeTermsModal()" data-i18n="receiptCloseBtn">
                     समझ गया (Accept & Close)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Call & WhatsApp Support Modal (No random numbers) -->
+    <div id="callSupportModal" class="modal-overlay">
+        <div class="modal-card support-modal-card">
+            <button type="button" class="modal-close-btn" onclick="closeCallSupportModal()">&times;</button>
+            <div class="support-icon">📞</div>
+            <h2 data-i18n="callModalTitle">किसान सहायता केंद्र (Kisan Support)</h2>
+            <p data-i18n="callModalSub">ट्रैक्टर बुकिंग या किसी भी जानकारी के लिए कॉल या व्हाट्सएप सहायता प्राप्त करें।</p>
+
+            <div class="support-options-list">
+                <div class="callback-card">
+                    <h4 data-i18n="callbackTitle">📞 कॉल बैक का अनुरोध करें (Request Call Back)</h4>
+                    <p data-i18n="callbackDesc">अपना 10 अंकों का मोबाइल नंबर डालें, हमारी टीम 5-10 मिनट में आपको कॉल करेगी:</p>
+                    <div class="callback-input-box">
+                        <input type="tel" id="callbackPhone" placeholder="जैसे: 9876543210" maxlength="10">
+                        <button type="button" class="btn btn-primary" onclick="submitCallbackRequest()" data-i18n="btnRequestCallback">
+                            कॉल बैक मंगाएं
+                        </button>
+                    </div>
+                </div>
+
+                <div class="support-divider">
+                    <span data-i18n="dividerOr">या</span>
+                </div>
+
+                <button type="button" class="btn btn-whatsapp support-whatsapp-btn" onclick="openDirectWhatsApp()">
+                    💬 <span data-i18n="btnWhatsAppNow">व्हाट्सएप पर सीधे बात करें</span>
                 </button>
             </div>
         </div>

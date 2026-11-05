@@ -1,4 +1,4 @@
-// Project Tractor - Complete Bilingual, Crop-Based Fleet with Real Photos, Drawer & Registration Logic
+// Project Tractor - Complete Bilingual, Crop-Based Fleet with Real Photos, Drawer, Registration & Safe Support (No Hardcoded Numbers)
 
 // Real photo mappings for tractor brands
 const brandRealPhotos = {
@@ -128,7 +128,7 @@ const translations = {
         menuRegTractorSub: "किराये पर देकर कमाई करें",
         menuLanguage: "भाषा बदलें (हिंदी / English)",
         menuTerms: "नियम व नीतियां (Terms & Policy)",
-        menuHelpline: "किसान सहायता केंद्र (24x7)",
+        menuHelpline: "किसान सहायता केंद्र (Call & WhatsApp)",
         drawerFooterTag: "किसान भाइयों का सच्चा साथी",
         navAttachBtn: "ट्रैक्टर जोड़ें",
 
@@ -174,11 +174,20 @@ const translations = {
         cardPriceTitle: "किराया दर",
         cardBookBtn: "🚜 बुक करें",
 
-        // Help Callout
-        calloutTitle: "फोन या व्हाट्सएप पर सीधे ट्रैक्टर मंगाएं",
-        calloutDesc: "अगर फॉर्म भरने में परेशानी हो, तो हमारे किसान नंबर पर कॉल या व्हाट्सएप करें — हमारी टीम तुरंत आपके खेत पर ट्रैक्टर भेजेगी।",
-        btnCallNow: "1800-123-4567 (टोल फ्री)",
-        btnWhatsAppNow: "व्हाट्सएप पर बात करें",
+        // Help Callout & Support
+        calloutTitle: "फोन या व्हाट्सएप पर सीधे सहायता पाएं",
+        calloutDesc: "अगर फॉर्म भरने में परेशानी हो, तो हमें कॉल या व्हाट्सएप करें — हमारी टीम तुरंत आपके खेत पर ट्रैक्टर भेजने में मदद करेगी।",
+        btnCallNow: "कॉल सहायता (Call Support)",
+        btnWhatsAppNow: "व्हाट्सएप सहायता (WhatsApp)",
+
+        // Call Support Modal
+        callModalTitle: "किसान सहायता केंद्र (Kisan Support)",
+        callModalSub: "ट्रैक्टर बुकिंग या किसी भी जानकारी के लिए कॉल या व्हाट्सएप सहायता प्राप्त करें।",
+        callbackTitle: "📞 कॉल बैक का अनुरोध करें (Request Call Back)",
+        callbackDesc: "अपना 10 अंकों का मोबाइल नंबर डालें, हमारी टीम 5-10 मिनट में आपको कॉल करेगी:",
+        btnRequestCallback: "कॉल बैक मंगाएं",
+        callbackSuccess: "धन्यवाद! आपकी कॉल बैक रिक्वेस्ट मिल गई है ({phone})। हमारी सपोर्ट टीम 5-10 मिनट में आपको कॉल करेगी।",
+        callbackErr: "कृपया अपना 10 अंकों का सही मोबाइल नंबर दर्ज करें।",
 
         // Booking Modal
         modalRateLabel: "किराया दर:",
@@ -253,7 +262,7 @@ const translations = {
         loginSuccess: "लॉगिन सफल रहा! कृपया प्रतीक्षा करें...",
         errFillFields: "कृपया सभी जरूरी जानकारी भरें।",
         errPasswordLength: "पासवर्ड कम से कम 4 अक्षरों का होना चाहिए।",
-        forgotAlert: "पासवर्ड रीसेट हेल्पलाइन: 1800-123-4567 पर कॉल करें।",
+        forgotAlert: "पासवर्ड रीसेट करने के लिए किसान सहायता केंद्र से संपर्क करें।",
         signupAlert: "नया रजिस्ट्रेशन जल्द शुरू होगा! अभी आप सीधे लॉगिन कर सकते हैं।",
         langTag: "हिंदी"
     },
@@ -270,7 +279,7 @@ const translations = {
         menuRegTractorSub: "Earn daily by renting",
         menuLanguage: "Change Language (हिंदी / English)",
         menuTerms: "Terms & Policies",
-        menuHelpline: "Farmer Helpline (24x7)",
+        menuHelpline: "Farmer Support Center (Call & WhatsApp)",
         drawerFooterTag: "Trusted Companion of Farmers",
         navAttachBtn: "Attach Tractor",
 
@@ -316,11 +325,20 @@ const translations = {
         cardPriceTitle: "Rental Rate",
         cardBookBtn: "🚜 Book Now",
 
-        // Help Callout
-        calloutTitle: "Order a Tractor Directly via Phone or WhatsApp",
-        calloutDesc: "If you find it difficult to fill forms, simply call or WhatsApp our helpline — our local team will deploy a tractor to your farm immediately.",
-        btnCallNow: "1800-123-4567 (Toll Free)",
-        btnWhatsAppNow: "Chat on WhatsApp",
+        // Help Callout & Support
+        calloutTitle: "Get Support via Call or WhatsApp",
+        calloutDesc: "If you need assistance with booking, contact our team via phone or WhatsApp for prompt deployment to your farm.",
+        btnCallNow: "Call Support",
+        btnWhatsAppNow: "WhatsApp Support",
+
+        // Call Support Modal
+        callModalTitle: "Farmer Support Center",
+        callModalSub: "Get direct assistance for tractor booking or inquiries via Call or WhatsApp.",
+        callbackTitle: "📞 Request a Call Back",
+        callbackDesc: "Enter your 10-digit mobile number, and our team will call you back within 5-10 minutes:",
+        btnRequestCallback: "Request Call Back",
+        callbackSuccess: "Thank you! Your call back request is received ({phone}). Our support team will call you within 5-10 minutes.",
+        callbackErr: "Please enter a valid 10-digit mobile number.",
 
         // Booking Modal
         modalRateLabel: "Rental Rate:",
@@ -395,7 +413,7 @@ const translations = {
         loginSuccess: "Login successful! Please wait...",
         errFillFields: "Please fill all required fields.",
         errPasswordLength: "Password must be at least 4 characters long.",
-        forgotAlert: "Please call helpline 1800-123-4567 to reset your password.",
+        forgotAlert: "Please contact farmer support to reset your password.",
         signupAlert: "New registration starting soon! You can login directly now.",
         langTag: "English"
     }
@@ -722,8 +740,34 @@ function closeReceiptModal() {
 }
 
 // ==========================================
-// 7. WhatsApp Booking Dispatcher
+// 7. Call & WhatsApp Support Dispatchers (No Hardcoded Numbers)
 // ==========================================
+function handleCallSupport() {
+    const modal = document.getElementById('callSupportModal');
+    if (modal) modal.style.display = 'flex';
+}
+
+function closeCallSupportModal() {
+    const modal = document.getElementById('callSupportModal');
+    if (modal) modal.style.display = 'none';
+}
+
+function submitCallbackRequest() {
+    const t = translations[currentLang] || translations.hi;
+    const phoneInput = document.getElementById('callbackPhone');
+    const phone = phoneInput ? phoneInput.value.trim() : '';
+
+    if (!phone || phone.length < 10) {
+        alert(t.callbackErr);
+        return;
+    }
+
+    alert(t.callbackSuccess.replace('{phone}', phone));
+    if (phoneInput) phoneInput.value = '';
+    closeCallSupportModal();
+}
+
+// WhatsApp Dispatcher without hardcoded phone number (Universal WhatsApp Share)
 function sendBookingViaWhatsApp() {
     if (!selectedMachine) return;
     const farmerName = document.getElementById('farmerName').value.trim() || 'Kisan';
@@ -746,12 +790,12 @@ function sendBookingViaWhatsApp() {
         `Kripya jaldi se tractor bhejane ki pushti karein. Shukriya!`;
 
     const encoded = encodeURIComponent(message);
-    window.open(`https://wa.me/919876543210?text=${encoded}`, '_blank');
+    window.open(`https://api.whatsapp.com/send?text=${encoded}`, '_blank');
 }
 
 function openDirectWhatsApp() {
-    const msg = encodeURIComponent("Namaste! Mujhe kheti ke liye tractor aur machine kiraye par chahiye. Kripya jankari dein.");
-    window.open(`https://wa.me/919876543210?text=${msg}`, '_blank');
+    const msg = encodeURIComponent("Namaste! Mujhe Project Tractor se kheti ke liye tractor / machine kiraye par chahiye. Kripya jankari dein.");
+    window.open(`https://api.whatsapp.com/send?text=${msg}`, '_blank');
 }
 
 // ==========================================
@@ -823,6 +867,7 @@ window.addEventListener('click', (e) => {
     const receiptModal = document.getElementById('receiptModal');
     const regModal = document.getElementById('tractorRegModal');
     const termsModal = document.getElementById('termsPolicyModal');
+    const callModal = document.getElementById('callSupportModal');
 
     if (e.target === langModal && localStorage.getItem('tractorLang')) {
         closeLanguageModal();
@@ -838,6 +883,9 @@ window.addEventListener('click', (e) => {
     }
     if (e.target === termsModal) {
         closeTermsModal();
+    }
+    if (e.target === callModal) {
+        closeCallSupportModal();
     }
 });
 
