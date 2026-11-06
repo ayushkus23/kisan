@@ -2,13 +2,13 @@
 
 // Real photo mappings for tractor brands
 const brandRealPhotos = {
-    "Mahindra 575 DI (45 HP)": "https://images.unsplash.com/photo-1592982537447-7440770cbfc9?auto=format&fit=crop&w=800&q=80",
-    "Swaraj 855 FE (52 HP)": "https://images.unsplash.com/photo-1530267981375-f0de937f5f13?auto=format&fit=crop&w=800&q=80",
-    "John Deere 5310 (55 HP)": "https://images.unsplash.com/photo-1595974482597-4b8da8879bc5?auto=format&fit=crop&w=800&q=80",
-    "Sonalika DI 745 (50 HP)": "https://images.unsplash.com/photo-1615811361523-6bd03d7748e7?auto=format&fit=crop&w=800&q=80",
-    "Massey Ferguson 241 (42 HP)": "https://images.unsplash.com/photo-1589923188900-85dae523342b?auto=format&fit=crop&w=800&q=80",
-    "Farmtrac 60 (50 HP)": "https://images.unsplash.com/photo-1586771107445-d3ca888129ff?auto=format&fit=crop&w=800&q=80",
-    "Chhota Mini Tractor (24 HP)": "https://images.unsplash.com/photo-1589923188651-268a9f65e320?auto=format&fit=crop&w=800&q=80"
+    "Mahindra 575 DI (45 HP)": "images/dhan-tractor.jpg",
+    "Swaraj 855 FE (52 HP)": "images/gehu-tractor.jpg",
+    "John Deere 5310 (55 HP)": "images/ganna-tractor.jpg",
+    "Sonalika DI 745 (50 HP)": "images/ganna-tractor.jpg",
+    "Massey Ferguson 241 (42 HP)": "images/dhan-tractor.jpg",
+    "Farmtrac 60 (50 HP)": "images/dhulai-tractor.jpg",
+    "Chhota Mini Tractor (24 HP)": "images/compact-tractor.jpg"
 };
 
 // 1. Tractor & Machine Catalog with REAL Agricultural Photographs
@@ -16,7 +16,7 @@ const fleetData = [
     {
         id: "dhan-4wd",
         categories: ["dhan"],
-        image: "https://images.unsplash.com/photo-1592982537447-7440770cbfc9?auto=format&fit=crop&w=800&q=80",
+        image: "images/dhan-tractor.jpg",
         rate: 600,
         rateUnit: { hi: "घंटा", en: "Hour" },
         badge: { hi: "🌾 धान कड़वा स्पेशल", en: "🌾 Paddy Puddling Special" },
@@ -30,7 +30,7 @@ const fleetData = [
     {
         id: "gehu-super-seeder",
         categories: ["gehu"],
-        image: "https://images.unsplash.com/photo-1530267981375-f0de937f5f13?auto=format&fit=crop&w=800&q=80",
+        image: "images/gehu-tractor.jpg",
         rate: 550,
         rateUnit: { hi: "घंटा", en: "Hour" },
         badge: { hi: "🌱 गेहूं व सरसों बोवाई स्पेशल", en: "🌱 Wheat & Sowing Special" },
@@ -44,7 +44,7 @@ const fleetData = [
     {
         id: "ganna-heavy-hauler",
         categories: ["ganna"],
-        image: "https://images.unsplash.com/photo-1615811361523-6bd03d7748e7?auto=format&fit=crop&w=800&q=80",
+        image: "images/ganna-tractor.jpg",
         rate: 700,
         rateUnit: { hi: "घंटा", en: "Hour" },
         badge: { hi: "🎋 गन्ना व भारी जुताई स्पेशल", en: "🎋 Heavy Sugarcane Hauler" },
@@ -58,7 +58,7 @@ const fleetData = [
     {
         id: "sabzi-mini-tractor",
         categories: ["sabzi", "bagwani"],
-        image: "https://images.unsplash.com/photo-1589923188651-268a9f65e320?auto=format&fit=crop&w=800&q=80",
+        image: "images/compact-tractor.jpg",
         rate: 380,
         rateUnit: { hi: "घंटा", en: "Hour" },
         badge: { hi: "🥔 आलू व सब्जी स्पेशल", en: "🥔 Potato & Veggies Special" },
@@ -72,7 +72,7 @@ const fleetData = [
     {
         id: "dhulai-trolley-tractor",
         categories: ["dhulai"],
-        image: "https://images.unsplash.com/photo-1586771107445-d3ca888129ff?auto=format&fit=crop&w=800&q=80",
+        image: "images/dhulai-tractor.jpg",
         rate: 450,
         rateUnit: { hi: "घंटा", en: "Hour" },
         badge: { hi: "🚛 मंडी व माल ढुलाई", en: "🚛 Mandi & Haulage Transport" },
@@ -86,7 +86,7 @@ const fleetData = [
     {
         id: "bagwani-sprayer-mini",
         categories: ["bagwani"],
-        image: "https://images.unsplash.com/photo-1594771804886-a933bb2d609b?auto=format&fit=crop&w=800&q=80",
+        image: "images/bagwani-tractor.jpg",
         rate: 350,
         rateUnit: { hi: "घंटा", en: "Hour" },
         badge: { hi: "🍎 बागवानी व स्प्रे स्पेशल", en: "🍎 Orchard & Spraying Special" },
@@ -100,7 +100,7 @@ const fleetData = [
     {
         id: "combine-harvester",
         categories: ["dhan", "gehu"],
-        image: "https://images.unsplash.com/photo-1585499193151-0f50d54c4e54?auto=format&fit=crop&w=800&q=80",
+        image: "images/combine-harvester.jpg",
         rate: 1400,
         rateUnit: { hi: "एकड़", en: "Acre" },
         badge: { hi: "⚡ धान व गेहूं सीधी कटाई", en: "⚡ Direct Harvesting & Threshing" },
@@ -498,7 +498,7 @@ function handleTractorRegistration(event) {
     }
 
     // Pick a real photo based on chosen brand
-    const photoUrl = brandRealPhotos[tractorBrand] || "https://images.unsplash.com/photo-1592982537447-7440770cbfc9?auto=format&fit=crop&w=800&q=80";
+    const photoUrl = brandRealPhotos[tractorBrand] || "images/dhan-tractor.jpg";
 
     // Add newly registered tractor to active fleet
     const newId = 'custom-' + Date.now();
@@ -551,13 +551,13 @@ function renderFleetCards(category = 'all') {
         const work = machine.suitableWork[currentLang] || machine.suitableWork.hi;
         const tool = machine.tool[currentLang] || machine.tool.hi;
         const rateUnit = machine.rateUnit[currentLang] || machine.rateUnit.hi;
-        const imgUrl = machine.image || "https://images.unsplash.com/photo-1592982537447-7440770cbfc9?auto=format&fit=crop&w=800&q=80";
+        const imgUrl = machine.image || "images/dhan-tractor.jpg";
 
         return `
             <div class="machine-card">
                 <span class="card-top-badge">${badge}</span>
                 <div class="machine-card-image">
-                    <img src="${imgUrl}" alt="${title}" class="machine-real-photo" loading="lazy">
+                    <img src="${imgUrl}" alt="${title}" class="machine-real-photo" loading="lazy" onerror="this.onerror=null; this.src='images/dhan-tractor.jpg'">
                 </div>
                 <div class="machine-card-body">
                     <h4 class="machine-title">${title}</h4>
@@ -617,7 +617,7 @@ function openBookingModal(machineId) {
     const sub = selectedMachine.subtitle[currentLang] || selectedMachine.subtitle.hi;
     const badge = selectedMachine.badge[currentLang] || selectedMachine.badge.hi;
     const rateUnit = selectedMachine.rateUnit[currentLang] || selectedMachine.rateUnit.hi;
-    const imgUrl = selectedMachine.image || "https://images.unsplash.com/photo-1592982537447-7440770cbfc9?auto=format&fit=crop&w=800&q=80";
+    const imgUrl = selectedMachine.image || "images/dhan-tractor.jpg";
 
     document.getElementById('modalMachineTitle').textContent = title;
     document.getElementById('modalMachineSubtitle').textContent = sub;

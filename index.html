@@ -5,6 +5,12 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Project Tractor - Kisan Portal</title>
+    <!-- First-time / Not-logged-in redirect to login page -->
+    <script>
+        if (!localStorage.getItem('tractorUser')) {
+            window.location.replace('login.html');
+        }
+    </script>
     <link rel="stylesheet" href="style.css">
 </head>
 
@@ -36,7 +42,7 @@
     <aside class="side-drawer" id="sideDrawer">
         <div class="drawer-header">
             <div class="drawer-user-info">
-                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=160&q=80" alt="Farmer Avatar" class="drawer-real-avatar">
+                <img src="images/dhan-tractor.jpg" alt="Farmer Avatar" class="drawer-real-avatar">
                 <div class="drawer-user-meta">
                     <h3 id="drawerUserName">नमस्ते, किसान भाई 🙏</h3>
                     <span class="user-badge" data-i18n="drawerVerifiedBadge">सत्यापित किसान</span>
@@ -138,31 +144,31 @@
 
             <div class="crop-pills-container">
                 <button type="button" class="crop-pill active" onclick="filterByCrop('all', this)">
-                    <img src="https://images.unsplash.com/photo-1592982537447-7440770cbfc9?auto=format&fit=crop&w=120&q=80" alt="All Tractors" class="crop-pill-img">
+                    <img src="images/dhan-tractor.jpg" alt="All Tractors" class="crop-pill-img">
                     <span class="pill-text" data-i18n="filterAll">सभी गाड़ियां (All)</span>
                 </button>
                 <button type="button" class="crop-pill" onclick="filterByCrop('dhan', this)">
-                    <img src="https://images.unsplash.com/photo-1536657464919-892534f60d6e?auto=format&fit=crop&w=120&q=80" alt="Paddy Crop" class="crop-pill-img">
+                    <img src="images/crop-paddy.jpg" alt="Paddy Crop" class="crop-pill-img">
                     <span class="pill-text" data-i18n="filterDhan">धान / चावल (Paddy)</span>
                 </button>
                 <button type="button" class="crop-pill" onclick="filterByCrop('gehu', this)">
-                    <img src="https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?auto=format&fit=crop&w=120&q=80" alt="Wheat Crop" class="crop-pill-img">
+                    <img src="images/crop-wheat.jpg" alt="Wheat Crop" class="crop-pill-img">
                     <span class="pill-text" data-i18n="filterGehu">गेहूं व सरसों (Wheat)</span>
                 </button>
                 <button type="button" class="crop-pill" onclick="filterByCrop('ganna', this)">
-                    <img src="https://images.unsplash.com/photo-1628088062854-d1870b4553da?auto=format&fit=crop&w=120&q=80" alt="Sugarcane Crop" class="crop-pill-img">
+                    <img src="images/crop-sugarcane.jpg" alt="Sugarcane Crop" class="crop-pill-img">
                     <span class="pill-text" data-i18n="filterGanna">गन्ना व भारी जुताई (Sugarcane)</span>
                 </button>
                 <button type="button" class="crop-pill" onclick="filterByCrop('sabzi', this)">
-                    <img src="https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&w=120&q=80" alt="Potato & Veggies" class="crop-pill-img">
+                    <img src="images/crop-potato.jpg" alt="Potato & Veggies" class="crop-pill-img">
                     <span class="pill-text" data-i18n="filterSabzi">आलू व सब्जियां (Veggies)</span>
                 </button>
                 <button type="button" class="crop-pill" onclick="filterByCrop('dhulai', this)">
-                    <img src="https://images.unsplash.com/photo-1586771107445-d3ca888129ff?auto=format&fit=crop&w=120&q=80" alt="Haulage" class="crop-pill-img">
+                    <img src="images/crop-haulage.jpg" alt="Haulage" class="crop-pill-img">
                     <span class="pill-text" data-i18n="filterDhulai">मंडी व माल ढुलाई (Haulage)</span>
                 </button>
                 <button type="button" class="crop-pill" onclick="filterByCrop('bagwani', this)">
-                    <img src="https://images.unsplash.com/photo-1618897996318-5a901fa6ca71?auto=format&fit=crop&w=120&q=80" alt="Orchard Trees" class="crop-pill-img">
+                    <img src="images/crop-orchard.jpg" alt="Orchard Trees" class="crop-pill-img">
                     <span class="pill-text" data-i18n="filterBagwani">बागवानी व स्प्रे (Orchard)</span>
                 </button>
             </div>
@@ -179,7 +185,7 @@
             </div>
         </section>
 
-        <!-- Quick Help & Support Callout (Clean Call & WhatsApp options without hardcoded toll numbers) -->
+        <!-- Quick Help & Support Callout -->
         <section class="help-callout-card">
             <div class="callout-content">
                 <div class="callout-icon">📞</div>
@@ -205,7 +211,7 @@
             <button type="button" class="modal-close-btn" onclick="closeBookingModal()">&times;</button>
             
             <div class="modal-photo-wrap">
-                <img id="modalMachinePhoto" src="" alt="Machine Photo" class="modal-real-photo">
+                <img id="modalMachinePhoto" src="images/dhan-tractor.jpg" alt="Machine Photo" class="modal-real-photo">
             </div>
 
             <div class="booking-modal-header">
@@ -449,7 +455,7 @@
         </div>
     </div>
 
-    <!-- Call & WhatsApp Support Modal (No random numbers) -->
+    <!-- Call & WhatsApp Support Modal -->
     <div id="callSupportModal" class="modal-overlay">
         <div class="modal-card support-modal-card">
             <button type="button" class="modal-close-btn" onclick="closeCallSupportModal()">&times;</button>
