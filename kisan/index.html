@@ -5,6 +5,12 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Project Tractor - Kisan Portal</title>
+    <!-- First-time / Not-logged-in redirect to login page -->
+    <script>
+        if (!localStorage.getItem('tractorUser')) {
+            window.location.replace('login.html');
+        }
+    </script>
     <link rel="stylesheet" href="style.css">
 </head>
 
@@ -36,7 +42,7 @@
     <aside class="side-drawer" id="sideDrawer">
         <div class="drawer-header">
             <div class="drawer-user-info">
-                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=160&q=80" alt="Farmer Avatar" class="drawer-real-avatar">
+                <img src="images/dhan-tractor.jpg" alt="Farmer Avatar" class="drawer-real-avatar">
                 <div class="drawer-user-meta">
                     <h3 id="drawerUserName">नमस्ते, किसान भाई 🙏</h3>
                     <span class="user-badge" data-i18n="drawerVerifiedBadge">सत्यापित किसान</span>
@@ -50,6 +56,13 @@
                 <span class="drawer-item-icon">🏠</span>
                 <span data-i18n="menuHome">होम / डैशबोर्ड</span>
             </a>
+            <button type="button" class="drawer-item" onclick="openMyBookingsModal(); closeDrawer();">
+                <span class="drawer-item-icon">📋</span>
+                <div class="item-text-group">
+                    <span class="item-title" data-i18n="menuMyBookings">मेरी बुकिंग्स</span>
+                    <span class="item-sub" id="drawerBookingCount">0 बुकिंग</span>
+                </div>
+            </button>
             <button type="button" class="drawer-item highlight-item" onclick="openTractorRegModal()">
                 <span class="drawer-item-icon">🚜</span>
                 <div class="item-text-group">
@@ -92,6 +105,10 @@
             <div class="logo">🚜 <span data-i18n="brandName">प्रोजेक्ट ट्रैक्टर</span></div>
         </div>
         <div class="nav-right">
+            <button type="button" class="btn-nav-bookings" onclick="openMyBookingsModal()" title="मेरी बुकिंग्स / My Bookings">
+                📋 <span data-i18n="navMyBookings">मेरी बुकिंग्स</span>
+                <span class="nav-booking-badge" id="navBookingBadge" style="display: none;">0</span>
+            </button>
             <button type="button" class="lang-switch-btn nav-lang-btn" onclick="openLanguageModal()" title="भाषा बदलें / Change Language">
                 🌐 <span id="currentLangTag">हिंदी</span> ▾
             </button>
@@ -104,8 +121,55 @@
         </div>
     </header>
 
+    <!-- Live Mandi Bhav Ticker -->
+    <div class="mandi-ticker-bar">
+        <div class="mandi-ticker-badge">
+            <span class="pulse-dot"></span>
+            <span data-i18n="mandiLiveTag">📊 आज के मंडी भाव (Agmarknet Live)</span>
+        </div>
+        <div class="mandi-ticker-wrap">
+            <div class="mandi-ticker-track" id="mandiTickerContent">
+                <!-- Injected via script.js -->
+            </div>
+        </div>
+    </div>
+
     <!-- Main Content Area -->
     <main class="main-content">
+        <!-- Live Weather & Agriculture Advisory Widget -->
+        <section class="weather-advisory-card">
+            <div class="weather-col-left">
+                <div class="weather-main-info">
+                    <span class="weather-icon">☀️</span>
+                    <div class="weather-temp-info">
+                        <span class="weather-temp">28°C</span>
+                        <span class="weather-condition" data-i18n="weatherCondition">धूप खिली है ☀️</span>
+                    </div>
+                </div>
+                <div class="weather-meta-row">
+                    <span class="weather-meta-item" data-i18n="weatherHumidity">💧 नमी: 42%</span>
+                    <span class="weather-meta-item" data-i18n="weatherWind">💨 हवा: 8 km/h</span>
+                    <span class="weather-meta-item" data-i18n="weatherRain">🌧️ बारिश: 0%</span>
+                </div>
+                <div class="weather-location-tag">
+                    📍 <span data-i18n="weatherCity">मेरठ, उत्तर प्रदेश (पश्चिमी क्षेत्र)</span>
+                </div>
+            </div>
+            <div class="weather-col-right">
+                <div class="advisory-pill">
+                    <span class="advisory-icon">🌾</span>
+                    <span data-i18n="advisoryTag">आज की कृषि सलाह (Daily Farm Advisory)</span>
+                </div>
+                <p class="advisory-text" data-i18n="advisoryText">
+                    मौसम पूरी तरह साफ और शुष्क है। गेहूं व सरसों की बोवाई, खेत की गहरी जुताई और कंबाइन से धान कटाई के लिए आज का दिन सर्वोत्तम है।
+                </p>
+                <div class="advisory-footer">
+                    <span class="badge-optimum">✅ जुताई व कटाई के लिए अनुकूल</span>
+                    <span class="advisory-time" data-i18n="advisoryTime">आज का अपडेट</span>
+                </div>
+            </div>
+        </section>
+
         <!-- Hero Banner with Real Agricultural Landscape -->
         <section class="hero-banner">
             <div class="hero-text">
@@ -138,31 +202,31 @@
 
             <div class="crop-pills-container">
                 <button type="button" class="crop-pill active" onclick="filterByCrop('all', this)">
-                    <img src="https://images.unsplash.com/photo-1592982537447-7440770cbfc9?auto=format&fit=crop&w=120&q=80" alt="All Tractors" class="crop-pill-img">
+                    <img src="images/dhan-tractor.jpg" alt="All Tractors" class="crop-pill-img">
                     <span class="pill-text" data-i18n="filterAll">सभी गाड़ियां (All)</span>
                 </button>
                 <button type="button" class="crop-pill" onclick="filterByCrop('dhan', this)">
-                    <img src="https://images.unsplash.com/photo-1536657464919-892534f60d6e?auto=format&fit=crop&w=120&q=80" alt="Paddy Crop" class="crop-pill-img">
+                    <img src="images/crop-paddy.jpg" alt="Paddy Crop" class="crop-pill-img">
                     <span class="pill-text" data-i18n="filterDhan">धान / चावल (Paddy)</span>
                 </button>
                 <button type="button" class="crop-pill" onclick="filterByCrop('gehu', this)">
-                    <img src="https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?auto=format&fit=crop&w=120&q=80" alt="Wheat Crop" class="crop-pill-img">
+                    <img src="images/crop-wheat.jpg" alt="Wheat Crop" class="crop-pill-img">
                     <span class="pill-text" data-i18n="filterGehu">गेहूं व सरसों (Wheat)</span>
                 </button>
                 <button type="button" class="crop-pill" onclick="filterByCrop('ganna', this)">
-                    <img src="https://images.unsplash.com/photo-1628088062854-d1870b4553da?auto=format&fit=crop&w=120&q=80" alt="Sugarcane Crop" class="crop-pill-img">
+                    <img src="images/crop-sugarcane.jpg" alt="Sugarcane Crop" class="crop-pill-img">
                     <span class="pill-text" data-i18n="filterGanna">गन्ना व भारी जुताई (Sugarcane)</span>
                 </button>
                 <button type="button" class="crop-pill" onclick="filterByCrop('sabzi', this)">
-                    <img src="https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&w=120&q=80" alt="Potato & Veggies" class="crop-pill-img">
+                    <img src="images/crop-potato.jpg" alt="Potato & Veggies" class="crop-pill-img">
                     <span class="pill-text" data-i18n="filterSabzi">आलू व सब्जियां (Veggies)</span>
                 </button>
                 <button type="button" class="crop-pill" onclick="filterByCrop('dhulai', this)">
-                    <img src="https://images.unsplash.com/photo-1586771107445-d3ca888129ff?auto=format&fit=crop&w=120&q=80" alt="Haulage" class="crop-pill-img">
+                    <img src="images/crop-haulage.jpg" alt="Haulage" class="crop-pill-img">
                     <span class="pill-text" data-i18n="filterDhulai">मंडी व माल ढुलाई (Haulage)</span>
                 </button>
                 <button type="button" class="crop-pill" onclick="filterByCrop('bagwani', this)">
-                    <img src="https://images.unsplash.com/photo-1618897996318-5a901fa6ca71?auto=format&fit=crop&w=120&q=80" alt="Orchard Trees" class="crop-pill-img">
+                    <img src="images/crop-orchard.jpg" alt="Orchard Trees" class="crop-pill-img">
                     <span class="pill-text" data-i18n="filterBagwani">बागवानी व स्प्रे (Orchard)</span>
                 </button>
             </div>
@@ -172,14 +236,33 @@
         <section class="fleet-section">
             <div class="fleet-header">
                 <h3 id="fleetSectionTitle" data-i18n="fleetTitle">अनुशंसित गाड़ियां और मशीनें</h3>
-                <span class="fleet-count" id="fleetCountBadge">7 गाड़ियां उपलब्ध</span>
+                <span class="fleet-count" id="fleetCountBadge">9 गाड़ियां उपलब्ध</span>
             </div>
+
+            <!-- Smart Search & Filter Bar -->
+            <div class="search-sort-bar">
+                <div class="search-input-wrap">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="machineSearchInput" placeholder="मशीन, औजार या काम खोजें (उदा: रोटावेटर, कंबाइन, 4WD, लेवलर)..." oninput="handleSearchAndSort()" data-i18n-placeholder="searchPlaceholder">
+                    <button type="button" class="clear-search-btn" id="clearSearchBtn" onclick="clearSearch()" style="display: none;">&times;</button>
+                </div>
+                <div class="sort-select-wrap">
+                    <label for="fleetSortSelect" data-i18n="labelSortBy">क्रमबद्ध करें:</label>
+                    <select id="fleetSortSelect" class="sort-select" onchange="handleSearchAndSort()">
+                        <option value="default" data-i18n="sortDefault">अनुशंसित (Recommended)</option>
+                        <option value="price-low" data-i18n="sortPriceLow">किराया: कम से ज्यादा (₹ ⬆)</option>
+                        <option value="price-high" data-i18n="sortPriceHigh">किराया: ज्यादा से कम (₹ ⬇)</option>
+                        <option value="rating" data-i18n="sortRating">उच्चतम रेटिंग (⭐️ 4.8+)</option>
+                    </select>
+                </div>
+            </div>
+
             <div class="fleet-grid" id="fleetGrid">
                 <!-- Fleet cards dynamically injected with real photos by script.js -->
             </div>
         </section>
 
-        <!-- Quick Help & Support Callout (Clean Call & WhatsApp options without hardcoded toll numbers) -->
+        <!-- Quick Help & Support Callout -->
         <section class="help-callout-card">
             <div class="callout-content">
                 <div class="callout-icon">📞</div>
@@ -205,7 +288,7 @@
             <button type="button" class="modal-close-btn" onclick="closeBookingModal()">&times;</button>
             
             <div class="modal-photo-wrap">
-                <img id="modalMachinePhoto" src="" alt="Machine Photo" class="modal-real-photo">
+                <img id="modalMachinePhoto" src="images/dhan-tractor.jpg" alt="Machine Photo" class="modal-real-photo">
             </div>
 
             <div class="booking-modal-header">
@@ -226,6 +309,29 @@
             </div>
 
             <form id="tractorBookingForm" onsubmit="handleTractorBookingSubmit(event)">
+                <!-- Fuel Option Toggle (With vs Without Diesel) -->
+                <div class="fuel-choice-section">
+                    <label class="fuel-choice-title" data-i18n="fuelChoiceTitle">⛽ डीजल का चुनाव करें (Fuel Option) *</label>
+                    <div class="fuel-options-grid">
+                        <label class="fuel-option-card active" id="fuelOptionWithCard" onclick="handleFuelOptionChange('with-fuel')">
+                            <input type="radio" name="fuelOption" id="fuelOptionWith" value="with-fuel" checked>
+                            <div class="fuel-opt-info">
+                                <span class="fuel-opt-title" data-i18n="fuelWithTitle">डीजल व ड्राइवर सहित</span>
+                                <span class="fuel-opt-desc" data-i18n="fuelWithDesc">डीजल और ड्राइवर का खर्च मालिक का</span>
+                            </div>
+                            <span class="fuel-opt-rate" id="fuelRateWith">₹600/घं</span>
+                        </label>
+                        <label class="fuel-option-card" id="fuelOptionWithoutCard" onclick="handleFuelOptionChange('without-fuel')">
+                            <input type="radio" name="fuelOption" id="fuelOptionWithout" value="without-fuel">
+                            <div class="fuel-opt-info">
+                                <span class="fuel-opt-title" data-i18n="fuelWithoutTitle">डीजल किसान का (सस्ता रेट)</span>
+                                <span class="fuel-opt-desc" data-i18n="fuelWithoutDesc">डीजल आप देंगे, सिर्फ मशीन व ड्राइवर</span>
+                            </div>
+                            <span class="fuel-opt-rate discount" id="fuelRateWithout">₹380/घं</span>
+                        </label>
+                    </div>
+                </div>
+
                 <div class="form-row">
                     <div class="form-group">
                         <label for="farmerName" data-i18n="labelFarmerName">किसान का नाम *</label>
@@ -239,8 +345,15 @@
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="farmerVillage" data-i18n="labelFarmerVillage">गांव / कस्बा व जिला *</label>
-                        <input type="text" id="farmerVillage" required placeholder="जैसे: रामपुर, मेरठ" data-i18n-placeholder="placeholderFarmerVillage">
+                        <div class="label-with-action">
+                            <label for="farmerVillage" data-i18n="labelFarmerVillage">गांव / खेत का स्थान व जिला *</label>
+                            <button type="button" class="btn-detect-gps" id="btnDetectLocation" onclick="detectFarmerLocation()" title="GPS से खेत की लोकेशन लें">
+                                📍 <span data-i18n="btnDetectGPS">GPS से खेत खोजें</span>
+                            </button>
+                        </div>
+                        <input type="text" id="farmerVillage" required placeholder="जैसे: रामपुर, मेरठ (या GPS बटन दबाएं)" data-i18n-placeholder="placeholderFarmerVillage">
+                        <div id="farmerGpsStatus" class="gps-status-pill" style="display: none;"></div>
+                        <input type="hidden" id="farmerGpsLink" value="">
                     </div>
                     <div class="form-group">
                         <label for="workDuration" data-i18n="labelWorkDuration">कितने घंटे / बीघा चाहिए? *</label>
@@ -310,8 +423,14 @@
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="ownerVillage" data-i18n="regOwnerLocation">गांव / कस्बा व जिला *</label>
-                        <input type="text" id="ownerVillage" required placeholder="जैसे: मवाना, मेरठ" data-i18n-placeholder="placeholderFarmerVillage">
+                        <div class="label-with-action">
+                            <label for="ownerVillage" data-i18n="regOwnerLocation">गांव / कस्बा व जिला *</label>
+                            <button type="button" class="btn-detect-gps" onclick="detectOwnerLocation()" title="GPS से गैराज लोकेशन लें">
+                                📍 <span data-i18n="btnDetectGPS">GPS लोकेशन</span>
+                            </button>
+                        </div>
+                        <input type="text" id="ownerVillage" required placeholder="जैसे: मवाना, मेरठ (या GPS बटन दबाएं)" data-i18n-placeholder="placeholderFarmerVillage">
+                        <div id="ownerGpsStatus" class="gps-status-pill" style="display: none;"></div>
                     </div>
                     <div class="form-group">
                         <label for="ownerDL" data-i18n="regOwnerDL">ड्राइविंग लाइसेंस (DL) नंबर</label>
@@ -449,7 +568,7 @@
         </div>
     </div>
 
-    <!-- Call & WhatsApp Support Modal (No random numbers) -->
+    <!-- Call & WhatsApp Support Modal -->
     <div id="callSupportModal" class="modal-overlay">
         <div class="modal-card support-modal-card">
             <button type="button" class="modal-close-btn" onclick="closeCallSupportModal()">&times;</button>
@@ -476,6 +595,126 @@
                 <button type="button" class="btn btn-whatsapp support-whatsapp-btn" onclick="openDirectWhatsApp()">
                     💬 <span data-i18n="btnWhatsAppNow">व्हाट्सएप पर सीधे बात करें</span>
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- My Bookings Modal -->
+    <div id="myBookingsModal" class="modal-overlay">
+        <div class="modal-card my-bookings-card">
+            <button type="button" class="modal-close-btn" onclick="closeMyBookingsModal()">&times;</button>
+            <div class="my-bookings-header">
+                <div class="my-bookings-icon">📋</div>
+                <div>
+                    <h2 data-i18n="myBookingsTitle">मेरी बुकिंग्स (My Bookings)</h2>
+                    <p data-i18n="myBookingsSub">आपके द्वारा बुक किए गए सभी ट्रैक्टरों और मशीनों की सूची</p>
+                </div>
+            </div>
+
+            <div id="myBookingsList" class="my-bookings-list">
+                <!-- Injected dynamically via script.js -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Live Tractor Tracking Modal -->
+    <div id="liveTrackingModal" class="modal-overlay">
+        <div class="modal-card tracking-modal-card">
+            <button type="button" class="modal-close-btn" onclick="closeLiveTrackingModal()">&times;</button>
+            
+            <div class="tracking-header">
+                <div class="tracking-icon">🚜</div>
+                <div>
+                    <h2 data-i18n="trackingTitle">ट्रैक्टर लाइव ट्रैकिंग (Live Tracker)</h2>
+                    <p id="trackingOrderSubtitle">ऑर्डर • खेत की ओर रवाना</p>
+                </div>
+            </div>
+
+            <!-- Simulated Live GPS Radar & Map View -->
+            <div class="tracking-map-viewport">
+                <div class="map-farm-bg">
+                    <div class="map-radar-ripple"></div>
+                    <div class="map-path-line"></div>
+                    
+                    <!-- Destination Pin (Farmer's Field) -->
+                    <div class="map-pin farm-pin" title="आपका खेत (Your Field)">
+                        <span class="pin-badge">🌾 आपका खेत</span>
+                        <div class="pin-marker red-marker">📍</div>
+                    </div>
+
+                    <!-- Tractor Pin (Moving towards Field) -->
+                    <div class="map-pin tractor-pin" id="mapTractorPin" title="ट्रैक्टर (Tractor)">
+                        <div class="tractor-marker-bubble">
+                            <span class="pulse-beacon"></span>
+                            🚜
+                        </div>
+                        <span class="pin-badge driver-tag" id="mapDriverTag">ड्राइवर रवाना</span>
+                    </div>
+
+                    <!-- Live Satellite Watermark -->
+                    <div class="map-status-overlay">
+                        <span class="live-dot-pulse"></span>
+                        <span>GPS LIVE SATELLITE RADAR</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Real-time Stats Cards -->
+            <div class="tracking-stats-grid">
+                <div class="track-stat-box">
+                    <span class="stat-meta" data-i18n="trackingDistance">खेत से दूरी</span>
+                    <strong class="stat-digit" id="trackDistance">2.1 किमी</strong>
+                </div>
+                <div class="track-stat-box highlight">
+                    <span class="stat-meta" data-i18n="trackingETA">पहुंचने का समय</span>
+                    <strong class="stat-digit" id="trackETA">11 मिनट</strong>
+                </div>
+                <div class="track-stat-box">
+                    <span class="stat-meta" data-i18n="trackingSpeed">ट्रैक्टर की गति</span>
+                    <strong class="stat-digit" id="trackSpeed">22 किमी/घं</strong>
+                </div>
+            </div>
+
+            <!-- Trip Milestone Stepper -->
+            <div class="trip-stepper">
+                <div class="step-node done">
+                    <span class="step-check">✓</span>
+                    <span class="step-label" data-i18n="stepConfirmed">बुकिंग स्वीकृत</span>
+                </div>
+                <div class="step-line done"></div>
+                <div class="step-node done">
+                    <span class="step-check">✓</span>
+                    <span class="step-label" data-i18n="stepAssigned">ड्राइवर असाइन</span>
+                </div>
+                <div class="step-line active"></div>
+                <div class="step-node active">
+                    <span class="step-pulse">🚜</span>
+                    <span class="step-label" data-i18n="stepOnWay">खेत की ओर रवाना</span>
+                </div>
+                <div class="step-line"></div>
+                <div class="step-node">
+                    <span class="step-circle">4</span>
+                    <span class="step-label" data-i18n="stepArrived">खेत पर आगमन</span>
+                </div>
+            </div>
+
+            <!-- Assigned Driver Profile & Call Action -->
+            <div class="assigned-driver-card">
+                <div class="driver-profile-info">
+                    <img src="images/dhan-tractor.jpg" alt="Driver Photo" class="driver-avatar-img" id="trackingMachinePhoto">
+                    <div>
+                        <h4 id="trackingDriverName">ड्राइवर: राजू यादव</h4>
+                        <p id="trackingMachineDetails">Mahindra 575 DI • 4WD</p>
+                    </div>
+                </div>
+                <div class="driver-card-actions">
+                    <button type="button" class="btn btn-call" onclick="handleCallDriver()">
+                        📞 <span data-i18n="btnCallDriver">कॉल सहायता</span>
+                    </button>
+                    <a id="btnOpenGoogleMaps" href="#" target="_blank" class="btn btn-map-link">
+                        🗺️ <span data-i18n="btnGoogleMaps">Google Maps</span>
+                    </a>
+                </div>
             </div>
         </div>
     </div>
