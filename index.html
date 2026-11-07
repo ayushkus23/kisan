@@ -56,6 +56,13 @@
                 <span class="drawer-item-icon">🏠</span>
                 <span data-i18n="menuHome">होम / डैशबोर्ड</span>
             </a>
+            <button type="button" class="drawer-item" onclick="openMyBookingsModal(); closeDrawer();">
+                <span class="drawer-item-icon">📋</span>
+                <div class="item-text-group">
+                    <span class="item-title" data-i18n="menuMyBookings">मेरी बुकिंग्स</span>
+                    <span class="item-sub" id="drawerBookingCount">0 बुकिंग</span>
+                </div>
+            </button>
             <button type="button" class="drawer-item highlight-item" onclick="openTractorRegModal()">
                 <span class="drawer-item-icon">🚜</span>
                 <div class="item-text-group">
@@ -98,6 +105,10 @@
             <div class="logo">🚜 <span data-i18n="brandName">प्रोजेक्ट ट्रैक्टर</span></div>
         </div>
         <div class="nav-right">
+            <button type="button" class="btn-nav-bookings" onclick="openMyBookingsModal()" title="मेरी बुकिंग्स / My Bookings">
+                📋 <span data-i18n="navMyBookings">मेरी बुकिंग्स</span>
+                <span class="nav-booking-badge" id="navBookingBadge" style="display: none;">0</span>
+            </button>
             <button type="button" class="lang-switch-btn nav-lang-btn" onclick="openLanguageModal()" title="भाषा बदलें / Change Language">
                 🌐 <span id="currentLangTag">हिंदी</span> ▾
             </button>
@@ -110,8 +121,55 @@
         </div>
     </header>
 
+    <!-- Live Mandi Bhav Ticker -->
+    <div class="mandi-ticker-bar">
+        <div class="mandi-ticker-badge">
+            <span class="pulse-dot"></span>
+            <span data-i18n="mandiLiveTag">📊 आज के मंडी भाव (Agmarknet Live)</span>
+        </div>
+        <div class="mandi-ticker-wrap">
+            <div class="mandi-ticker-track" id="mandiTickerContent">
+                <!-- Injected via script.js -->
+            </div>
+        </div>
+    </div>
+
     <!-- Main Content Area -->
     <main class="main-content">
+        <!-- Live Weather & Agriculture Advisory Widget -->
+        <section class="weather-advisory-card">
+            <div class="weather-col-left">
+                <div class="weather-main-info">
+                    <span class="weather-icon">☀️</span>
+                    <div class="weather-temp-info">
+                        <span class="weather-temp">28°C</span>
+                        <span class="weather-condition" data-i18n="weatherCondition">धूप खिली है ☀️</span>
+                    </div>
+                </div>
+                <div class="weather-meta-row">
+                    <span class="weather-meta-item" data-i18n="weatherHumidity">💧 नमी: 42%</span>
+                    <span class="weather-meta-item" data-i18n="weatherWind">💨 हवा: 8 km/h</span>
+                    <span class="weather-meta-item" data-i18n="weatherRain">🌧️ बारिश: 0%</span>
+                </div>
+                <div class="weather-location-tag">
+                    📍 <span data-i18n="weatherCity">मेरठ, उत्तर प्रदेश (पश्चिमी क्षेत्र)</span>
+                </div>
+            </div>
+            <div class="weather-col-right">
+                <div class="advisory-pill">
+                    <span class="advisory-icon">🌾</span>
+                    <span data-i18n="advisoryTag">आज की कृषि सलाह (Daily Farm Advisory)</span>
+                </div>
+                <p class="advisory-text" data-i18n="advisoryText">
+                    मौसम पूरी तरह साफ और शुष्क है। गेहूं व सरसों की बोवाई, खेत की गहरी जुताई और कंबाइन से धान कटाई के लिए आज का दिन सर्वोत्तम है।
+                </p>
+                <div class="advisory-footer">
+                    <span class="badge-optimum">✅ जुताई व कटाई के लिए अनुकूल</span>
+                    <span class="advisory-time" data-i18n="advisoryTime">आज का अपडेट</span>
+                </div>
+            </div>
+        </section>
+
         <!-- Hero Banner with Real Agricultural Landscape -->
         <section class="hero-banner">
             <div class="hero-text">
@@ -178,8 +236,27 @@
         <section class="fleet-section">
             <div class="fleet-header">
                 <h3 id="fleetSectionTitle" data-i18n="fleetTitle">अनुशंसित गाड़ियां और मशीनें</h3>
-                <span class="fleet-count" id="fleetCountBadge">7 गाड़ियां उपलब्ध</span>
+                <span class="fleet-count" id="fleetCountBadge">9 गाड़ियां उपलब्ध</span>
             </div>
+
+            <!-- Smart Search & Filter Bar -->
+            <div class="search-sort-bar">
+                <div class="search-input-wrap">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="machineSearchInput" placeholder="मशीन, औजार या काम खोजें (उदा: रोटावेटर, कंबाइन, 4WD, लेवलर)..." oninput="handleSearchAndSort()" data-i18n-placeholder="searchPlaceholder">
+                    <button type="button" class="clear-search-btn" id="clearSearchBtn" onclick="clearSearch()" style="display: none;">&times;</button>
+                </div>
+                <div class="sort-select-wrap">
+                    <label for="fleetSortSelect" data-i18n="labelSortBy">क्रमबद्ध करें:</label>
+                    <select id="fleetSortSelect" class="sort-select" onchange="handleSearchAndSort()">
+                        <option value="default" data-i18n="sortDefault">अनुशंसित (Recommended)</option>
+                        <option value="price-low" data-i18n="sortPriceLow">किराया: कम से ज्यादा (₹ ⬆)</option>
+                        <option value="price-high" data-i18n="sortPriceHigh">किराया: ज्यादा से कम (₹ ⬇)</option>
+                        <option value="rating" data-i18n="sortRating">उच्चतम रेटिंग (⭐️ 4.8+)</option>
+                    </select>
+                </div>
+            </div>
+
             <div class="fleet-grid" id="fleetGrid">
                 <!-- Fleet cards dynamically injected with real photos by script.js -->
             </div>
@@ -232,6 +309,29 @@
             </div>
 
             <form id="tractorBookingForm" onsubmit="handleTractorBookingSubmit(event)">
+                <!-- Fuel Option Toggle (With vs Without Diesel) -->
+                <div class="fuel-choice-section">
+                    <label class="fuel-choice-title" data-i18n="fuelChoiceTitle">⛽ डीजल का चुनाव करें (Fuel Option) *</label>
+                    <div class="fuel-options-grid">
+                        <label class="fuel-option-card active" id="fuelOptionWithCard" onclick="handleFuelOptionChange('with-fuel')">
+                            <input type="radio" name="fuelOption" id="fuelOptionWith" value="with-fuel" checked>
+                            <div class="fuel-opt-info">
+                                <span class="fuel-opt-title" data-i18n="fuelWithTitle">डीजल व ड्राइवर सहित</span>
+                                <span class="fuel-opt-desc" data-i18n="fuelWithDesc">डीजल और ड्राइवर का खर्च मालिक का</span>
+                            </div>
+                            <span class="fuel-opt-rate" id="fuelRateWith">₹600/घं</span>
+                        </label>
+                        <label class="fuel-option-card" id="fuelOptionWithoutCard" onclick="handleFuelOptionChange('without-fuel')">
+                            <input type="radio" name="fuelOption" id="fuelOptionWithout" value="without-fuel">
+                            <div class="fuel-opt-info">
+                                <span class="fuel-opt-title" data-i18n="fuelWithoutTitle">डीजल किसान का (सस्ता रेट)</span>
+                                <span class="fuel-opt-desc" data-i18n="fuelWithoutDesc">डीजल आप देंगे, सिर्फ मशीन व ड्राइवर</span>
+                            </div>
+                            <span class="fuel-opt-rate discount" id="fuelRateWithout">₹380/घं</span>
+                        </label>
+                    </div>
+                </div>
+
                 <div class="form-row">
                     <div class="form-group">
                         <label for="farmerName" data-i18n="labelFarmerName">किसान का नाम *</label>
@@ -482,6 +582,24 @@
                 <button type="button" class="btn btn-whatsapp support-whatsapp-btn" onclick="openDirectWhatsApp()">
                     💬 <span data-i18n="btnWhatsAppNow">व्हाट्सएप पर सीधे बात करें</span>
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- My Bookings Modal -->
+    <div id="myBookingsModal" class="modal-overlay">
+        <div class="modal-card my-bookings-card">
+            <button type="button" class="modal-close-btn" onclick="closeMyBookingsModal()">&times;</button>
+            <div class="my-bookings-header">
+                <div class="my-bookings-icon">📋</div>
+                <div>
+                    <h2 data-i18n="myBookingsTitle">मेरी बुकिंग्स (My Bookings)</h2>
+                    <p data-i18n="myBookingsSub">आपके द्वारा बुक किए गए सभी ट्रैक्टरों और मशीनों की सूची</p>
+                </div>
+            </div>
+
+            <div id="myBookingsList" class="my-bookings-list">
+                <!-- Injected dynamically via script.js -->
             </div>
         </div>
     </div>

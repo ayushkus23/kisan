@@ -1,4 +1,4 @@
-// Project Tractor - Complete Bilingual, Crop-Based Fleet with Real Photos, Drawer, Registration & Safe Support (No Hardcoded Numbers)
+// Project Tractor - Complete Bilingual, Crop-Based Fleet with Real Photos, Drawer, Registration, My Bookings, Search/Filter, Diesel Option & Mandi Rates
 
 // Real photo mappings for tractor brands
 const brandRealPhotos = {
@@ -11,13 +11,14 @@ const brandRealPhotos = {
     "Chhota Mini Tractor (24 HP)": "images/compact-tractor.jpg"
 };
 
-// 1. Tractor & Machine Catalog with REAL Agricultural Photographs
+// 1. Tractor & Machine Catalog with REAL Agricultural Photographs, Fuel Discount & Farmer Ratings
 const fleetData = [
     {
         id: "dhan-4wd",
         categories: ["dhan"],
         image: "images/dhan-tractor.jpg",
         rate: 600,
+        fuelDiscount: 220,
         rateUnit: { hi: "घंटा", en: "Hour" },
         badge: { hi: "🌾 धान कड़वा स्पेशल", en: "🌾 Paddy Puddling Special" },
         name: { hi: "धान 4WD मड-मास्टर ट्रैक्टर", en: "Paddy 4WD Mud-Master Tractor" },
@@ -25,13 +26,16 @@ const fleetData = [
         suitableCrops: { hi: "धान / चावल (Paddy)", en: "Paddy / Rice" },
         suitableWork: { hi: "कड़वा जुताई (Puddling), कीचड़ तैयार करना", en: "Wet Land Puddling & Slurry Prep" },
         tool: { hi: "केज व्हील + 6 फीट वेट रोटावेटर", en: "Cage Wheels + 6ft Wet Rotavator" },
-        power: "45-50 HP (4WD)"
+        power: "45-50 HP (4WD)",
+        rating: 4.9,
+        reviewsCount: 68
     },
     {
         id: "gehu-super-seeder",
         categories: ["gehu"],
         image: "images/gehu-tractor.jpg",
         rate: 550,
+        fuelDiscount: 200,
         rateUnit: { hi: "घंटा", en: "Hour" },
         badge: { hi: "🌱 गेहूं व सरसों बोवाई स्पेशल", en: "🌱 Wheat & Sowing Special" },
         name: { hi: "सुपर-सीडर व रोटावेटर ट्रैक्टर", en: "Super Seeder & Rotavator Tractor" },
@@ -39,13 +43,33 @@ const fleetData = [
         suitableCrops: { hi: "गेहूं, सरसों, चना, मटर", en: "Wheat, Mustard, Gram, Peas" },
         suitableWork: { hi: "बारीक जुताई व सटीक बीज/खाद बोवाई", en: "Fine Tilth Ploughing & Precise Sowing" },
         tool: { hi: "7 फीट सुपर सीडर + मल्टी-क्रॉप ड्रिल", en: "7ft Super Seeder + Multi-Crop Drill" },
-        power: "50-55 HP"
+        power: "50-55 HP",
+        rating: 4.8,
+        reviewsCount: 52
+    },
+    {
+        id: "gehu-laser-leveler",
+        categories: ["gehu", "dhan", "ganna"],
+        image: "images/gehu-tractor.jpg",
+        rate: 750,
+        fuelDiscount: 250,
+        rateUnit: { hi: "घंटा", en: "Hour" },
+        badge: { hi: "📐 30% पानी व खाद बचत", en: "📐 30% Water & Fertilizer Saving" },
+        name: { hi: "लेज़र लैंड लेवलर ट्रैक्टर", en: "Laser Land Leveler Tractor" },
+        subtitle: { hi: "खेत को 100% समतल करने के लिए लेज़र तकनीक", en: "High-precision laser field leveling unit" },
+        suitableCrops: { hi: "धान, गेहूं, गन्ना, सभी फसलें", en: "Paddy, Wheat, Sugarcane, All Crops" },
+        suitableWork: { hi: "खेत को एक समान समतल करना, पानी का समान फैलाव", en: "Zero slope levelling, even water spread across field" },
+        tool: { hi: "ट्रांसमीटर पोल + लेज़र रिसीवर बकेट (7 फीट)", en: "Transmitter Mast + Laser Receiver Bucket (7ft)" },
+        power: "55-60 HP",
+        rating: 4.9,
+        reviewsCount: 54
     },
     {
         id: "ganna-heavy-hauler",
         categories: ["ganna"],
         image: "images/ganna-tractor.jpg",
         rate: 700,
+        fuelDiscount: 250,
         rateUnit: { hi: "घंटा", en: "Hour" },
         badge: { hi: "🎋 गन्ना व भारी जुताई स्पेशल", en: "🎋 Heavy Sugarcane Hauler" },
         name: { hi: "हाई-टॉर्क हैवी ड्यूटी ट्रैक्टर", en: "High-Torque Heavy Duty Tractor" },
@@ -53,13 +77,33 @@ const fleetData = [
         suitableCrops: { hi: "गन्ना, कपास, मक्का", en: "Sugarcane, Cotton, Maize" },
         suitableWork: { hi: "गहरी एमबी जुताई, 15 टन गन्ना ट्रॉली खींचना", en: "Deep MB Ploughing & 15-Ton Trolley Hauling" },
         tool: { hi: "3-बॉटम एमबी हल / ट्रेन्चर / हैवी ट्रॉली", en: "3-Bottom MB Plough / Trencher / Heavy Trolley" },
-        power: "55-65 HP"
+        power: "55-65 HP",
+        rating: 4.9,
+        reviewsCount: 45
+    },
+    {
+        id: "straw-reaper",
+        categories: ["gehu", "dhulai"],
+        image: "images/combine-harvester.jpg",
+        rate: 1100,
+        fuelDiscount: 350,
+        rateUnit: { hi: "एकड़", en: "Acre" },
+        badge: { hi: "🌾 उत्तम भूसा मेकर", en: "🌾 Premium Straw & Bhusa Maker" },
+        name: { hi: "सुपर स्ट्रा रीपर व भूसा मशीन", en: "Super Straw Reaper (Bhusa Maker)" },
+        subtitle: { hi: "गेहूं के डंठल काटकर बारीक भूसा बनाकर सीधे ट्रॉली में लोड करता है", en: "Cuts stubble into fine animal fodder & loads into trolley" },
+        suitableCrops: { hi: "गेहूं, जौ (कटाई के बाद)", en: "Wheat, Barley (Post-harvest)" },
+        suitableWork: { hi: "पराली का 100% उपयोग व पशुओं के लिए पौष्टिक भूसा", en: "Stubble recovery & fine straw production" },
+        tool: { hi: "डबल कटर बार + हैवी ब्लोअर पाइप + ट्रॉली अटैचमेंट", en: "Double Cutter Bar + Heavy Blower + Trolley Hook" },
+        power: "50-60 HP",
+        rating: 4.8,
+        reviewsCount: 41
     },
     {
         id: "sabzi-mini-tractor",
         categories: ["sabzi", "bagwani"],
         image: "images/compact-tractor.jpg",
         rate: 380,
+        fuelDiscount: 140,
         rateUnit: { hi: "घंटा", en: "Hour" },
         badge: { hi: "🥔 आलू व सब्जी स्पेशल", en: "🥔 Potato & Veggies Special" },
         name: { hi: "छोटा चैंपियन नैरो ट्रैक्टर", en: "Chhota Champion Compact Tractor" },
@@ -67,13 +111,16 @@ const fleetData = [
         suitableCrops: { hi: "आलू, प्याज, टमाटर, गोभी, लहसुन", en: "Potato, Onion, Tomato, Garlic & Veggies" },
         suitableWork: { hi: "बेड बनाना, आलू खुदाई (Digger), संकरी जुताई", en: "Bed Making, Potato Digging & Row Tillage" },
         tool: { hi: "पोटैटो डिगर / 4 फीट मिनी रोटावेटर", en: "Potato Digger / 4ft Mini Rotavator" },
-        power: "24-28 HP (Narrow Width)"
+        power: "24-28 HP (Narrow Width)",
+        rating: 4.7,
+        reviewsCount: 39
     },
     {
         id: "dhulai-trolley-tractor",
         categories: ["dhulai"],
         image: "images/dhulai-tractor.jpg",
         rate: 450,
+        fuelDiscount: 160,
         rateUnit: { hi: "घंटा", en: "Hour" },
         badge: { hi: "🚛 मंडी व माल ढुलाई", en: "🚛 Mandi & Haulage Transport" },
         name: { hi: "हाइड्रोलिक ट्रॉली ट्रैक्टर सेट", en: "Hydraulic Trolley Tractor Set" },
@@ -81,13 +128,16 @@ const fleetData = [
         suitableCrops: { hi: "सभी फसलें (मंडी ले जाने हेतु)", en: "All Crops (Mandi Transport)" },
         suitableWork: { hi: "मंडी ढुलाई, एक लीवर से तुरंत खाली होना", en: "Grain transport & single-lever hydraulic dumping" },
         tool: { hi: "डबल एक्सल हाइड्रोलिक लिफ्ट ट्रॉली", en: "Double Axle Hydraulic Lift Trolley" },
-        power: "42-45 HP"
+        power: "42-45 HP",
+        rating: 4.8,
+        reviewsCount: 61
     },
     {
         id: "bagwani-sprayer-mini",
         categories: ["bagwani"],
         image: "images/bagwani-tractor.jpg",
         rate: 350,
+        fuelDiscount: 130,
         rateUnit: { hi: "घंटा", en: "Hour" },
         badge: { hi: "🍎 बागवानी व स्प्रे स्पेशल", en: "🍎 Orchard & Spraying Special" },
         name: { hi: "ऑर्चर्ड ब्लोअर-स्प्रेयर ट्रैक्टर", en: "Orchard Blower-Sprayer Tractor" },
@@ -95,13 +145,16 @@ const fleetData = [
         suitableCrops: { hi: "आम, किन्नू, सेब, अमरूद, अंगूर", en: "Mango, Citrus, Apple, Guava, Grapes" },
         suitableWork: { hi: "कीटनाशक स्प्रे, बागों के बीच जुताई व घास कटाई", en: "Insecticide Blower Spraying & Orchard Tillage" },
         tool: { hi: "600 लीटर ब्लोअर स्प्रेयर + म्यूटर", en: "600L Blower Sprayer + Mulcher" },
-        power: "20-25 HP 4WD"
+        power: "20-25 HP 4WD",
+        rating: 4.9,
+        reviewsCount: 29
     },
     {
         id: "combine-harvester",
         categories: ["dhan", "gehu"],
         image: "images/combine-harvester.jpg",
         rate: 1400,
+        fuelDiscount: 450,
         rateUnit: { hi: "एकड़", en: "Acre" },
         badge: { hi: "⚡ धान व गेहूं सीधी कटाई", en: "⚡ Direct Harvesting & Threshing" },
         name: { hi: "मल्टी-क्रॉप कंबाइन हार्वेस्टर", en: "Multi-Crop Combine Harvester" },
@@ -109,7 +162,9 @@ const fleetData = [
         suitableCrops: { hi: "धान, गेहूं, सोयाबीन, चना", en: "Paddy, Wheat, Soybean, Gram" },
         suitableWork: { hi: "समय और मजदूरी की भारी बचत, 1 घंटे में कटाई", en: "Huge time and labor savings, cuts 1 acre/hour" },
         tool: { hi: "14 फीट कटर बार + ग्रेन क्लीनर", en: "14ft Cutter Bar + High Flow Grain Tank" },
-        power: "100+ HP Turbo Engine"
+        power: "100+ HP Turbo Engine",
+        rating: 5.0,
+        reviewsCount: 83
     }
 ];
 
@@ -121,9 +176,12 @@ const translations = {
         brandName: "प्रोजेक्ट ट्रैक्टर",
         brandSubtitle: "किसान भाइयों का अपना ट्रैक्टर पोर्टल",
 
-        // Drawer Menu
+        // Drawer Menu & Badges
         drawerVerifiedBadge: "सत्यापित किसान",
         menuHome: "होम / डैशबोर्ड",
+        menuMyBookings: "मेरी बुकिंग्स (My Bookings)",
+        navMyBookings: "मेरी बुकिंग्स",
+        badgeBookingCountText: "बुकिंग",
         menuRegTractor: "अपना ट्रैक्टर जोड़ें",
         menuRegTractorSub: "किराये पर देकर कमाई करें",
         menuLanguage: "भाषा बदलें (हिंदी / English)",
@@ -131,6 +189,36 @@ const translations = {
         menuHelpline: "किसान सहायता केंद्र (Call & WhatsApp)",
         drawerFooterTag: "किसान भाइयों का सच्चा साथी",
         navAttachBtn: "ट्रैक्टर जोड़ें",
+
+        // Mandi Ticker
+        mandiLiveTag: "📊 आज के मंडी भाव (Agmarknet Live)",
+        mandiTickerItem1: "🌾 गेहूं (Wheat): ₹2,425/क्विं",
+        mandiTickerItem2: "🌾 धान 1121 (Basmati): ₹3,850/क्विं",
+        mandiTickerItem3: "🟡 सरसों (Mustard): ₹5,680/क्विं",
+        mandiTickerItem4: "🥔 आलू (Potato): ₹1,350/क्विं",
+        mandiTickerItem5: "🌽 मक्का (Maize): ₹2,150/क्विं",
+        mandiTickerItem6: "🌱 चना (Gram): ₹5,800/क्विं",
+
+        // Weather & Advisory
+        weatherCity: "मेरठ, उत्तर प्रदेश (पश्चिमी क्षेत्र)",
+        weatherCondition: "धूप खिली है ☀️",
+        weatherHumidity: "💧 नमी: 42%",
+        weatherWind: "💨 हवा: 8 km/h",
+        weatherRain: "🌧️ बारिश: 0%",
+        advisoryTag: "आज की कृषि सलाह (Daily Farm Advisory)",
+        advisoryText: "मौसम पूरी तरह साफ और शुष्क है। गेहूं व सरसों की बोवाई, खेत की गहरी जुताई और कंबाइन से धान कटाई के लिए आज का दिन सर्वोत्तम है।",
+        advisoryTime: "आज का अपडेट",
+
+        // Search & Sort Bar
+        searchPlaceholder: "मशीन, औजार या काम खोजें (उदा: रोटावेटर, कंबाइन, 4WD, लेवलर)...",
+        labelSortBy: "क्रमबद्ध करें:",
+        sortDefault: "अनुशंसित (Recommended)",
+        sortPriceLow: "किराया: कम से ज्यादा (₹ ⬆)",
+        sortPriceHigh: "किराया: ज्यादा से कम (₹ ⬇)",
+        sortRating: "उच्चतम रेटिंग (⭐️ 4.8+)",
+        noMatchTitle: "कोई मशीन नहीं मिली",
+        noMatchDesc: "आपके खोजे गए शब्द से कोई मशीन मेल नहीं खाती। कृपया अन्य औजार या फसल का नाम डालकर देखें।",
+        btnResetSearch: "सभी मशीनें देखें",
 
         // Login Page
         labelUsername: "मोबाइल नंबर या यूजरनेम",
@@ -173,12 +261,24 @@ const translations = {
         cardPower: "पावर:",
         cardPriceTitle: "किराया दर",
         cardBookBtn: "🚜 बुक करें",
+        cardVerified: "100% जांची गई मशीन",
+        cardBookingsSuffix: "बुकिंग्स",
+
+        // Fuel Choice
+        fuelChoiceTitle: "⛽ डीजल का चुनाव करें (Fuel Option) *",
+        fuelWithTitle: "डीजल व ड्राइवर सहित",
+        fuelWithDesc: "डीजल और ड्राइवर का खर्च मालिक का",
+        fuelWithoutTitle: "डीजल किसान का (सस्ता रेट)",
+        fuelWithoutDesc: "डीजल आप देंगे, सिर्फ मशीन व ड्राइवर",
+        fuelWithShort: "डीजल सहित",
+        fuelWithoutShort: "बिना डीजल",
+        fuelOptionLabel: "डीजल प्रकार:",
 
         // Help Callout & Support
         calloutTitle: "फोन या व्हाट्सएप पर सीधे सहायता पाएं",
         calloutDesc: "अगर फॉर्म भरने में परेशानी हो, तो हमें कॉल या व्हाट्सएप करें — हमारी टीम तुरंत आपके खेत पर ट्रैक्टर भेजने में मदद करेगी।",
         btnCallNow: "कॉल सहायता (Call Support)",
-        btnWhatsAppNow: "व्हाट्सएप सहायता (WhatsApp)",
+        btnWhatsAppNow: "व्हाट्सएप सहायता",
 
         // Call Support Modal
         callModalTitle: "किसान सहायता केंद्र (Kisan Support)",
@@ -215,6 +315,18 @@ const translations = {
         receiptMachine: "चुनी गई मशीन:",
         receiptDuration: "समय / अवधि:",
         receiptTotal: "अनुमानित कुल बिल:",
+
+        // My Bookings Modal
+        myBookingsTitle: "मेरी बुकिंग्स (My Bookings)",
+        myBookingsSub: "आपके द्वारा बुक किए गए सभी ट्रैक्टरों और मशीनों की सूची",
+        noBookingsTitle: "अभी कोई बुकिंग नहीं है",
+        noBookingsDesc: "आपने अभी तक कोई ट्रैक्टर बुक नहीं किया है। अपनी फसल के लिए उपयुक्त मशीन चुनें और तुरंत बुक करें।",
+        btnBookNow: "🚜 मशीनें देखें व बुक करें",
+        statusConfirmed: "🟢 बुकिंग स्वीकृत (Confirmed)",
+        statusCancelled: "🔴 रद्द किया गया (Cancelled)",
+        btnViewReceipt: "📄 रसीद देखें",
+        btnCancelBooking: "बुकिंग रद्द करें",
+        cancelConfirm: "क्या आप वाकई इस ट्रैक्टर बुकिंग को रद्द करना चाहते हैं?",
 
         // Tractor Registration Modal
         regModalTitle: "अपना ट्रैक्टर जोड़ें — रोज कमाई करें",
@@ -272,9 +384,12 @@ const translations = {
         brandName: "Project Tractor",
         brandSubtitle: "The Trusted Tractor Portal for Farmers",
 
-        // Drawer Menu
+        // Drawer Menu & Badges
         drawerVerifiedBadge: "Verified Farmer",
         menuHome: "Home / Dashboard",
+        menuMyBookings: "My Bookings",
+        navMyBookings: "My Bookings",
+        badgeBookingCountText: "bookings",
         menuRegTractor: "Register Your Tractor",
         menuRegTractorSub: "Earn daily by renting",
         menuLanguage: "Change Language (हिंदी / English)",
@@ -282,6 +397,36 @@ const translations = {
         menuHelpline: "Farmer Support Center (Call & WhatsApp)",
         drawerFooterTag: "Trusted Companion of Farmers",
         navAttachBtn: "Attach Tractor",
+
+        // Mandi Ticker
+        mandiLiveTag: "📊 Live Mandi Rates (Agmarknet Live)",
+        mandiTickerItem1: "🌾 Wheat: ₹2,425/Qtl",
+        mandiTickerItem2: "🌾 Paddy (Basmati 1121): ₹3,850/Qtl",
+        mandiTickerItem3: "🟡 Mustard: ₹5,680/Qtl",
+        mandiTickerItem4: "🥔 Potato: ₹1,350/Qtl",
+        mandiTickerItem5: "🌽 Maize: ₹2,150/Qtl",
+        mandiTickerItem6: "🌱 Gram (Chana): ₹5,800/Qtl",
+
+        // Weather & Advisory
+        weatherCity: "Meerut, Uttar Pradesh (Western Region)",
+        weatherCondition: "Sunny & Clear ☀️",
+        weatherHumidity: "💧 Humidity: 42%",
+        weatherWind: "💨 Wind: 8 km/h",
+        weatherRain: "🌧️ Rain Chance: 0%",
+        advisoryTag: "Daily Farm Advisory",
+        advisoryText: "The weather is completely clear and dry. Optimal condition for wheat/mustard sowing, deep ploughing, and combine harvesting.",
+        advisoryTime: "Today's Update",
+
+        // Search & Sort Bar
+        searchPlaceholder: "Search machines, tools or crops (e.g. Rotavator, Combine, 4WD, Leveler)...",
+        labelSortBy: "Sort By:",
+        sortDefault: "Recommended",
+        sortPriceLow: "Price: Low to High (₹ ⬆)",
+        sortPriceHigh: "Price: High to Low (₹ ⬇)",
+        sortRating: "Highest Rating (⭐️ 4.8+)",
+        noMatchTitle: "No Machines Found",
+        noMatchDesc: "No tractors or machines match your search keyword. Please try a different implement or crop name.",
+        btnResetSearch: "View All Machines",
 
         // Login Page
         labelUsername: "Mobile Number or Username",
@@ -324,6 +469,18 @@ const translations = {
         cardPower: "Power:",
         cardPriceTitle: "Rental Rate",
         cardBookBtn: "🚜 Book Now",
+        cardVerified: "100% Verified Machine",
+        cardBookingsSuffix: "bookings",
+
+        // Fuel Choice
+        fuelChoiceTitle: "⛽ Choose Fuel Option *",
+        fuelWithTitle: "With Fuel & Driver",
+        fuelWithDesc: "Fuel & operator included by tractor owner",
+        fuelWithoutTitle: "Without Fuel (Discounted)",
+        fuelWithoutDesc: "You provide fuel on field, pay machine + driver",
+        fuelWithShort: "With Fuel",
+        fuelWithoutShort: "Without Fuel",
+        fuelOptionLabel: "Fuel Mode:",
 
         // Help Callout & Support
         calloutTitle: "Get Support via Call or WhatsApp",
@@ -366,6 +523,18 @@ const translations = {
         receiptMachine: "Selected Machine:",
         receiptDuration: "Duration:",
         receiptTotal: "Estimated Total Bill:",
+
+        // My Bookings Modal
+        myBookingsTitle: "My Bookings",
+        myBookingsSub: "List of all your active and previous tractor bookings",
+        noBookingsTitle: "No Bookings Yet",
+        noBookingsDesc: "You haven't booked any machines yet. Pick the right tractor for your crop and book instantly.",
+        btnBookNow: "🚜 Browse Machines & Book",
+        statusConfirmed: "🟢 Booking Confirmed",
+        statusCancelled: "🔴 Cancelled",
+        btnViewReceipt: "📄 View Receipt",
+        btnCancelBooking: "Cancel Booking",
+        cancelConfirm: "Are you sure you want to cancel this tractor booking?",
 
         // Tractor Registration Modal
         regModalTitle: "Register Your Tractor — Earn Everyday",
@@ -421,10 +590,13 @@ const translations = {
 
 let currentLang = 'hi';
 let currentFilter = 'all';
+let currentSearchQuery = '';
+let currentSortMode = 'default';
 let selectedMachine = null;
+let selectedFuelOption = 'with-fuel';
 
 // ==========================================
-// 3. 3-Line Side Drawer (Hamburger Menu)
+// 3. Side Drawer (Hamburger Menu)
 // ==========================================
 function openDrawer() {
     const drawer = document.getElementById('sideDrawer');
@@ -507,6 +679,7 @@ function handleTractorRegistration(event) {
         categories: tractorDrive === '4WD' ? ['dhan', 'gehu'] : ['gehu', 'ganna', 'dhulai'],
         image: photoUrl,
         rate: tractorRate,
+        fuelDiscount: 180,
         rateUnit: { hi: "घंटा", en: "Hour" },
         badge: { hi: `⭐ ${ownerVillage} स्पेशल`, en: `⭐ ${ownerVillage} Local` },
         name: { hi: `${tractorBrand} (${ownerName})`, en: `${tractorBrand} (${ownerName})` },
@@ -514,7 +687,9 @@ function handleTractorRegistration(event) {
         suitableCrops: { hi: "स्थानीय फसलें व जुताई", en: "Local Crops & Tillage" },
         suitableWork: { hi: "कस्टम किराए पर उपलब्ध", en: "Available for Custom Rent" },
         tool: { hi: "रोटावेटर / कल्टीवेटर अटैच्ड", en: "Rotavator / Cultivator Attached" },
-        power: tractorBrand.includes('HP') ? tractorBrand.split('(')[1].replace(')', '') : "50 HP"
+        power: tractorBrand.includes('HP') ? tractorBrand.split('(')[1].replace(')', '') : "50 HP",
+        rating: 5.0,
+        reviewsCount: 1
     });
 
     closeTractorRegModal();
@@ -524,7 +699,7 @@ function handleTractorRegistration(event) {
 }
 
 // ==========================================
-// 5. Render Fleet Cards with Real Photos
+// 5. Render Fleet Cards with Real Photos, Search, Sort & Ratings
 // ==========================================
 function renderFleetCards(category = 'all') {
     const grid = document.getElementById('fleetGrid');
@@ -533,14 +708,66 @@ function renderFleetCards(category = 'all') {
     currentFilter = category;
     const t = translations[currentLang] || translations.hi;
 
-    const filtered = category === 'all'
-        ? fleetData
+    // 1. Filter by crop category
+    let filtered = category === 'all'
+        ? [...fleetData]
         : fleetData.filter(item => item.categories.includes(category));
 
-    // Update fleet count
+    // 2. Filter by search query
+    if (currentSearchQuery) {
+        filtered = filtered.filter(item => {
+            const nameHi = item.name.hi.toLowerCase();
+            const nameEn = item.name.en.toLowerCase();
+            const subHi = item.subtitle.hi.toLowerCase();
+            const subEn = item.subtitle.en.toLowerCase();
+            const cropsHi = item.suitableCrops.hi.toLowerCase();
+            const cropsEn = item.suitableCrops.en.toLowerCase();
+            const workHi = item.suitableWork.hi.toLowerCase();
+            const workEn = item.suitableWork.en.toLowerCase();
+            const toolHi = item.tool.hi.toLowerCase();
+            const toolEn = item.tool.en.toLowerCase();
+            const power = item.power.toLowerCase();
+
+            return nameHi.includes(currentSearchQuery) ||
+                nameEn.includes(currentSearchQuery) ||
+                subHi.includes(currentSearchQuery) ||
+                subEn.includes(currentSearchQuery) ||
+                cropsHi.includes(currentSearchQuery) ||
+                cropsEn.includes(currentSearchQuery) ||
+                workHi.includes(currentSearchQuery) ||
+                workEn.includes(currentSearchQuery) ||
+                toolHi.includes(currentSearchQuery) ||
+                toolEn.includes(currentSearchQuery) ||
+                power.includes(currentSearchQuery);
+        });
+    }
+
+    // 3. Sort
+    if (currentSortMode === 'price-low') {
+        filtered.sort((a, b) => a.rate - b.rate);
+    } else if (currentSortMode === 'price-high') {
+        filtered.sort((a, b) => b.rate - a.rate);
+    } else if (currentSortMode === 'rating') {
+        filtered.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+    }
+
+    // Update fleet count badge
     const countBadge = document.getElementById('fleetCountBadge');
     if (countBadge) {
         countBadge.textContent = `${filtered.length} ${t.fleetCountSuffix}`;
+    }
+
+    // If no matching machines
+    if (filtered.length === 0) {
+        grid.innerHTML = `
+            <div class="no-machines-card">
+                <div class="no-machines-icon">🚜</div>
+                <h4>${t.noMatchTitle}</h4>
+                <p>${t.noMatchDesc}</p>
+                <button type="button" class="btn btn-primary" onclick="clearSearch()">${t.btnResetSearch}</button>
+            </div>
+        `;
+        return;
     }
 
     grid.innerHTML = filtered.map(machine => {
@@ -552,12 +779,17 @@ function renderFleetCards(category = 'all') {
         const tool = machine.tool[currentLang] || machine.tool.hi;
         const rateUnit = machine.rateUnit[currentLang] || machine.rateUnit.hi;
         const imgUrl = machine.image || "images/dhan-tractor.jpg";
+        const rating = machine.rating || 4.8;
+        const reviews = machine.reviewsCount || 35;
 
         return `
             <div class="machine-card">
                 <span class="card-top-badge">${badge}</span>
                 <div class="machine-card-image">
                     <img src="${imgUrl}" alt="${title}" class="machine-real-photo" loading="lazy" onerror="this.onerror=null; this.src='images/dhan-tractor.jpg'">
+                    <div class="card-rating-pill">
+                        ⭐ ${rating} <span class="rating-sub">(${reviews} ${t.cardBookingsSuffix})</span>
+                    </div>
                 </div>
                 <div class="machine-card-body">
                     <h4 class="machine-title">${title}</h4>
@@ -604,8 +836,33 @@ function filterByCrop(category, buttonEl) {
     renderFleetCards(category);
 }
 
+// Search & Sort Handlers
+function handleSearchAndSort() {
+    const searchInput = document.getElementById('machineSearchInput');
+    const clearBtn = document.getElementById('clearSearchBtn');
+    const sortSelect = document.getElementById('fleetSortSelect');
+
+    currentSearchQuery = searchInput ? searchInput.value.trim().toLowerCase() : '';
+    currentSortMode = sortSelect ? sortSelect.value : 'default';
+
+    if (clearBtn) {
+        clearBtn.style.display = currentSearchQuery ? 'block' : 'none';
+    }
+
+    renderFleetCards(currentFilter);
+}
+
+function clearSearch() {
+    const searchInput = document.getElementById('machineSearchInput');
+    const clearBtn = document.getElementById('clearSearchBtn');
+    if (searchInput) searchInput.value = '';
+    if (clearBtn) clearBtn.style.display = 'none';
+    currentSearchQuery = '';
+    renderFleetCards(currentFilter);
+}
+
 // ==========================================
-// 6. Booking Modal Handlers with Photo Preview
+// 6. Booking Modal Handlers & Fuel Selection
 // ==========================================
 function openBookingModal(machineId) {
     selectedMachine = fleetData.find(m => m.id === machineId) || fleetData[0];
@@ -622,7 +879,28 @@ function openBookingModal(machineId) {
     document.getElementById('modalMachineTitle').textContent = title;
     document.getElementById('modalMachineSubtitle').textContent = sub;
     document.getElementById('modalMachineCategory').textContent = badge;
-    document.getElementById('modalMachineRate').textContent = `₹${selectedMachine.rate} / ${rateUnit}`;
+
+    // Reset Fuel Option to With Fuel
+    selectedFuelOption = 'with-fuel';
+    const withRadio = document.getElementById('fuelOptionWith');
+    const withoutRadio = document.getElementById('fuelOptionWithout');
+    const withCard = document.getElementById('fuelOptionWithCard');
+    const withoutCard = document.getElementById('fuelOptionWithoutCard');
+
+    if (withRadio) withRadio.checked = true;
+    if (withoutRadio) withoutRadio.checked = false;
+    if (withCard) withCard.classList.add('active');
+    if (withoutCard) withoutCard.classList.remove('active');
+
+    // Update fuel option rate badges
+    const discount = selectedMachine.fuelDiscount || 200;
+    const rateWith = selectedMachine.rate;
+    const rateWithout = selectedMachine.rate - discount;
+
+    const rateWithEl = document.getElementById('fuelRateWith');
+    const rateWithoutEl = document.getElementById('fuelRateWithout');
+    if (rateWithEl) rateWithEl.textContent = `₹${rateWith}/${rateUnit}`;
+    if (rateWithoutEl) rateWithoutEl.textContent = `₹${rateWithout}/${rateUnit}`;
 
     // Set real photo in booking modal
     const modalPhoto = document.getElementById('modalMachinePhoto');
@@ -650,19 +928,54 @@ function closeBookingModal() {
     if (modal) modal.style.display = 'none';
 }
 
+function handleFuelOptionChange(option) {
+    selectedFuelOption = option;
+    const withCard = document.getElementById('fuelOptionWithCard');
+    const withoutCard = document.getElementById('fuelOptionWithoutCard');
+    const withRadio = document.getElementById('fuelOptionWith');
+    const withoutRadio = document.getElementById('fuelOptionWithout');
+
+    if (option === 'with-fuel') {
+        if (withCard) withCard.classList.add('active');
+        if (withoutCard) withoutCard.classList.remove('active');
+        if (withRadio) withRadio.checked = true;
+    } else {
+        if (withCard) withCard.classList.remove('active');
+        if (withoutCard) withoutCard.classList.add('active');
+        if (withoutRadio) withoutRadio.checked = true;
+    }
+
+    calculateEstimate();
+}
+
 // Live Cost Calculator inside Booking Modal
 function calculateEstimate() {
     if (!selectedMachine) return;
+    const t = translations[currentLang] || translations.hi;
     const durationInput = document.getElementById('workDuration');
     const duration = parseFloat(durationInput ? durationInput.value : 1) || 1;
-    const total = duration * selectedMachine.rate;
+    const rateUnit = selectedMachine.rateUnit[currentLang] || selectedMachine.rateUnit.hi;
+
+    const discount = selectedMachine.fuelDiscount || 200;
+    const appliedRate = selectedFuelOption === 'with-fuel'
+        ? selectedMachine.rate
+        : (selectedMachine.rate - discount);
+
+    const total = duration * appliedRate;
+
+    const rateEl = document.getElementById('modalMachineRate');
+    if (rateEl) {
+        const fuelNote = selectedFuelOption === 'without-fuel' ? ` (${t.fuelWithoutShort})` : '';
+        rateEl.textContent = `₹${appliedRate} / ${rateUnit}${fuelNote}`;
+    }
+
     const totalEl = document.getElementById('modalTotalEstimate');
     if (totalEl) {
         totalEl.textContent = `₹${total.toLocaleString('en-IN')}`;
     }
 }
 
-// Handle Booking Form Submit
+// Handle Booking Form Submit & LocalStorage Persistence
 function handleTractorBookingSubmit(event) {
     event.preventDefault();
     const t = translations[currentLang] || translations.hi;
@@ -679,18 +992,47 @@ function handleTractorBookingSubmit(event) {
 
     const machineTitle = selectedMachine.name[currentLang] || selectedMachine.name.hi;
     const rateUnit = selectedMachine.rateUnit[currentLang] || selectedMachine.rateUnit.hi;
-    const total = (parseFloat(duration) * selectedMachine.rate).toLocaleString('en-IN');
+    const discount = selectedMachine.fuelDiscount || 200;
+    const appliedRate = selectedFuelOption === 'with-fuel'
+        ? selectedMachine.rate
+        : (selectedMachine.rate - discount);
+    const totalNum = parseFloat(duration) * appliedRate;
+    const totalStr = totalNum.toLocaleString('en-IN');
     const orderId = 'TRAC-' + Math.floor(100000 + Math.random() * 900000);
+    const fuelText = selectedFuelOption === 'with-fuel' ? t.fuelWithShort : t.fuelWithoutShort;
 
+    const bookingRecord = {
+        orderId,
+        machineId: selectedMachine.id,
+        machineTitle,
+        machinePhoto: selectedMachine.image || "images/dhan-tractor.jpg",
+        farmerName,
+        farmerPhone,
+        farmerVillage,
+        duration: `${duration} ${rateUnit}`,
+        fuelOption: selectedFuelOption,
+        fuelText,
+        appliedRate,
+        total: totalStr,
+        date: new Date().toLocaleDateString(currentLang === 'hi' ? 'hi-IN' : 'en-IN', {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric'
+        }),
+        status: 'confirmed'
+    };
+
+    saveBooking(bookingRecord);
     closeBookingModal();
+
     showReceiptModal({
         orderId,
         farmerName,
         farmerPhone,
         farmerVillage,
-        machineTitle,
+        machineTitle: `${machineTitle} (${fuelText})`,
         duration: `${duration} ${rateUnit}`,
-        total: `₹${total}`
+        total: `₹${totalStr}`
     });
 }
 
@@ -740,7 +1082,167 @@ function closeReceiptModal() {
 }
 
 // ==========================================
-// 7. Call & WhatsApp Support Dispatchers (No Hardcoded Numbers)
+// 7. Persistent Bookings (My Bookings) System
+// ==========================================
+function getBookings() {
+    try {
+        return JSON.parse(localStorage.getItem('tractorBookings') || '[]');
+    } catch (e) {
+        return [];
+    }
+}
+
+function saveBooking(booking) {
+    const bookings = getBookings();
+    bookings.unshift(booking);
+    localStorage.setItem('tractorBookings', JSON.stringify(bookings));
+    updateBookingBadges();
+}
+
+function updateBookingBadges() {
+    const bookings = getBookings().filter(b => b.status !== 'cancelled');
+    const count = bookings.length;
+    const t = translations[currentLang] || translations.hi;
+
+    const drawerBadge = document.getElementById('drawerBookingCount');
+    if (drawerBadge) {
+        drawerBadge.textContent = `${count} ${t.badgeBookingCountText}`;
+    }
+
+    const navBadge = document.getElementById('navBookingBadge');
+    if (navBadge) {
+        if (count > 0) {
+            navBadge.textContent = count;
+            navBadge.style.display = 'inline-flex';
+        } else {
+            navBadge.style.display = 'none';
+        }
+    }
+}
+
+function openMyBookingsModal() {
+    closeDrawer();
+    renderMyBookings();
+    const modal = document.getElementById('myBookingsModal');
+    if (modal) modal.style.display = 'flex';
+}
+
+function closeMyBookingsModal() {
+    const modal = document.getElementById('myBookingsModal');
+    if (modal) modal.style.display = 'none';
+}
+
+function renderMyBookings() {
+    const container = document.getElementById('myBookingsList');
+    if (!container) return;
+    const bookings = getBookings();
+    const t = translations[currentLang] || translations.hi;
+
+    if (bookings.length === 0) {
+        container.innerHTML = `
+            <div class="empty-bookings-box">
+                <div class="empty-icon">🚜</div>
+                <h4>${t.noBookingsTitle}</h4>
+                <p>${t.noBookingsDesc}</p>
+                <button type="button" class="btn btn-primary" onclick="closeMyBookingsModal()">${t.btnBookNow}</button>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = bookings.map(b => {
+        const isCancelled = b.status === 'cancelled';
+        const statusBadge = isCancelled
+            ? `<span class="booking-status-tag cancelled">${t.statusCancelled}</span>`
+            : `<span class="booking-status-tag confirmed">${t.statusConfirmed}</span>`;
+
+        return `
+            <div class="booking-record-card ${isCancelled ? 'cancelled-card' : ''}">
+                <div class="record-top">
+                    <div class="record-main-info">
+                        <img src="${b.machinePhoto || 'images/dhan-tractor.jpg'}" alt="${b.machineTitle}" class="record-thumb">
+                        <div>
+                            <h4 class="record-title">${b.machineTitle}</h4>
+                            <span class="record-order-id">#${b.orderId} • ${b.date}</span>
+                        </div>
+                    </div>
+                    ${statusBadge}
+                </div>
+                <div class="record-grid">
+                    <div><strong>${t.receiptFarmer}:</strong> ${b.farmerName} (${b.farmerPhone})</div>
+                    <div><strong>${t.receiptVillage}:</strong> ${b.farmerVillage}</div>
+                    <div><strong>${t.receiptDuration}:</strong> ${b.duration}</div>
+                    <div><strong>${t.fuelOptionLabel}:</strong> ${b.fuelText || t.fuelWithShort}</div>
+                </div>
+                <div class="record-bottom">
+                    <div class="record-price">
+                        <span>${t.receiptTotal}</span>
+                        <strong>₹${b.total}</strong>
+                    </div>
+                    <div class="record-actions">
+                        <button type="button" class="btn-receipt-view" onclick="viewPastReceipt('${b.orderId}')">${t.btnViewReceipt}</button>
+                        ${!isCancelled ? `<button type="button" class="btn-booking-cancel" onclick="cancelBooking('${b.orderId}')">${t.btnCancelBooking}</button>` : ''}
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function cancelBooking(orderId) {
+    const t = translations[currentLang] || translations.hi;
+    if (!confirm(t.cancelConfirm)) return;
+
+    const bookings = getBookings();
+    const target = bookings.find(b => b.orderId === orderId);
+    if (target) {
+        target.status = 'cancelled';
+        localStorage.setItem('tractorBookings', JSON.stringify(bookings));
+        updateBookingBadges();
+        renderMyBookings();
+    }
+}
+
+function viewPastReceipt(orderId) {
+    const bookings = getBookings();
+    const b = bookings.find(item => item.orderId === orderId);
+    if (!b) return;
+    closeMyBookingsModal();
+    showReceiptModal({
+        orderId: b.orderId,
+        farmerName: b.farmerName,
+        farmerPhone: b.farmerPhone,
+        farmerVillage: b.farmerVillage,
+        machineTitle: `${b.machineTitle} (${b.fuelText || ''})`,
+        duration: b.duration,
+        total: `₹${b.total}`
+    });
+}
+
+// ==========================================
+// 8. Mandi Ticker
+// ==========================================
+function renderMandiTicker() {
+    const ticker = document.getElementById('mandiTickerContent');
+    if (!ticker) return;
+    const t = translations[currentLang] || translations.hi;
+    ticker.innerHTML = `
+        <span class="mandi-item">${t.mandiTickerItem1}</span>
+        <span class="mandi-divider">•</span>
+        <span class="mandi-item">${t.mandiTickerItem2}</span>
+        <span class="mandi-divider">•</span>
+        <span class="mandi-item">${t.mandiTickerItem3}</span>
+        <span class="mandi-divider">•</span>
+        <span class="mandi-item">${t.mandiTickerItem4}</span>
+        <span class="mandi-divider">•</span>
+        <span class="mandi-item">${t.mandiTickerItem5}</span>
+        <span class="mandi-divider">•</span>
+        <span class="mandi-item">${t.mandiTickerItem6}</span>
+    `;
+}
+
+// ==========================================
+// 9. Call & WhatsApp Support Dispatchers (No Hardcoded Numbers)
 // ==========================================
 function handleCallSupport() {
     const modal = document.getElementById('callSupportModal');
@@ -767,9 +1269,10 @@ function submitCallbackRequest() {
     closeCallSupportModal();
 }
 
-// WhatsApp Dispatcher without hardcoded phone number (Universal WhatsApp Share)
+// Universal WhatsApp Share Dispatcher
 function sendBookingViaWhatsApp() {
     if (!selectedMachine) return;
+    const t = translations[currentLang] || translations.hi;
     const farmerName = document.getElementById('farmerName').value.trim() || 'Kisan';
     const farmerPhone = document.getElementById('farmerPhone').value.trim() || 'Not Provided';
     const farmerVillage = document.getElementById('farmerVillage').value.trim() || 'Village';
@@ -777,7 +1280,13 @@ function sendBookingViaWhatsApp() {
     const cropName = document.getElementById('workCropName').value.trim() || 'Kheti';
     const machineTitle = selectedMachine.name[currentLang] || selectedMachine.name.hi;
     const rateUnit = selectedMachine.rateUnit[currentLang] || selectedMachine.rateUnit.hi;
-    const total = (parseFloat(duration) * selectedMachine.rate);
+
+    const discount = selectedMachine.fuelDiscount || 200;
+    const appliedRate = selectedFuelOption === 'with-fuel'
+        ? selectedMachine.rate
+        : (selectedMachine.rate - discount);
+    const total = (parseFloat(duration) * appliedRate);
+    const fuelText = selectedFuelOption === 'with-fuel' ? t.fuelWithShort : t.fuelWithoutShort;
 
     const message = `🚜 *PROJECT TRACTOR - BOOKING ORDER* 🚜\n\n` +
         `👤 *Kisan Ka Naam:* ${farmerName}\n` +
@@ -785,8 +1294,9 @@ function sendBookingViaWhatsApp() {
         `📍 *Gaon / District:* ${farmerVillage}\n` +
         `🌾 *Fasal / Kaam:* ${cropName}\n` +
         `🚜 *Chuni Gayi Gaadi:* ${machineTitle}\n` +
+        `⛽ *Diesel Option:* ${fuelText}\n` +
         `⏱️ *Samay / Avadhi:* ${duration} ${rateUnit}\n` +
-        `💰 *Anumanit Bill:* ₹${total}\n\n` +
+        `💰 *Anumanit Bill:* ₹${total.toLocaleString('en-IN')}\n\n` +
         `Kripya jaldi se tractor bhejane ki pushti karein. Shukriya!`;
 
     const encoded = encodeURIComponent(message);
@@ -799,7 +1309,7 @@ function openDirectWhatsApp() {
 }
 
 // ==========================================
-// 8. Language Switch Logic
+// 10. Language Switch Logic
 // ==========================================
 function applyLanguage(lang) {
     if (!translations[lang]) lang = 'hi';
@@ -837,8 +1347,10 @@ function applyLanguage(lang) {
         document.title = (lang === 'hi') ? 'प्रोजेक्ट ट्रैक्टर - किसान पोर्टल' : 'Project Tractor - Farmer Portal';
     }
 
-    // Re-render fleet in chosen language
+    // Re-render fleet and ticker in chosen language
     renderFleetCards(currentFilter);
+    renderMandiTicker();
+    updateBookingBadges();
 
     // Update navbar session state
     updateNavSession();
@@ -868,6 +1380,7 @@ window.addEventListener('click', (e) => {
     const regModal = document.getElementById('tractorRegModal');
     const termsModal = document.getElementById('termsPolicyModal');
     const callModal = document.getElementById('callSupportModal');
+    const myBookingsModal = document.getElementById('myBookingsModal');
 
     if (e.target === langModal && localStorage.getItem('tractorLang')) {
         closeLanguageModal();
@@ -887,10 +1400,13 @@ window.addEventListener('click', (e) => {
     if (e.target === callModal) {
         closeCallSupportModal();
     }
+    if (e.target === myBookingsModal) {
+        closeMyBookingsModal();
+    }
 });
 
 // ==========================================
-// 9. Auth & Navbar Session
+// 11. Auth & Navbar Session
 // ==========================================
 function updateNavSession() {
     const drawerUserName = document.getElementById('drawerUserName');
@@ -965,7 +1481,7 @@ function logout() {
 }
 
 // ==========================================
-// 10. Page Initialization
+// 12. Page Initialization
 // ==========================================
 window.addEventListener('DOMContentLoaded', () => {
     const savedLang = localStorage.getItem('tractorLang');
@@ -978,5 +1494,6 @@ window.addEventListener('DOMContentLoaded', () => {
         applyLanguage(savedLang);
     }
 
-    renderFleetCards('all');
+    renderMandiTicker();
+    updateBookingBadges();
 });
