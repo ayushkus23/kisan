@@ -1,4 +1,4 @@
-// Project Tractor - Complete Bilingual, Crop-Based Fleet with Real Photos, Drawer, Registration, My Bookings, Search/Filter, Diesel Option & Mandi Rates
+// Project Tractor - Complete Bilingual, Crop-Based Fleet with Real Photos, Drawer, Registration, My Bookings, Search/Filter, Diesel Option, Mandi Rates & Live GPS Tracking
 
 // Real photo mappings for tractor brands
 const brandRealPhotos = {
@@ -209,6 +209,25 @@ const translations = {
         advisoryText: "मौसम पूरी तरह साफ और शुष्क है। गेहूं व सरसों की बोवाई, खेत की गहरी जुताई और कंबाइन से धान कटाई के लिए आज का दिन सर्वोत्तम है।",
         advisoryTime: "आज का अपडेट",
 
+        // GPS & Live Location
+        btnDetectGPS: "GPS से खेत खोजें",
+        locDetecting: "⏳ जीपीएस लोकेशन खोजी जा रही है...",
+        locSuccess: "खेत की लोकेशन सेट हो गई: {loc}",
+        locErr: "⚠️ लोकेशन नहीं मिल सकी। कृपया गांव का नाम टाइप करें।",
+        gpsFieldLabel: "खेत का GPS मैप:",
+        btnTrackTractor: "🗺️ ट्रैक्टर ट्रैक करें",
+        trackingTitle: "ट्रैक्टर लाइव ट्रैकिंग (Live Tracker)",
+        trackingDistance: "खेत से दूरी",
+        trackingETA: "पहुंचने का समय",
+        trackingSpeed: "ट्रैक्टर की गति",
+        stepConfirmed: "बुकिंग स्वीकृत",
+        stepAssigned: "ड्राइवर असाइन",
+        stepOnWay: "खेत की ओर रवाना",
+        stepArrived: "खेत पर आगमन",
+        btnCallDriver: "कॉल सहायता",
+        btnGoogleMaps: "Google Maps पर देखें",
+        driverCalledAlert: "ड्राइवर से संपर्क किया जा रहा है... (सहायता केंद्र 24x7)",
+
         // Search & Sort Bar
         searchPlaceholder: "मशीन, औजार या काम खोजें (उदा: रोटावेटर, कंबाइन, 4WD, लेवलर)...",
         labelSortBy: "क्रमबद्ध करें:",
@@ -296,8 +315,8 @@ const translations = {
         placeholderFarmerName: "जैसे: रमेश कुमार",
         labelFarmerPhone: "मोबाइल नंबर *",
         placeholderFarmerPhone: "10 अंकों का मोबाइल नंबर",
-        labelFarmerVillage: "गांव / कस्बा व जिला *",
-        placeholderFarmerVillage: "जैसे: रामपुर, मेरठ",
+        labelFarmerVillage: "गांव / खेत का स्थान व जिला *",
+        placeholderFarmerVillage: "जैसे: रामपुर, मेरठ (या GPS बटन दबाएं)",
         labelWorkDuration: "कितने घंटे / बीघा चाहिए? *",
         labelWorkCrop: "किस फसल के लिए काम करवाना है?",
         placeholderWorkCrop: "जैसे: धान का कीचड़, गेहूं बोवाई",
@@ -417,6 +436,25 @@ const translations = {
         advisoryText: "The weather is completely clear and dry. Optimal condition for wheat/mustard sowing, deep ploughing, and combine harvesting.",
         advisoryTime: "Today's Update",
 
+        // GPS & Live Location
+        btnDetectGPS: "Auto-Detect GPS",
+        locDetecting: "⏳ Detecting GPS location...",
+        locSuccess: "Farm GPS set: {loc}",
+        locErr: "⚠️ Location could not be detected. Please type village name.",
+        gpsFieldLabel: "Field GPS Location:",
+        btnTrackTractor: "🗺️ Track Tractor",
+        trackingTitle: "Live Tractor Tracker",
+        trackingDistance: "Distance from Field",
+        trackingETA: "Estimated Time",
+        trackingSpeed: "Tractor Speed",
+        stepConfirmed: "Booking Confirmed",
+        stepAssigned: "Driver Assigned",
+        stepOnWay: "On the Way to Field",
+        stepArrived: "Arrived at Field",
+        btnCallDriver: "Call Support",
+        btnGoogleMaps: "View on Google Maps",
+        driverCalledAlert: "Connecting to driver / farmer support center...",
+
         // Search & Sort Bar
         searchPlaceholder: "Search machines, tools or crops (e.g. Rotavator, Combine, 4WD, Leveler)...",
         labelSortBy: "Sort By:",
@@ -504,8 +542,8 @@ const translations = {
         placeholderFarmerName: "e.g. Ramesh Kumar",
         labelFarmerPhone: "Mobile Number *",
         placeholderFarmerPhone: "10-digit mobile number",
-        labelFarmerVillage: "Village / Town & District *",
-        placeholderFarmerVillage: "e.g. Rampur, Meerut",
+        labelFarmerVillage: "Village / Field Location & District *",
+        placeholderFarmerVillage: "e.g. Rampur, Meerut (or tap GPS button)",
         labelWorkDuration: "Hours or Acres Required? *",
         labelWorkCrop: "Crop or Work Purpose:",
         placeholderWorkCrop: "e.g. Paddy Puddling, Wheat Sowing",
@@ -862,7 +900,121 @@ function clearSearch() {
 }
 
 // ==========================================
-// 6. Booking Modal Handlers & Fuel Selection
+// 6. GPS Location Auto-Detection
+// ==========================================
+function detectFarmerLocation() {
+    const statusPill = document.getElementById('farmerGpsStatus');
+    const villageInput = document.getElementById('farmerVillage');
+    const gpsInput = document.getElementById('farmerGpsLink');
+    const t = translations[currentLang] || translations.hi;
+
+    if (!navigator.geolocation) {
+        alert(t.locErr);
+        return;
+    }
+
+    if (statusPill) {
+        statusPill.style.display = 'block';
+        statusPill.textContent = t.locDetecting;
+        statusPill.className = 'gps-status-pill loading';
+    }
+
+    navigator.geolocation.getCurrentPosition(
+        (pos) => {
+            const lat = pos.coords.latitude;
+            const lng = pos.coords.longitude;
+            const accuracy = Math.round(pos.coords.accuracy);
+            const mapsUrl = `https://www.google.com/maps?q=${lat},${lng}`;
+
+            if (gpsInput) gpsInput.value = mapsUrl;
+
+            // Attempt reverse geocoding via OpenStreetMap or graceful fallback
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+                .then(res => res.json())
+                .then(data => {
+                    const address = data.address || {};
+                    const village = address.village || address.suburb || address.town || address.county || address.state_district || 'खेत (Farm Location)';
+                    const state = address.state || '';
+                    const locText = `${village}, ${state}`;
+
+                    if (villageInput) villageInput.value = locText;
+                    if (statusPill) {
+                        statusPill.innerHTML = `✅ ${t.locSuccess.replace('{loc}', locText)} <a href="${mapsUrl}" target="_blank" class="gps-preview-link">🗺️ मैप देखें</a>`;
+                        statusPill.className = 'gps-status-pill success';
+                    }
+                })
+                .catch(() => {
+                    const fallbackText = `GPS: ${lat.toFixed(4)}, ${lng.toFixed(4)} (सटीक ±${accuracy}m)`;
+                    if (villageInput) villageInput.value = fallbackText;
+                    if (statusPill) {
+                        statusPill.innerHTML = `✅ ${t.locSuccess.replace('{loc}', fallbackText)} <a href="${mapsUrl}" target="_blank" class="gps-preview-link">🗺️ मैप देखें</a>`;
+                        statusPill.className = 'gps-status-pill success';
+                    }
+                });
+        },
+        () => {
+            if (statusPill) {
+                statusPill.textContent = t.locErr;
+                statusPill.className = 'gps-status-pill error';
+            }
+            alert(t.locErr);
+        },
+        { timeout: 10000, enableHighAccuracy: true }
+    );
+}
+
+function detectOwnerLocation() {
+    const statusPill = document.getElementById('ownerGpsStatus');
+    const villageInput = document.getElementById('ownerVillage');
+    const t = translations[currentLang] || translations.hi;
+
+    if (!navigator.geolocation) {
+        alert(t.locErr);
+        return;
+    }
+
+    if (statusPill) {
+        statusPill.style.display = 'block';
+        statusPill.textContent = t.locDetecting;
+        statusPill.className = 'gps-status-pill loading';
+    }
+
+    navigator.geolocation.getCurrentPosition(
+        (pos) => {
+            const lat = pos.coords.latitude;
+            const lng = pos.coords.longitude;
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+                .then(res => res.json())
+                .then(data => {
+                    const address = data.address || {};
+                    const place = address.village || address.suburb || address.town || address.city || 'My Garage';
+                    const state = address.state || '';
+                    if (villageInput) villageInput.value = `${place}, ${state}`;
+                    if (statusPill) {
+                        statusPill.textContent = `✅ ट्रैक्टर गैराज लोकेशन सेट: ${place}, ${state}`;
+                        statusPill.className = 'gps-status-pill success';
+                    }
+                })
+                .catch(() => {
+                    if (villageInput) villageInput.value = `GPS (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
+                    if (statusPill) {
+                        statusPill.textContent = `✅ GPS सेट: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+                        statusPill.className = 'gps-status-pill success';
+                    }
+                });
+        },
+        () => {
+            if (statusPill) {
+                statusPill.textContent = t.locErr;
+                statusPill.className = 'gps-status-pill error';
+            }
+        },
+        { timeout: 10000 }
+    );
+}
+
+// ==========================================
+// 7. Booking Modal Handlers & Fuel Selection
 // ==========================================
 function openBookingModal(machineId) {
     selectedMachine = fleetData.find(m => m.id === machineId) || fleetData[0];
@@ -908,6 +1060,15 @@ function openBookingModal(machineId) {
         modalPhoto.src = imgUrl;
         modalPhoto.alt = title;
     }
+
+    // Reset GPS status badge
+    const gpsStatus = document.getElementById('farmerGpsStatus');
+    const gpsInput = document.getElementById('farmerGpsLink');
+    if (gpsStatus) {
+        gpsStatus.style.display = 'none';
+        gpsStatus.innerHTML = '';
+    }
+    if (gpsInput) gpsInput.value = '';
 
     // Pre-fill user name if logged in
     const savedUser = localStorage.getItem('tractorUser');
@@ -984,6 +1145,7 @@ function handleTractorBookingSubmit(event) {
     const farmerPhone = document.getElementById('farmerPhone').value.trim();
     const farmerVillage = document.getElementById('farmerVillage').value.trim();
     const duration = document.getElementById('workDuration').value;
+    const gpsLink = document.getElementById('farmerGpsLink') ? document.getElementById('farmerGpsLink').value : '';
 
     if (!farmerName || !farmerPhone || !farmerVillage) {
         alert(t.errFillFields);
@@ -1009,6 +1171,7 @@ function handleTractorBookingSubmit(event) {
         farmerName,
         farmerPhone,
         farmerVillage,
+        gpsLink: gpsLink || `https://maps.google.com/?q=${encodeURIComponent(farmerVillage)}`,
         duration: `${duration} ${rateUnit}`,
         fuelOption: selectedFuelOption,
         fuelText,
@@ -1030,6 +1193,7 @@ function handleTractorBookingSubmit(event) {
         farmerName,
         farmerPhone,
         farmerVillage,
+        gpsLink: bookingRecord.gpsLink,
         machineTitle: `${machineTitle} (${fuelText})`,
         duration: `${duration} ${rateUnit}`,
         total: `₹${totalStr}`
@@ -1041,6 +1205,13 @@ function showReceiptModal(data) {
     const content = document.getElementById('receiptDetailsContent');
     const t = translations[currentLang] || translations.hi;
     if (!modal || !content) return;
+
+    const gpsRow = data.gpsLink ? `
+        <div class="receipt-row">
+            <span>${t.gpsFieldLabel}</span>
+            <a href="${data.gpsLink}" target="_blank" class="receipt-map-link">📍 Google Maps पर लोकेशन देखें</a>
+        </div>
+    ` : '';
 
     content.innerHTML = `
         <div class="receipt-row">
@@ -1059,6 +1230,7 @@ function showReceiptModal(data) {
             <span>${t.receiptVillage}</span>
             <span>${data.farmerVillage}</span>
         </div>
+        ${gpsRow}
         <div class="receipt-row">
             <span>${t.receiptMachine}</span>
             <span>${data.machineTitle}</span>
@@ -1082,7 +1254,7 @@ function closeReceiptModal() {
 }
 
 // ==========================================
-// 7. Persistent Bookings (My Bookings) System
+// 8. Persistent Bookings (My Bookings) System
 // ==========================================
 function getBookings() {
     try {
@@ -1180,6 +1352,7 @@ function renderMyBookings() {
                         <strong>₹${b.total}</strong>
                     </div>
                     <div class="record-actions">
+                        ${!isCancelled ? `<button type="button" class="btn-track-booking" onclick="openLiveTrackingModal('${b.orderId}')">${t.btnTrackTractor}</button>` : ''}
                         <button type="button" class="btn-receipt-view" onclick="viewPastReceipt('${b.orderId}')">${t.btnViewReceipt}</button>
                         ${!isCancelled ? `<button type="button" class="btn-booking-cancel" onclick="cancelBooking('${b.orderId}')">${t.btnCancelBooking}</button>` : ''}
                     </div>
@@ -1213,6 +1386,7 @@ function viewPastReceipt(orderId) {
         farmerName: b.farmerName,
         farmerPhone: b.farmerPhone,
         farmerVillage: b.farmerVillage,
+        gpsLink: b.gpsLink,
         machineTitle: `${b.machineTitle} (${b.fuelText || ''})`,
         duration: b.duration,
         total: `₹${b.total}`
@@ -1220,7 +1394,55 @@ function viewPastReceipt(orderId) {
 }
 
 // ==========================================
-// 8. Mandi Ticker
+// 9. Live Tractor Tracking Modal
+// ==========================================
+function openLiveTrackingModal(orderId) {
+    closeMyBookingsModal();
+    const bookings = getBookings();
+    const booking = bookings.find(b => b.orderId === orderId) || bookings[0];
+    const modal = document.getElementById('liveTrackingModal');
+    if (!modal) return;
+
+    const subtitleEl = document.getElementById('trackingOrderSubtitle');
+    const machinePhoto = document.getElementById('trackingMachinePhoto');
+    const driverNameEl = document.getElementById('trackingDriverName');
+    const machineDetailsEl = document.getElementById('trackingMachineDetails');
+    const mapsBtn = document.getElementById('btnOpenGoogleMaps');
+
+    if (booking) {
+        if (subtitleEl) subtitleEl.textContent = `ऑर्डर #${booking.orderId} • ${booking.farmerVillage}`;
+        if (machinePhoto) machinePhoto.src = booking.machinePhoto || 'images/dhan-tractor.jpg';
+        if (machineDetailsEl) machineDetailsEl.textContent = `${booking.machineTitle} • UP 15 AB 4589`;
+        if (mapsBtn) mapsBtn.href = booking.gpsLink || 'https://maps.google.com';
+    }
+
+    // Dynamic realistic ETA simulation
+    const dist = (1.5 + Math.random() * 1.5).toFixed(1);
+    const eta = Math.round(dist * 5 + 2);
+    const speed = Math.round(20 + Math.random() * 5);
+
+    const distEl = document.getElementById('trackDistance');
+    const etaEl = document.getElementById('trackETA');
+    const speedEl = document.getElementById('trackSpeed');
+
+    if (distEl) distEl.textContent = `${dist} किमी`;
+    if (etaEl) etaEl.textContent = `${eta} मिनट`;
+    if (speedEl) speedEl.textContent = `${speed} किमी/घं`;
+
+    modal.style.display = 'flex';
+}
+
+function closeLiveTrackingModal() {
+    const modal = document.getElementById('liveTrackingModal');
+    if (modal) modal.style.display = 'none';
+}
+
+function handleCallDriver() {
+    handleCallSupport();
+}
+
+// ==========================================
+// 10. Mandi Ticker
 // ==========================================
 function renderMandiTicker() {
     const ticker = document.getElementById('mandiTickerContent');
@@ -1242,7 +1464,7 @@ function renderMandiTicker() {
 }
 
 // ==========================================
-// 9. Call & WhatsApp Support Dispatchers (No Hardcoded Numbers)
+// 11. Call & WhatsApp Support Dispatchers (No Hardcoded Numbers)
 // ==========================================
 function handleCallSupport() {
     const modal = document.getElementById('callSupportModal');
@@ -1269,13 +1491,14 @@ function submitCallbackRequest() {
     closeCallSupportModal();
 }
 
-// Universal WhatsApp Share Dispatcher
+// Universal WhatsApp Share Dispatcher with GPS Field Location Pin
 function sendBookingViaWhatsApp() {
     if (!selectedMachine) return;
     const t = translations[currentLang] || translations.hi;
     const farmerName = document.getElementById('farmerName').value.trim() || 'Kisan';
     const farmerPhone = document.getElementById('farmerPhone').value.trim() || 'Not Provided';
     const farmerVillage = document.getElementById('farmerVillage').value.trim() || 'Village';
+    const gpsLink = document.getElementById('farmerGpsLink') ? document.getElementById('farmerGpsLink').value : '';
     const duration = document.getElementById('workDuration').value || 1;
     const cropName = document.getElementById('workCropName').value.trim() || 'Kheti';
     const machineTitle = selectedMachine.name[currentLang] || selectedMachine.name.hi;
@@ -1288,10 +1511,13 @@ function sendBookingViaWhatsApp() {
     const total = (parseFloat(duration) * appliedRate);
     const fuelText = selectedFuelOption === 'with-fuel' ? t.fuelWithShort : t.fuelWithoutShort;
 
+    const gpsLine = gpsLink ? `📍 *Khet Ka Google Maps Link:* ${gpsLink}\n` : '';
+
     const message = `🚜 *PROJECT TRACTOR - BOOKING ORDER* 🚜\n\n` +
         `👤 *Kisan Ka Naam:* ${farmerName}\n` +
         `📱 *Mobile Number:* ${farmerPhone}\n` +
-        `📍 *Gaon / District:* ${farmerVillage}\n` +
+        `📍 *Gaon / Khet Location:* ${farmerVillage}\n` +
+        gpsLine +
         `🌾 *Fasal / Kaam:* ${cropName}\n` +
         `🚜 *Chuni Gayi Gaadi:* ${machineTitle}\n` +
         `⛽ *Diesel Option:* ${fuelText}\n` +
@@ -1309,7 +1535,7 @@ function openDirectWhatsApp() {
 }
 
 // ==========================================
-// 10. Language Switch Logic
+// 12. Language Switch Logic
 // ==========================================
 function applyLanguage(lang) {
     if (!translations[lang]) lang = 'hi';
@@ -1381,6 +1607,7 @@ window.addEventListener('click', (e) => {
     const termsModal = document.getElementById('termsPolicyModal');
     const callModal = document.getElementById('callSupportModal');
     const myBookingsModal = document.getElementById('myBookingsModal');
+    const liveTrackingModal = document.getElementById('liveTrackingModal');
 
     if (e.target === langModal && localStorage.getItem('tractorLang')) {
         closeLanguageModal();
@@ -1403,10 +1630,13 @@ window.addEventListener('click', (e) => {
     if (e.target === myBookingsModal) {
         closeMyBookingsModal();
     }
+    if (e.target === liveTrackingModal) {
+        closeLiveTrackingModal();
+    }
 });
 
 // ==========================================
-// 11. Auth & Navbar Session
+// 13. Auth & Navbar Session
 // ==========================================
 function updateNavSession() {
     const drawerUserName = document.getElementById('drawerUserName');
@@ -1481,7 +1711,7 @@ function logout() {
 }
 
 // ==========================================
-// 12. Page Initialization
+// 14. Page Initialization
 // ==========================================
 window.addEventListener('DOMContentLoaded', () => {
     const savedLang = localStorage.getItem('tractorLang');

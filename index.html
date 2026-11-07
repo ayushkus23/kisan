@@ -345,8 +345,15 @@
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="farmerVillage" data-i18n="labelFarmerVillage">गांव / कस्बा व जिला *</label>
-                        <input type="text" id="farmerVillage" required placeholder="जैसे: रामपुर, मेरठ" data-i18n-placeholder="placeholderFarmerVillage">
+                        <div class="label-with-action">
+                            <label for="farmerVillage" data-i18n="labelFarmerVillage">गांव / खेत का स्थान व जिला *</label>
+                            <button type="button" class="btn-detect-gps" id="btnDetectLocation" onclick="detectFarmerLocation()" title="GPS से खेत की लोकेशन लें">
+                                📍 <span data-i18n="btnDetectGPS">GPS से खेत खोजें</span>
+                            </button>
+                        </div>
+                        <input type="text" id="farmerVillage" required placeholder="जैसे: रामपुर, मेरठ (या GPS बटन दबाएं)" data-i18n-placeholder="placeholderFarmerVillage">
+                        <div id="farmerGpsStatus" class="gps-status-pill" style="display: none;"></div>
+                        <input type="hidden" id="farmerGpsLink" value="">
                     </div>
                     <div class="form-group">
                         <label for="workDuration" data-i18n="labelWorkDuration">कितने घंटे / बीघा चाहिए? *</label>
@@ -416,8 +423,14 @@
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="ownerVillage" data-i18n="regOwnerLocation">गांव / कस्बा व जिला *</label>
-                        <input type="text" id="ownerVillage" required placeholder="जैसे: मवाना, मेरठ" data-i18n-placeholder="placeholderFarmerVillage">
+                        <div class="label-with-action">
+                            <label for="ownerVillage" data-i18n="regOwnerLocation">गांव / कस्बा व जिला *</label>
+                            <button type="button" class="btn-detect-gps" onclick="detectOwnerLocation()" title="GPS से गैराज लोकेशन लें">
+                                📍 <span data-i18n="btnDetectGPS">GPS लोकेशन</span>
+                            </button>
+                        </div>
+                        <input type="text" id="ownerVillage" required placeholder="जैसे: मवाना, मेरठ (या GPS बटन दबाएं)" data-i18n-placeholder="placeholderFarmerVillage">
+                        <div id="ownerGpsStatus" class="gps-status-pill" style="display: none;"></div>
                     </div>
                     <div class="form-group">
                         <label for="ownerDL" data-i18n="regOwnerDL">ड्राइविंग लाइसेंस (DL) नंबर</label>
@@ -600,6 +613,108 @@
 
             <div id="myBookingsList" class="my-bookings-list">
                 <!-- Injected dynamically via script.js -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Live Tractor Tracking Modal -->
+    <div id="liveTrackingModal" class="modal-overlay">
+        <div class="modal-card tracking-modal-card">
+            <button type="button" class="modal-close-btn" onclick="closeLiveTrackingModal()">&times;</button>
+            
+            <div class="tracking-header">
+                <div class="tracking-icon">🚜</div>
+                <div>
+                    <h2 data-i18n="trackingTitle">ट्रैक्टर लाइव ट्रैकिंग (Live Tracker)</h2>
+                    <p id="trackingOrderSubtitle">ऑर्डर • खेत की ओर रवाना</p>
+                </div>
+            </div>
+
+            <!-- Simulated Live GPS Radar & Map View -->
+            <div class="tracking-map-viewport">
+                <div class="map-farm-bg">
+                    <div class="map-radar-ripple"></div>
+                    <div class="map-path-line"></div>
+                    
+                    <!-- Destination Pin (Farmer's Field) -->
+                    <div class="map-pin farm-pin" title="आपका खेत (Your Field)">
+                        <span class="pin-badge">🌾 आपका खेत</span>
+                        <div class="pin-marker red-marker">📍</div>
+                    </div>
+
+                    <!-- Tractor Pin (Moving towards Field) -->
+                    <div class="map-pin tractor-pin" id="mapTractorPin" title="ट्रैक्टर (Tractor)">
+                        <div class="tractor-marker-bubble">
+                            <span class="pulse-beacon"></span>
+                            🚜
+                        </div>
+                        <span class="pin-badge driver-tag" id="mapDriverTag">ड्राइवर रवाना</span>
+                    </div>
+
+                    <!-- Live Satellite Watermark -->
+                    <div class="map-status-overlay">
+                        <span class="live-dot-pulse"></span>
+                        <span>GPS LIVE SATELLITE RADAR</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Real-time Stats Cards -->
+            <div class="tracking-stats-grid">
+                <div class="track-stat-box">
+                    <span class="stat-meta" data-i18n="trackingDistance">खेत से दूरी</span>
+                    <strong class="stat-digit" id="trackDistance">2.1 किमी</strong>
+                </div>
+                <div class="track-stat-box highlight">
+                    <span class="stat-meta" data-i18n="trackingETA">पहुंचने का समय</span>
+                    <strong class="stat-digit" id="trackETA">11 मिनट</strong>
+                </div>
+                <div class="track-stat-box">
+                    <span class="stat-meta" data-i18n="trackingSpeed">ट्रैक्टर की गति</span>
+                    <strong class="stat-digit" id="trackSpeed">22 किमी/घं</strong>
+                </div>
+            </div>
+
+            <!-- Trip Milestone Stepper -->
+            <div class="trip-stepper">
+                <div class="step-node done">
+                    <span class="step-check">✓</span>
+                    <span class="step-label" data-i18n="stepConfirmed">बुकिंग स्वीकृत</span>
+                </div>
+                <div class="step-line done"></div>
+                <div class="step-node done">
+                    <span class="step-check">✓</span>
+                    <span class="step-label" data-i18n="stepAssigned">ड्राइवर असाइन</span>
+                </div>
+                <div class="step-line active"></div>
+                <div class="step-node active">
+                    <span class="step-pulse">🚜</span>
+                    <span class="step-label" data-i18n="stepOnWay">खेत की ओर रवाना</span>
+                </div>
+                <div class="step-line"></div>
+                <div class="step-node">
+                    <span class="step-circle">4</span>
+                    <span class="step-label" data-i18n="stepArrived">खेत पर आगमन</span>
+                </div>
+            </div>
+
+            <!-- Assigned Driver Profile & Call Action -->
+            <div class="assigned-driver-card">
+                <div class="driver-profile-info">
+                    <img src="images/dhan-tractor.jpg" alt="Driver Photo" class="driver-avatar-img" id="trackingMachinePhoto">
+                    <div>
+                        <h4 id="trackingDriverName">ड्राइवर: राजू यादव</h4>
+                        <p id="trackingMachineDetails">Mahindra 575 DI • 4WD</p>
+                    </div>
+                </div>
+                <div class="driver-card-actions">
+                    <button type="button" class="btn btn-call" onclick="handleCallDriver()">
+                        📞 <span data-i18n="btnCallDriver">कॉल सहायता</span>
+                    </button>
+                    <a id="btnOpenGoogleMaps" href="#" target="_blank" class="btn btn-map-link">
+                        🗺️ <span data-i18n="btnGoogleMaps">Google Maps</span>
+                    </a>
+                </div>
             </div>
         </div>
     </div>

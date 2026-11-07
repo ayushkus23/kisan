@@ -2153,6 +2153,452 @@ body {
     margin-right: auto;
 }
 
+/* =========================================
+   GPS Location Auto-Detect Button & Badges
+   ========================================= */
+.label-with-action {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.label-with-action label {
+    margin-bottom: 0;
+}
+
+.btn-detect-gps {
+    background: #eef7eb;
+    color: #1f5130;
+    border: 1px solid #c8e0be;
+    font-size: 11.5px;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 12px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.2s ease;
+}
+
+.btn-detect-gps:hover {
+    background: #1f5130;
+    color: #ffffff;
+    border-color: #1f5130;
+}
+
+.gps-status-pill {
+    font-size: 12px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    margin-top: 6px;
+    line-height: 1.4;
+}
+
+.gps-status-pill.loading {
+    background: #fff8e1;
+    color: #f57f17;
+    border: 1px solid #ffe082;
+}
+
+.gps-status-pill.success {
+    background: #e8f5e9;
+    color: #1b5e20;
+    border: 1px solid #a5d6a7;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.gps-status-pill.error {
+    background: #ffebee;
+    color: #c62828;
+    border: 1px solid #ffcdd2;
+}
+
+.gps-preview-link,
+.receipt-map-link {
+    color: #1565c0;
+    text-decoration: underline;
+    font-weight: 600;
+}
+
+.btn-track-booking {
+    background: #1f5130;
+    color: #ffffff;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-track-booking:hover {
+    background: #163e24;
+}
+
+/* =========================================
+   Live Tractor Tracking Modal
+   ========================================= */
+.tracking-modal-card {
+    max-width: 580px;
+}
+
+.tracking-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 18px;
+}
+
+.tracking-icon {
+    font-size: 38px;
+    background: #eef7eb;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.tracking-header h2 {
+    color: #1f5130;
+    font-size: 22px;
+    margin-bottom: 2px;
+}
+
+.tracking-header p {
+    color: #607d8b;
+    font-size: 13px;
+}
+
+/* Simulated GPS Map Viewport */
+.tracking-map-viewport {
+    width: 100%;
+    height: 220px;
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 18px;
+    box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.4);
+    position: relative;
+    border: 2px solid #296d42;
+}
+
+.map-farm-bg {
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at 75% 35%, #2a5a3a 0%, #153420 50%, #0a1e12 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.map-radar-ripple {
+    position: absolute;
+    top: 35%;
+    left: 75%;
+    transform: translate(-50%, -50%);
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(76, 175, 80, 0.4);
+    animation: radarPulse 2.8s infinite linear;
+    pointer-events: none;
+}
+
+@keyframes radarPulse {
+    0% { width: 30px; height: 30px; opacity: 1; }
+    100% { width: 260px; height: 260px; opacity: 0; }
+}
+
+.map-path-line {
+    position: absolute;
+    top: 50%;
+    left: 20%;
+    width: 55%;
+    height: 2px;
+    background: repeating-linear-gradient(90deg, #4caf50, #4caf50 6px, transparent 6px, transparent 12px);
+    transform: rotate(-14deg);
+    animation: dashMove 1.5s infinite linear;
+}
+
+@keyframes dashMove {
+    0% { background-position: 0 0; }
+    100% { background-position: 24px 0; }
+}
+
+.map-pin {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 5;
+}
+
+.farm-pin {
+    top: 25%;
+    right: 18%;
+}
+
+.tractor-pin {
+    bottom: 22%;
+    left: 16%;
+    animation: tractorDrift 4s ease-in-out infinite alternate;
+}
+
+@keyframes tractorDrift {
+    0% { transform: translate(0, 0); }
+    100% { transform: translate(12px, -8px); }
+}
+
+.tractor-marker-bubble {
+    width: 44px;
+    height: 44px;
+    background: #1f5130;
+    border: 2.5px solid #ffd966;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+    position: relative;
+}
+
+.pulse-beacon {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: rgba(232, 185, 49, 0.4);
+    animation: pulse 1.8s infinite;
+}
+
+.pin-badge {
+    background: rgba(15, 34, 21, 0.88);
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 8px;
+    white-space: nowrap;
+    margin-top: 4px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.pin-marker.red-marker {
+    font-size: 26px;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+}
+
+.map-status-overlay {
+    position: absolute;
+    bottom: 8px;
+    left: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #81c784;
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    background: rgba(0, 0, 0, 0.55);
+    padding: 3px 8px;
+    border-radius: 6px;
+}
+
+.live-dot-pulse {
+    width: 7px;
+    height: 7px;
+    background: #00e676;
+    border-radius: 50%;
+    animation: pulse 1.2s infinite;
+}
+
+/* Tracking Stats Grid */
+.tracking-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.track-stat-box {
+    background: #f8faf6;
+    border: 1.5px solid #dce8d5;
+    padding: 12px 10px;
+    border-radius: 10px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+}
+
+.track-stat-box.highlight {
+    background: #eef7eb;
+    border-color: #1f5130;
+}
+
+.stat-meta {
+    font-size: 11.5px;
+    color: #607d8b;
+    margin-bottom: 2px;
+}
+
+.stat-digit {
+    font-size: 18px;
+    color: #1f5130;
+    font-weight: 800;
+}
+
+/* Trip Stepper */
+.trip-stepper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 22px;
+    padding: 14px 10px;
+    background: #fafdf8;
+    border-radius: 12px;
+    border: 1px solid #edf4ea;
+}
+
+.step-node {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 4px;
+    position: relative;
+    z-index: 2;
+}
+
+.step-check,
+.step-circle,
+.step-pulse {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.step-node.done .step-check {
+    background: #2e7d32;
+    color: #ffffff;
+}
+
+.step-node.active .step-pulse {
+    background: #e8b931;
+    color: #1f5130;
+    box-shadow: 0 0 0 4px rgba(232, 185, 49, 0.3);
+}
+
+.step-circle {
+    background: #eceff1;
+    color: #78909c;
+}
+
+.step-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #455a64;
+    white-space: nowrap;
+}
+
+.step-node.active .step-label {
+    color: #1f5130;
+    font-weight: 700;
+}
+
+.step-line {
+    flex: 1;
+    height: 2px;
+    background: #cfd8dc;
+    margin: 0 6px 16px 6px;
+}
+
+.step-line.done {
+    background: #2e7d32;
+}
+
+.step-line.active {
+    background: linear-gradient(90deg, #2e7d32, #e8b931);
+}
+
+/* Assigned Driver Card */
+.assigned-driver-card {
+    background: #f7faf4;
+    border: 1.5px solid #d4e7cc;
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 14px;
+}
+
+.driver-profile-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.driver-avatar-img {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #e8b931;
+    flex-shrink: 0;
+}
+
+.driver-profile-info h4 {
+    font-size: 15px;
+    color: #1f5130;
+    margin-bottom: 2px;
+}
+
+.driver-profile-info p {
+    font-size: 12px;
+    color: #607d8b;
+}
+
+.driver-card-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.btn-map-link {
+    background: #1565c0;
+    color: #ffffff;
+    padding: 10px 14px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: background 0.2s;
+}
+
+.btn-map-link:hover {
+    background: #0d47a1;
+}
+
 /* Responsive Media Queries */
 @media (max-width: 768px) {
     .navbar {
@@ -2262,5 +2708,23 @@ body {
 
     .callback-input-box .btn {
         width: 100%;
+    }
+
+    .assigned-driver-card {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .driver-card-actions {
+        width: 100%;
+        display: flex;
+        gap: 8px;
+    }
+
+    .driver-card-actions .btn,
+    .driver-card-actions .btn-map-link {
+        flex: 1;
+        text-align: center;
+        justify-content: center;
     }
 }
