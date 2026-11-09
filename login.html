@@ -5,6 +5,15 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Project Tractor</title>
+    <!-- Already logged-in redirect to main dashboard -->
+    <script>
+        (function() {
+            var user = localStorage.getItem('tractorUser');
+            if (user && user !== 'null' && user !== 'undefined' && user.trim() !== '') {
+                window.location.replace('index.html');
+            }
+        })();
+    </script>
     <link rel="stylesheet" href="style.css">
 </head>
 
@@ -17,13 +26,11 @@
             <p data-i18n="modalSubtitle">कृपया अपनी पसंदीदा भाषा चुनें / Please select your preferred language</p>
 
             <div class="lang-buttons-grid">
-                <button type="button" class="lang-choice-btn" onclick="selectLanguage('hi')">
-                    <span class="flag">🇮🇳</span>
+                <button type="button" class="lang-choice-btn" id="langBtnHi" onclick="selectLanguage('hi')">
                     <span class="lang-name">हिंदी</span>
                     <span class="lang-hint">आगे बढ़ें</span>
                 </button>
-                <button type="button" class="lang-choice-btn" onclick="selectLanguage('en')">
-                    <span class="flag">🇬🇧</span>
+                <button type="button" class="lang-choice-btn" id="langBtnEn" onclick="selectLanguage('en')">
                     <span class="lang-name">English</span>
                     <span class="lang-hint">Continue</span>
                 </button>

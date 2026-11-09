@@ -1544,6 +1544,12 @@ function applyLanguage(lang) {
 
     const t = translations[lang];
 
+    // Highlight active language button
+    const btnHi = document.getElementById('langBtnHi');
+    const btnEn = document.getElementById('langBtnEn');
+    if (btnHi) btnHi.classList.toggle('active-lang', lang === 'hi');
+    if (btnEn) btnEn.classList.toggle('active-lang', lang === 'en');
+
     // Update text
     document.querySelectorAll('[data-i18n]').forEach((el) => {
         const key = el.getAttribute('data-i18n');
@@ -1675,14 +1681,14 @@ function handleLogin(event) {
     localStorage.setItem('tractorUser', username);
 
     setTimeout(() => {
-        window.location.href = 'index.html';
+        window.location.replace('index.html');
     }, 800);
 }
 
 function guestLogin() {
     const t = translations[currentLang] || translations.hi;
     localStorage.setItem('tractorUser', t.guestUser);
-    window.location.href = 'index.html';
+    window.location.replace('index.html');
 }
 
 function forgotPassword(event) {
@@ -1707,7 +1713,7 @@ function showMessage(text, type) {
 
 function logout() {
     localStorage.removeItem('tractorUser');
-    window.location.href = 'login.html';
+    window.location.replace('login.html');
 }
 
 // ==========================================
