@@ -988,55 +988,150 @@ function clearSearch() {
 // ==========================================
 // 6. GPS Location Auto-Detection
 // ==========================================
+// 6. Universal Multi-Tier GPS & Reverse Geocoding
+// ==========================================
+async function fetchReverseGeocode(lat, lng, lang = 'hi') {
+    // 1. Try BigDataCloud (Free, client-side, fast, Native Hindi/English support)
+    try {
+        const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=${lang}`);
+        if (res.ok) {
+            const data = await res.json();
+            const locality = data.locality || data.city || '';
+            const adminLevel5 = data.localityInfo?.administrative?.find(a => a.adminLevel === 5)?.name || '';
+            const district = adminLevel5 || data.city || '';
+            const state = data.principalSubdivision || '';
+            const parts = Array.from(new Set([locality, district, state].filter(Boolean)));
+            if (parts.length > 0) {
+                return {
+                    name: parts.join(', '),
+                    lat: data.latitude || lat,
+                    lng: data.longitude || lng
+                };
+            }
+        }
+    } catch (e) {
+        console.warn('BigDataCloud error, trying Nominatim fallback:', e);
+    }
+
+    // 2. Fallback to OpenStreetMap Nominatim
+    try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=${lang},en`);
+        if (res.ok) {
+            const data = await res.json();
+            const addr = data.address || {};
+            const village = addr.village || addr.suburb || addr.town || addr.hamlet || addr.county || addr.city_district || '';
+            const district = addr.state_district || addr.district || addr.county || addr.city || '';
+            const state = addr.state || '';
+            const parts = Array.from(new Set([village, district, state].filter(Boolean)));
+            if (parts.length > 0) {
+                return {
+                    name: parts.join(', '),
+                    lat,
+                    lng
+                };
+            }
+        }
+    } catch (e) {
+        console.warn('Nominatim fallback error:', e);
+    }
+
+    return {
+        name: `GPS (${lat.toFixed(4)}, ${lng.toFixed(4)})`,
+        lat,
+        lng
+    };
+}
+
+// IP-based fallback when browser hardware GPS is unavailable or blocked on PC/laptop
+async function fetchIpLocation(lang = 'hi') {
+    try {
+        const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?localityLanguage=${lang}`);
+        if (res.ok) {
+            const data = await res.json();
+            const city = data.city || data.locality || '';
+            const state = data.principalSubdivision || '';
+            const parts = Array.from(new Set([city, state].filter(Boolean)));
+            if (parts.length > 0) {
+                return {
+                    name: parts.join(', '),
+                    lat: data.latitude,
+                    lng: data.longitude,
+                    isIpFallback: true
+                };
+            }
+        }
+    } catch (e) {
+        console.warn('IP fallback error:', e);
+    }
+    return null;
+}
+
+function getUniversalLocation(onStart, onSuccess, onError) {
+    if (typeof onStart === 'function') onStart();
+    const lang = currentLang || 'hi';
+
+    const tryIpFallback = async (reason) => {
+        const ipLoc = await fetchIpLocation(lang);
+        if (ipLoc && ipLoc.name) {
+            onSuccess({
+                ...ipLoc,
+                mapsUrl: `https://www.google.com/maps?q=${ipLoc.lat},${ipLoc.lng}`
+            });
+        } else {
+            onError(reason);
+        }
+    };
+
+    if (!navigator.geolocation) {
+        tryIpFallback('No Geolocation API');
+        return;
+    }
+
+    // Try standard browser geolocation (relaxed timeout, fallback on timeout or error)
+    navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+            const lat = pos.coords.latitude;
+            const lng = pos.coords.longitude;
+            const accuracy = Math.round(pos.coords.accuracy || 0);
+
+            const result = await fetchReverseGeocode(lat, lng, lang);
+            onSuccess({
+                ...result,
+                accuracy,
+                mapsUrl: `https://www.google.com/maps?q=${lat},${lng}`
+            });
+        },
+        async (err) => {
+            console.warn('Hardware GPS error/timeout, using IP network location:', err);
+            await tryIpFallback(err.message || 'GPS hardware timeout');
+        },
+        { enableHighAccuracy: false, timeout: 8000, maximumAge: 120000 }
+    );
+}
+
 function detectFarmerLocation() {
     const statusPill = document.getElementById('farmerGpsStatus');
     const villageInput = document.getElementById('farmerVillage');
     const gpsInput = document.getElementById('farmerGpsLink');
     const t = translations[currentLang] || translations.hi;
 
-    if (!navigator.geolocation) {
-        alert(t.locErr);
-        return;
-    }
-
-    if (statusPill) {
-        statusPill.style.display = 'block';
-        statusPill.textContent = t.locDetecting;
-        statusPill.className = 'gps-status-pill loading';
-    }
-
-    navigator.geolocation.getCurrentPosition(
-        (pos) => {
-            const lat = pos.coords.latitude;
-            const lng = pos.coords.longitude;
-            const accuracy = Math.round(pos.coords.accuracy);
-            const mapsUrl = `https://www.google.com/maps?q=${lat},${lng}`;
-
+    getUniversalLocation(
+        () => {
+            if (statusPill) {
+                statusPill.style.display = 'block';
+                statusPill.textContent = t.locDetecting;
+                statusPill.className = 'gps-status-pill loading';
+            }
+        },
+        (loc) => {
+            if (villageInput) villageInput.value = loc.name;
+            const mapsUrl = loc.mapsUrl || `https://www.google.com/maps?q=${loc.lat},${loc.lng}`;
             if (gpsInput) gpsInput.value = mapsUrl;
 
-            // Attempt reverse geocoding via OpenStreetMap or graceful fallback
-            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
-                .then(res => res.json())
-                .then(data => {
-                    const address = data.address || {};
-                    const village = address.village || address.suburb || address.town || address.county || address.state_district || 'खेत (Farm Location)';
-                    const state = address.state || '';
-                    const locText = `${village}, ${state}`;
-
-                    if (villageInput) villageInput.value = locText;
-                    if (statusPill) {
-                        statusPill.innerHTML = `✅ ${t.locSuccess.replace('{loc}', locText)} <a href="${mapsUrl}" target="_blank" class="gps-preview-link">🗺️ मैप देखें</a>`;
-                        statusPill.className = 'gps-status-pill success';
-                    }
-                })
-                .catch(() => {
-                    const fallbackText = `GPS: ${lat.toFixed(4)}, ${lng.toFixed(4)} (सटीक ±${accuracy}m)`;
-                    if (villageInput) villageInput.value = fallbackText;
-                    if (statusPill) {
-                        statusPill.innerHTML = `✅ ${t.locSuccess.replace('{loc}', fallbackText)} <a href="${mapsUrl}" target="_blank" class="gps-preview-link">🗺️ मैप देखें</a>`;
-                        statusPill.className = 'gps-status-pill success';
-                    }
-                });
+            if (statusPill) {
+                statusPill.className = 'gps-status-pill success';
+                statusPill.innerHTML = `✅ ${t.locSuccess.replace('{loc}', loc.name)} <a href="${mapsUrl}" target="_blank" class="gps-preview-link">🗺️ मैप देखें</a>`;
+            }
         },
         () => {
             if (statusPill) {
@@ -1044,8 +1139,7 @@ function detectFarmerLocation() {
                 statusPill.className = 'gps-status-pill error';
             }
             alert(t.locErr);
-        },
-        { timeout: 10000, enableHighAccuracy: true }
+        }
     );
 }
 
@@ -1054,48 +1148,27 @@ function detectOwnerLocation() {
     const villageInput = document.getElementById('ownerVillage');
     const t = translations[currentLang] || translations.hi;
 
-    if (!navigator.geolocation) {
-        alert(t.locErr);
-        return;
-    }
-
-    if (statusPill) {
-        statusPill.style.display = 'block';
-        statusPill.textContent = t.locDetecting;
-        statusPill.className = 'gps-status-pill loading';
-    }
-
-    navigator.geolocation.getCurrentPosition(
-        (pos) => {
-            const lat = pos.coords.latitude;
-            const lng = pos.coords.longitude;
-            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
-                .then(res => res.json())
-                .then(data => {
-                    const address = data.address || {};
-                    const place = address.village || address.suburb || address.town || address.city || 'My Garage';
-                    const state = address.state || '';
-                    if (villageInput) villageInput.value = `${place}, ${state}`;
-                    if (statusPill) {
-                        statusPill.textContent = `✅ ट्रैक्टर गैराज लोकेशन सेट: ${place}, ${state}`;
-                        statusPill.className = 'gps-status-pill success';
-                    }
-                })
-                .catch(() => {
-                    if (villageInput) villageInput.value = `GPS (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
-                    if (statusPill) {
-                        statusPill.textContent = `✅ GPS सेट: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
-                        statusPill.className = 'gps-status-pill success';
-                    }
-                });
+    getUniversalLocation(
+        () => {
+            if (statusPill) {
+                statusPill.style.display = 'block';
+                statusPill.textContent = t.locDetecting;
+                statusPill.className = 'gps-status-pill loading';
+            }
+        },
+        (loc) => {
+            if (villageInput) villageInput.value = loc.name;
+            if (statusPill) {
+                statusPill.textContent = `✅ लोकेशन सेट: ${loc.name}`;
+                statusPill.className = 'gps-status-pill success';
+            }
         },
         () => {
             if (statusPill) {
                 statusPill.textContent = t.locErr;
                 statusPill.className = 'gps-status-pill error';
             }
-        },
-        { timeout: 10000 }
+        }
     );
 }
 
@@ -1869,61 +1942,30 @@ function detectRegisterLocation() {
     const villageInput = document.getElementById('regVillage');
     const btn = document.getElementById('btnRegGps');
 
-    if (!navigator.geolocation) {
-        alert("आपके डिवाइस में GPS उपलब्ध नहीं है। कृपया गांव का नाम हाथ से लिखें।");
-        return;
-    }
-
-    if (statusDiv) {
-        statusDiv.style.display = 'inline-block';
-        statusDiv.className = 'gps-status-pill loading';
-        statusDiv.innerHTML = '⏳ GPS से खेत/गांव की लोकेशन खोजी जा रही है...';
-    }
-    if (btn) btn.disabled = true;
-
-    navigator.geolocation.getCurrentPosition(
-        async (position) => {
-            const lat = position.coords.latitude;
-            const lng = position.coords.longitude;
-
-            try {
-                const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=hi,en`);
-                const data = await response.json();
-                const addr = data.address || {};
-                const village = addr.village || addr.suburb || addr.town || addr.city_district || addr.hamlet || addr.county || '';
-                const district = addr.state_district || addr.district || addr.county || addr.city || '';
-                const state = addr.state || '';
-
-                let locText = [village, district, state].filter(Boolean).join(', ');
-                if (!locText) locText = `Lat: ${lat.toFixed(4)}, Lng: ${lng.toFixed(4)}`;
-
-                if (villageInput) {
-                    villageInput.value = locText;
-                }
-
-                if (statusDiv) {
-                    statusDiv.className = 'gps-status-pill success';
-                    statusDiv.innerHTML = `✅ स्थान प्राप्त हुआ: <strong>${locText}</strong>`;
-                }
-            } catch (err) {
-                const fallback = `Lat: ${lat.toFixed(4)}, Lng: ${lng.toFixed(4)}`;
-                if (villageInput && !villageInput.value) villageInput.value = fallback;
-                if (statusDiv) {
-                    statusDiv.className = 'gps-status-pill success';
-                    statusDiv.innerHTML = `✅ GPS मिला: ${fallback}`;
-                }
-            } finally {
-                if (btn) btn.disabled = false;
+    getUniversalLocation(
+        () => {
+            if (statusDiv) {
+                statusDiv.style.display = 'inline-block';
+                statusDiv.className = 'gps-status-pill loading';
+                statusDiv.innerHTML = '⏳ GPS व नेटवर्क से स्थान खोजा जा रहा है...';
+            }
+            if (btn) btn.disabled = true;
+        },
+        (loc) => {
+            if (btn) btn.disabled = false;
+            if (villageInput) villageInput.value = loc.name;
+            if (statusDiv) {
+                statusDiv.className = 'gps-status-pill success';
+                statusDiv.innerHTML = `✅ स्थान प्राप्त हुआ: <strong>${loc.name}</strong>`;
             }
         },
-        (error) => {
+        () => {
             if (btn) btn.disabled = false;
             if (statusDiv) {
                 statusDiv.className = 'gps-status-pill error';
-                statusDiv.innerHTML = '⚠️ GPS अनुमति नहीं मिली। कृपया गांव का नाम हाथ से दर्ज करें।';
+                statusDiv.innerHTML = '⚠️ स्थान नहीं मिल सका। कृपया गांव का नाम हाथ से दर्ज करें।';
             }
-        },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+        }
     );
 }
 
