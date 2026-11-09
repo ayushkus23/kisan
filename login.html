@@ -53,6 +53,17 @@
                 <p class="subtitle" data-i18n="brandSubtitle">किसान भाइयों का अपना ट्रैक्टर पोर्टल</p>
             </div>
 
+            <!-- Auth Tabs: Login & Create Account -->
+            <div class="auth-tabs">
+                <button type="button" class="auth-tab-btn active" id="tabLoginBtn" onclick="switchAuthTab('login')">
+                    🔑 <span data-i18n="tabLogin">लॉगिन करें</span>
+                </button>
+                <button type="button" class="auth-tab-btn" id="tabRegisterBtn" onclick="switchAuthTab('register')">
+                    📝 <span data-i18n="tabRegister">नया खाता बनाएं</span>
+                </button>
+            </div>
+
+            <!-- 1. Login Form -->
             <form id="loginForm" onsubmit="handleLogin(event)">
                 <div class="form-group">
                     <label for="username" data-i18n="labelUsername">मोबाइल नंबर या यूजरनेम</label>
@@ -76,17 +87,86 @@
                 <button type="submit" class="btn btn-primary login-btn" data-i18n="loginBtn">🚜 लॉगिन करें</button>
             </form>
 
-            <div class="divider">
-                <span data-i18n="dividerOr">या</span>
+            <div id="loginSectionFooter">
+                <div class="divider">
+                    <span data-i18n="dividerOr">या</span>
+                </div>
+
+                <button type="button" class="btn btn-guest" onclick="guestLogin()" data-i18n="guestBtn">
+                    🌾 गेस्ट के रूप में देखें
+                </button>
+
+                <div class="login-footer">
+                    <p><span data-i18n="newFarmerText">नए किसान हैं?</span> <a href="#" onclick="switchAuthTab('register'); return false;" data-i18n="createAccountLink">नया अकाउंट बनाएं</a></p>
+                </div>
             </div>
 
-            <button type="button" class="btn btn-guest" onclick="guestLogin()" data-i18n="guestBtn">
-                🌾 गेस्ट के रूप में देखें
-            </button>
+            <!-- 2. Create Account (Register) Form -->
+            <form id="registerForm" onsubmit="handleRegister(event)" style="display: none;">
+                <div class="form-group">
+                    <label for="regFullName" data-i18n="labelFullName">पूरा नाम / Farmer Name *</label>
+                    <input type="text" id="regFullName" data-i18n-placeholder="placeholderFullName" placeholder="जैसे: रामप्रसाद यादव" required autocomplete="name">
+                </div>
 
-            <div class="login-footer">
-                <p><span data-i18n="newFarmerText">नए किसान हैं?</span> <a href="#" onclick="showSignUpNotice(event)" data-i18n="createAccountLink">नया अकाउंट बनाएं</a></p>
-            </div>
+                <div class="form-group">
+                    <label for="regPhone" data-i18n="labelPhone">मोबाइल नंबर (10 अंक) *</label>
+                    <input type="tel" id="regPhone" pattern="[0-9]{10}" maxlength="10" data-i18n-placeholder="placeholderPhone" placeholder="जैसे: 9876543210" required autocomplete="tel">
+                </div>
+
+                <div class="form-group">
+                    <label data-i18n="labelRole">आपकी भूमिका / Your Role *</label>
+                    <div class="role-selector-grid">
+                        <label class="role-card selected" id="roleCardFarmer">
+                            <input type="radio" name="regRole" value="farmer" checked onchange="handleRoleChange(this)">
+                            <span class="role-icon">🌾</span>
+                            <div class="role-meta">
+                                <span class="role-title" data-i18n="roleFarmerTitle">किसान भाई</span>
+                                <span class="role-desc" data-i18n="roleFarmerDesc">ट्रैक्टर किराये पर चाहिए</span>
+                            </div>
+                        </label>
+                        <label class="role-card" id="roleCardOwner">
+                            <input type="radio" name="regRole" value="owner" onchange="handleRoleChange(this)">
+                            <span class="role-icon">🚜</span>
+                            <div class="role-meta">
+                                <span class="role-title" data-i18n="roleOwnerTitle">ट्रैक्टर मालिक</span>
+                                <span class="role-desc" data-i18n="roleOwnerDesc">किराये पर कमाई करनी है</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="label-with-action">
+                        <label for="regVillage" data-i18n="labelVillage">गांव और जिला *</label>
+                        <button type="button" class="btn-gps-inline" id="btnRegGps" onclick="detectRegisterLocation()" title="GPS से अपना गांव पता करें">
+                            📍 <span data-i18n="btnGpsInline">GPS से खोजें</span>
+                        </button>
+                    </div>
+                    <input type="text" id="regVillage" data-i18n-placeholder="placeholderVillage" placeholder="जैसे: मवाना, मेरठ (उत्तर प्रदेश)" required autocomplete="address-level2">
+                    <div id="regGpsStatus" class="gps-status-pill" style="display: none; margin-top: 6px;"></div>
+                </div>
+
+                <div class="form-row-2">
+                    <div class="form-group">
+                        <label for="regPassword" data-i18n="labelNewPassword">पासवर्ड बनाएं *</label>
+                        <input type="password" id="regPassword" data-i18n-placeholder="placeholderNewPassword" placeholder="कम से कम 4 अंक" required autocomplete="new-password">
+                    </div>
+                    <div class="form-group">
+                        <label for="regConfirmPassword" data-i18n="labelConfirmPassword">पासवर्ड दोबारा डालें *</label>
+                        <input type="password" id="regConfirmPassword" data-i18n-placeholder="placeholderConfirmPassword" placeholder="वही पासवर्ड दोबारा डालें" required autocomplete="new-password">
+                    </div>
+                </div>
+
+                <div id="registerMessage" class="message-box"></div>
+
+                <button type="submit" class="btn btn-primary login-btn" data-i18n="regBtn">
+                    ✅ खाता बनाएं और शुरू करें
+                </button>
+
+                <div class="login-footer" style="margin-top: 18px;">
+                    <p><span data-i18n="alreadyAccountText">पहले से खाता है?</span> <a href="#" onclick="switchAuthTab('login'); return false;" data-i18n="loginLink">लॉगिन करें</a></p>
+                </div>
+            </form>
         </div>
     </div>
 

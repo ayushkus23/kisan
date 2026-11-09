@@ -395,7 +395,35 @@ const translations = {
         errPasswordLength: "पासवर्ड कम से कम 4 अक्षरों का होना चाहिए।",
         forgotAlert: "पासवर्ड रीसेट करने के लिए किसान सहायता केंद्र से संपर्क करें।",
         signupAlert: "नया रजिस्ट्रेशन जल्द शुरू होगा! अभी आप सीधे लॉगिन कर सकते हैं।",
-        langTag: "हिंदी"
+        langTag: "हिंदी",
+
+        // Create Account & Tab Auth
+        tabLogin: "लॉगिन करें",
+        tabRegister: "नया खाता बनाएं",
+        labelFullName: "पूरा नाम / Farmer Name *",
+        placeholderFullName: "जैसे: रामप्रसाद यादव",
+        labelPhone: "मोबाइल नंबर (10 अंक) *",
+        placeholderPhone: "जैसे: 9876543210",
+        labelRole: "आपकी भूमिका / Your Role *",
+        roleFarmerTitle: "किसान भाई",
+        roleFarmerDesc: "ट्रैक्टर किराये पर चाहिए",
+        roleOwnerTitle: "ट्रैक्टर मालिक",
+        roleOwnerDesc: "ट्रैक्टर किराये पर देना है",
+        labelVillage: "गांव और जिला *",
+        placeholderVillage: "जैसे: मवाना, मेरठ (उत्तर प्रदेश)",
+        btnGpsInline: "GPS से खोजें",
+        labelNewPassword: "पासवर्ड बनाएं *",
+        placeholderNewPassword: "कम से कम 4 अंक",
+        labelConfirmPassword: "पासवर्ड दोबारा डालें *",
+        placeholderConfirmPassword: "वही पासवर्ड दोबारा डालें",
+        regBtn: "✅ खाता बनाएं और शुरू करें",
+        alreadyAccountText: "पहले से खाता है?",
+        loginLink: "लॉगिन करें",
+        errPhoneInvalid: "कृपया 10 अंकों का मान्य भारतीय मोबाइल नंबर दर्ज करें।",
+        errPasswordMismatch: "दोनों पासवर्ड आपस में मेल नहीं खा रहे हैं।",
+        errPhoneExists: "इस मोबाइल नंबर से पहले ही खाता बना हुआ है। कृपया लॉगिन करें।",
+        errWrongPassword: "पासवर्ड गलत है। कृपया पुनः प्रयास करें।",
+        regSuccess: "🎉 बधाई हो! आपका खाता सफलतापूर्वक बन गया है। कृपया प्रतीक्षा करें..."
     },
     en: {
         modalTitle: "Choose Language / अपनी भाषा चुनें",
@@ -622,7 +650,35 @@ const translations = {
         errPasswordLength: "Password must be at least 4 characters long.",
         forgotAlert: "Please contact farmer support to reset your password.",
         signupAlert: "New registration starting soon! You can login directly now.",
-        langTag: "English"
+        langTag: "English",
+
+        // Create Account & Tab Auth
+        tabLogin: "Login",
+        tabRegister: "Create Account",
+        labelFullName: "Full Name / Farmer Name *",
+        placeholderFullName: "e.g. Ramprasad Yadav",
+        labelPhone: "Mobile Number (10 digits) *",
+        placeholderPhone: "e.g. 9876543210",
+        labelRole: "Your Role / Identity *",
+        roleFarmerTitle: "Farmer Friend",
+        roleFarmerDesc: "Need tractor on rent",
+        roleOwnerTitle: "Tractor Owner",
+        roleOwnerDesc: "Rent out & earn income",
+        labelVillage: "Village & District *",
+        placeholderVillage: "e.g. Mawana, Meerut (UP)",
+        btnGpsInline: "Detect via GPS",
+        labelNewPassword: "Create Password *",
+        placeholderNewPassword: "At least 4 characters",
+        labelConfirmPassword: "Confirm Password *",
+        placeholderConfirmPassword: "Re-enter your password",
+        regBtn: "✅ Create Account & Get Started",
+        alreadyAccountText: "Already have an account?",
+        loginLink: "Login here",
+        errPhoneInvalid: "Please enter a valid 10-digit mobile number.",
+        errPasswordMismatch: "Passwords do not match.",
+        errPhoneExists: "An account with this mobile number already exists. Please login.",
+        errWrongPassword: "Incorrect password. Please try again.",
+        regSuccess: "🎉 Congratulations! Your account has been created. Redirecting..."
     }
 };
 
@@ -1070,11 +1126,26 @@ function openBookingModal(machineId) {
     }
     if (gpsInput) gpsInput.value = '';
 
-    // Pre-fill user name if logged in
+    // Pre-fill user name and profile if logged in
     const savedUser = localStorage.getItem('tractorUser');
     const farmerNameInput = document.getElementById('farmerName');
     if (farmerNameInput && savedUser && savedUser !== t.guestUser) {
         farmerNameInput.value = savedUser;
+    }
+
+    const profileStr = localStorage.getItem('tractorUserProfile');
+    if (profileStr) {
+        try {
+            const profile = JSON.parse(profileStr);
+            const phoneInput = document.getElementById('farmerPhone');
+            const villageInput = document.getElementById('farmerVillage');
+            if (phoneInput && profile.phone && !phoneInput.value) {
+                phoneInput.value = profile.phone;
+            }
+            if (villageInput && profile.village && !villageInput.value) {
+                villageInput.value = profile.village;
+            }
+        } catch (e) {}
     }
 
     // Default duration
@@ -1659,6 +1730,192 @@ function updateNavSession() {
     }
 }
 
+function switchAuthTab(tab) {
+    const tabLoginBtn = document.getElementById('tabLoginBtn');
+    const tabRegisterBtn = document.getElementById('tabRegisterBtn');
+    const loginForm = document.getElementById('loginForm');
+    const registerForm = document.getElementById('registerForm');
+    const loginSectionFooter = document.getElementById('loginSectionFooter');
+    const loginMessage = document.getElementById('loginMessage');
+    const registerMessage = document.getElementById('registerMessage');
+
+    if (loginMessage) loginMessage.style.display = 'none';
+    if (registerMessage) registerMessage.style.display = 'none';
+
+    if (tab === 'register') {
+        if (tabRegisterBtn) tabRegisterBtn.classList.add('active');
+        if (tabLoginBtn) tabLoginBtn.classList.remove('active');
+        if (loginForm) loginForm.style.display = 'none';
+        if (loginSectionFooter) loginSectionFooter.style.display = 'none';
+        if (registerForm) registerForm.style.display = 'block';
+    } else {
+        if (tabLoginBtn) tabLoginBtn.classList.add('active');
+        if (tabRegisterBtn) tabRegisterBtn.classList.remove('active');
+        if (loginForm) loginForm.style.display = 'block';
+        if (loginSectionFooter) loginSectionFooter.style.display = 'block';
+        if (registerForm) registerForm.style.display = 'none';
+    }
+}
+
+function handleRoleChange(radio) {
+    document.querySelectorAll('.role-card').forEach(card => card.classList.remove('selected'));
+    const parentCard = radio.closest('.role-card');
+    if (parentCard) parentCard.classList.add('selected');
+}
+
+function detectRegisterLocation() {
+    const statusDiv = document.getElementById('regGpsStatus');
+    const villageInput = document.getElementById('regVillage');
+    const btn = document.getElementById('btnRegGps');
+
+    if (!navigator.geolocation) {
+        alert("आपके डिवाइस में GPS उपलब्ध नहीं है। कृपया गांव का नाम हाथ से लिखें।");
+        return;
+    }
+
+    if (statusDiv) {
+        statusDiv.style.display = 'inline-block';
+        statusDiv.className = 'gps-status-pill loading';
+        statusDiv.innerHTML = '⏳ GPS से खेत/गांव की लोकेशन खोजी जा रही है...';
+    }
+    if (btn) btn.disabled = true;
+
+    navigator.geolocation.getCurrentPosition(
+        async (position) => {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+
+            try {
+                const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=hi,en`);
+                const data = await response.json();
+                const addr = data.address || {};
+                const village = addr.village || addr.suburb || addr.town || addr.city_district || addr.hamlet || addr.county || '';
+                const district = addr.state_district || addr.district || addr.county || addr.city || '';
+                const state = addr.state || '';
+
+                let locText = [village, district, state].filter(Boolean).join(', ');
+                if (!locText) locText = `Lat: ${lat.toFixed(4)}, Lng: ${lng.toFixed(4)}`;
+
+                if (villageInput) {
+                    villageInput.value = locText;
+                }
+
+                if (statusDiv) {
+                    statusDiv.className = 'gps-status-pill success';
+                    statusDiv.innerHTML = `✅ स्थान प्राप्त हुआ: <strong>${locText}</strong>`;
+                }
+            } catch (err) {
+                const fallback = `Lat: ${lat.toFixed(4)}, Lng: ${lng.toFixed(4)}`;
+                if (villageInput && !villageInput.value) villageInput.value = fallback;
+                if (statusDiv) {
+                    statusDiv.className = 'gps-status-pill success';
+                    statusDiv.innerHTML = `✅ GPS मिला: ${fallback}`;
+                }
+            } finally {
+                if (btn) btn.disabled = false;
+            }
+        },
+        (error) => {
+            if (btn) btn.disabled = false;
+            if (statusDiv) {
+                statusDiv.className = 'gps-status-pill error';
+                statusDiv.innerHTML = '⚠️ GPS अनुमति नहीं मिली। कृपया गांव का नाम हाथ से दर्ज करें।';
+            }
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+    );
+}
+
+function getRegisteredUsers() {
+    try {
+        const raw = localStorage.getItem('tractorRegisteredUsers');
+        return raw ? JSON.parse(raw) : [];
+    } catch (e) {
+        return [];
+    }
+}
+
+function saveRegisteredUsers(users) {
+    localStorage.setItem('tractorRegisteredUsers', JSON.stringify(users));
+}
+
+function handleRegister(event) {
+    event.preventDefault();
+    const t = translations[currentLang] || translations.hi;
+
+    const fullNameInput = document.getElementById('regFullName');
+    const phoneInput = document.getElementById('regPhone');
+    const roleRadio = document.querySelector('input[name="regRole"]:checked');
+    const villageInput = document.getElementById('regVillage');
+    const passwordInput = document.getElementById('regPassword');
+    const confirmPasswordInput = document.getElementById('regConfirmPassword');
+
+    const fullName = fullNameInput ? fullNameInput.value.trim() : '';
+    const phone = phoneInput ? phoneInput.value.trim() : '';
+    const role = roleRadio ? roleRadio.value : 'farmer';
+    const village = villageInput ? villageInput.value.trim() : '';
+    const password = passwordInput ? passwordInput.value : '';
+    const confirmPassword = confirmPasswordInput ? confirmPasswordInput.value : '';
+
+    if (!fullName || !phone || !village || !password || !confirmPassword) {
+        showRegisterMessage(t.errFillFields, 'error');
+        return;
+    }
+
+    if (!/^[0-9]{10}$/.test(phone)) {
+        showRegisterMessage(t.errPhoneInvalid, 'error');
+        return;
+    }
+
+    if (password.length < 4) {
+        showRegisterMessage(t.errPasswordLength, 'error');
+        return;
+    }
+
+    if (password !== confirmPassword) {
+        showRegisterMessage(t.errPasswordMismatch, 'error');
+        return;
+    }
+
+    const users = getRegisteredUsers();
+    const existing = users.find(u => u.phone === phone);
+    if (existing) {
+        showRegisterMessage(t.errPhoneExists, 'error');
+        return;
+    }
+
+    const newUser = {
+        id: 'user-' + Date.now(),
+        fullName,
+        phone,
+        role,
+        village,
+        password,
+        createdAt: new Date().toISOString()
+    };
+
+    users.push(newUser);
+    saveRegisteredUsers(users);
+
+    // Auto-login registered user
+    localStorage.setItem('tractorUser', fullName);
+    localStorage.setItem('tractorUserProfile', JSON.stringify(newUser));
+
+    showRegisterMessage(t.regSuccess, 'success');
+
+    setTimeout(() => {
+        window.location.replace('index.html');
+    }, 900);
+}
+
+function showRegisterMessage(text, type) {
+    const box = document.getElementById('registerMessage');
+    if (!box) return;
+    box.textContent = text;
+    box.className = 'message-box ' + type;
+    box.style.display = 'block';
+}
+
 function handleLogin(event) {
     event.preventDefault();
     const t = translations[currentLang] || translations.hi;
@@ -1677,8 +1934,22 @@ function handleLogin(event) {
         return;
     }
 
+    const users = getRegisteredUsers();
+    const foundUser = users.find(u => u.phone === username || u.fullName.toLowerCase() === username.toLowerCase());
+
+    if (foundUser) {
+        if (foundUser.password !== password) {
+            showMessage(t.errWrongPassword, 'error');
+            return;
+        }
+        localStorage.setItem('tractorUser', foundUser.fullName);
+        localStorage.setItem('tractorUserProfile', JSON.stringify(foundUser));
+    } else {
+        // Allow demo/direct login
+        localStorage.setItem('tractorUser', username);
+    }
+
     showMessage(t.loginSuccess, 'success');
-    localStorage.setItem('tractorUser', username);
 
     setTimeout(() => {
         window.location.replace('index.html');
@@ -1699,8 +1970,7 @@ function forgotPassword(event) {
 
 function showSignUpNotice(event) {
     event.preventDefault();
-    const t = translations[currentLang] || translations.hi;
-    alert(t.signupAlert);
+    switchAuthTab('register');
 }
 
 function showMessage(text, type) {
@@ -1713,6 +1983,7 @@ function showMessage(text, type) {
 
 function logout() {
     localStorage.removeItem('tractorUser');
+    localStorage.removeItem('tractorUserProfile');
     window.location.replace('login.html');
 }
 
