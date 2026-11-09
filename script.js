@@ -1,5 +1,21 @@
 // Project Tractor - Complete Bilingual, Crop-Based Fleet with Real Photos, Drawer, Registration, My Bookings, Search/Filter, Diesel Option, Mandi Rates & Live GPS Tracking
 
+// ==========================================
+// 0. Supabase Cloud Database Client
+// ==========================================
+const SUPABASE_URL = 'https://dtyimtqwvdlhqipsmnpi.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR0eWltdHF3dmRsaHFpcHNtbnBpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQxOTYzNzQsImV4cCI6MjEwOTc3MjM3NH0.FA1mEc44H431jJMv39QfTDkKEbe3gotqwKqKawYH_Ek';
+
+let sbClient = null;
+try {
+    if (window.supabase && typeof window.supabase.createClient === 'function') {
+        sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        console.log('✅ Supabase connected to Kisan Portal');
+    }
+} catch (err) {
+    console.warn('Supabase initialization warning:', err);
+}
+
 // Real photo mappings for tractor brands
 const brandRealPhotos = {
     "Mahindra 575 DI (45 HP)": "images/dhan-tractor.jpg",
@@ -786,6 +802,20 @@ function handleTractorRegistration(event) {
         reviewsCount: 1
     });
 
+    // Sync tractor to Supabase
+    if (sbClient) {
+        sbClient.from('custom_tractors').insert([{
+            id: newId,
+            owner_name: ownerName,
+            owner_phone: ownerPhone,
+            village: ownerVillage,
+            tractor_brand: tractorBrand,
+            daily_rent: tractorRate,
+            status: 'verified',
+            created_at: new Date().toISOString()
+        }]).then();
+    }
+
     closeTractorRegModal();
     renderFleetCards(currentFilter);
 
@@ -1340,6 +1370,73 @@ function saveBooking(booking) {
     bookings.unshift(booking);
     localStorage.setItem('tractorBookings', JSON.stringify(bookings));
     updateBookingBadges();
+
+    // Sync to Supabase Cloud Database
+    if (sbClient) {
+        sbClient.from('bookings').insert([{
+            id: booking.orderId,
+            machine_id: booking.machineId,
+            machine_name: booking.machineTitle,
+            farmer_name: booking.farmerName,
+            farmer_phone: booking.farmerPhone,
+            village: booking.farmerVillage,
+            gps_link: booking.gpsLink,
+            booking_date: booking.date,
+            work_duration: parseFloat(booking.duration) || 1,
+            rate_unit: booking.duration ? booking.duration.split(' ')[1] : 'Hour',
+            fuel_option: booking.fuelOption,
+            estimated_cost: parseFloat(String(booking.total).replace(/,/g, '')) || 0,
+            status: booking.status || 'confirmed',
+            created_at: new Date().toISOString()
+        }]).then(({ error }) => {
+            if (error) console.warn('Supabase booking sync notice:', error.message);
+            else console.log('✅ Booking successfully stored in Supabase!');
+        }).catch(e => console.warn('Supabase booking error:', e));
+    }
+}
+
+async function syncBookingsFromSupabase() {
+    if (!sbClient) return;
+    try {
+        const { data, error } = await sbClient
+            .from('bookings')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (!error && Array.isArray(data) && data.length > 0) {
+            const mapped = data.map(b => ({
+                orderId: b.id,
+                machineId: b.machine_id,
+                machineTitle: b.machine_name,
+                machinePhoto: "images/dhan-tractor.jpg",
+                farmerName: b.farmer_name,
+                farmerPhone: b.farmer_phone,
+                farmerVillage: b.village,
+                gpsLink: b.gps_link,
+                duration: `${b.work_duration} ${b.rate_unit || 'घंटा'}`,
+                fuelOption: b.fuel_option,
+                fuelText: b.fuel_option === 'with-fuel' ? 'डीजल सहित' : 'डीजल किसान का',
+                appliedRate: 0,
+                total: Number(b.estimated_cost).toLocaleString('en-IN'),
+                date: b.booking_date || new Date(b.created_at).toLocaleDateString('hi-IN'),
+                status: b.status || 'confirmed'
+            }));
+
+            const local = getBookings();
+            const map = new Map();
+            local.forEach(item => map.set(item.orderId, item));
+            mapped.forEach(item => map.set(item.orderId, item));
+            const merged = Array.from(map.values());
+
+            localStorage.setItem('tractorBookings', JSON.stringify(merged));
+            updateBookingBadges();
+            if (document.getElementById('myBookingsList')) {
+                renderMyBookings();
+            }
+        }
+    } catch (e) {
+        console.warn('Supabase syncBookings fallback:', e);
+    }
 }
 
 function updateBookingBadges() {
@@ -1444,6 +1541,10 @@ function cancelBooking(orderId) {
         localStorage.setItem('tractorBookings', JSON.stringify(bookings));
         updateBookingBadges();
         renderMyBookings();
+
+        if (sbClient) {
+            sbClient.from('bookings').update({ status: 'cancelled' }).eq('id', orderId).then();
+        }
     }
 }
 
@@ -1839,7 +1940,7 @@ function saveRegisteredUsers(users) {
     localStorage.setItem('tractorRegisteredUsers', JSON.stringify(users));
 }
 
-function handleRegister(event) {
+async function handleRegister(event) {
     event.preventDefault();
     const t = translations[currentLang] || translations.hi;
 
@@ -1877,6 +1978,27 @@ function handleRegister(event) {
         return;
     }
 
+    showRegisterMessage('⏳ खाता बनाया जा रहा है...', 'info');
+
+    // 1. Check Supabase for existing user
+    if (sbClient) {
+        try {
+            const { data: existingUser } = await sbClient
+                .from('users_profile')
+                .select('phone')
+                .eq('phone', phone)
+                .maybeSingle();
+
+            if (existingUser) {
+                showRegisterMessage(t.errPhoneExists, 'error');
+                return;
+            }
+        } catch (e) {
+            console.warn('Supabase check fallback:', e);
+        }
+    }
+
+    // Local check fallback
     const users = getRegisteredUsers();
     const existing = users.find(u => u.phone === phone);
     if (existing) {
@@ -1886,20 +2008,50 @@ function handleRegister(event) {
 
     const newUser = {
         id: 'user-' + Date.now(),
-        fullName,
-        phone,
-        role,
-        village,
-        password,
-        createdAt: new Date().toISOString()
+        full_name: fullName,
+        phone: phone,
+        role: role,
+        village: village,
+        password: password,
+        created_at: new Date().toISOString()
     };
 
-    users.push(newUser);
+    // 2. Insert into Supabase Cloud
+    if (sbClient) {
+        try {
+            const { error: insertError } = await sbClient
+                .from('users_profile')
+                .insert([newUser]);
+            if (insertError) {
+                console.warn('Supabase insert warning:', insertError.message);
+            } else {
+                console.log('✅ User registered successfully in Supabase cloud!');
+            }
+        } catch (e) {
+            console.warn('Supabase insert exception:', e);
+        }
+    }
+
+    // 3. Always save to LocalStorage (offline backup)
+    users.push({
+        id: newUser.id,
+        fullName: newUser.full_name,
+        phone: newUser.phone,
+        role: newUser.role,
+        village: newUser.village,
+        password: newUser.password,
+        createdAt: newUser.created_at
+    });
     saveRegisteredUsers(users);
 
     // Auto-login registered user
     localStorage.setItem('tractorUser', fullName);
-    localStorage.setItem('tractorUserProfile', JSON.stringify(newUser));
+    localStorage.setItem('tractorUserProfile', JSON.stringify({
+        fullName,
+        phone,
+        role,
+        village
+    }));
 
     showRegisterMessage(t.regSuccess, 'success');
 
@@ -1916,7 +2068,7 @@ function showRegisterMessage(text, type) {
     box.style.display = 'block';
 }
 
-function handleLogin(event) {
+async function handleLogin(event) {
     event.preventDefault();
     const t = translations[currentLang] || translations.hi;
     const usernameInput = document.getElementById('username');
@@ -1934,8 +2086,39 @@ function handleLogin(event) {
         return;
     }
 
-    const users = getRegisteredUsers();
-    const foundUser = users.find(u => u.phone === username || u.fullName.toLowerCase() === username.toLowerCase());
+    showMessage('⏳ लॉगिन की पुष्टि हो रही है...', 'info');
+
+    let foundUser = null;
+
+    // 1. Check Supabase first
+    if (sbClient) {
+        try {
+            const { data, error } = await sbClient
+                .from('users_profile')
+                .select('*')
+                .or(`phone.eq.${username},full_name.ilike.${username}`)
+                .maybeSingle();
+
+            if (!error && data) {
+                foundUser = {
+                    id: data.id,
+                    fullName: data.full_name,
+                    phone: data.phone,
+                    role: data.role,
+                    village: data.village,
+                    password: data.password
+                };
+            }
+        } catch (e) {
+            console.warn('Supabase login check fallback:', e);
+        }
+    }
+
+    // 2. Fallback to LocalStorage
+    if (!foundUser) {
+        const users = getRegisteredUsers();
+        foundUser = users.find(u => u.phone === username || (u.fullName && u.fullName.toLowerCase() === username.toLowerCase()));
+    }
 
     if (foundUser) {
         if (foundUser.password !== password) {
@@ -2003,4 +2186,5 @@ window.addEventListener('DOMContentLoaded', () => {
 
     renderMandiTicker();
     updateBookingBadges();
+    syncBookingsFromSupabase();
 });
