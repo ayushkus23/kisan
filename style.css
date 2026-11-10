@@ -1353,6 +1353,43 @@ body {
     gap: 12px;
 }
 
+/* ===== Forgot Password / Reset Password Styles ===== */
+.forgot-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.forgot-icon {
+    font-size: 42px;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.forgot-header h3 {
+    color: #1f5130;
+    font-size: 20px;
+    margin: 0 0 6px;
+}
+
+.forgot-subtitle {
+    color: #607d8b;
+    font-size: 13px;
+    line-height: 1.4;
+    margin: 0;
+}
+
+.reset-verified-badge {
+    background: #e8f5e9;
+    color: #2e7d32;
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 16px;
+    border: 1.5px solid #a5d6a7;
+}
+
 @media (max-width: 480px) {
     .login-wrapper {
         max-width: 100%;

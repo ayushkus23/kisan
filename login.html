@@ -63,28 +63,33 @@
                 </button>
             </div>
 
-            <!-- 1. Login Form -->
+            <!-- Login Form -->
             <form id="loginForm" onsubmit="handleLogin(event)">
-                <div class="form-group">
-                    <label for="username" data-i18n="labelUsername">मोबाइल नंबर या यूजरनेम</label>
-                    <input type="text" id="username" data-i18n-placeholder="placeholderUsername" placeholder="जैसे: 9876543210 या kisan123" required autocomplete="username">
-                </div>
+                <!-- Password Login Fields -->
+                <div id="loginPasswordFields">
+                    <div class="form-group">
+                        <label for="username" data-i18n="labelUsername">मोबाइल नंबर या यूजरनेम</label>
+                        <input type="text" id="username" data-i18n-placeholder="placeholderUsername" placeholder="जैसे: 9876543210 या kisan123" autocomplete="username">
+                    </div>
 
-                <div class="form-group">
-                    <label for="password" data-i18n="labelPassword">पासवर्ड</label>
-                    <input type="password" id="password" data-i18n-placeholder="placeholderPassword" placeholder="अपना पासवर्ड दर्ज करें" required autocomplete="current-password">
-                </div>
+                    <div class="form-group">
+                        <label for="password" data-i18n="labelPassword">पासवर्ड</label>
+                        <input type="password" id="password" data-i18n-placeholder="placeholderPassword" placeholder="अपना पासवर्ड दर्ज करें" autocomplete="current-password">
+                    </div>
 
-                <div class="form-options">
-                    <label class="remember-me">
-                        <input type="checkbox" id="rememberMe"> <span data-i18n="rememberMe">याद रखें</span>
-                    </label>
-                    <a href="#" class="forgot-link" onclick="forgotPassword(event)" data-i18n="forgotPassword">पासवर्ड भूल गए?</a>
+                    <div class="form-options">
+                        <label class="remember-me">
+                            <input type="checkbox" id="rememberMe"> <span data-i18n="rememberMe">याद रखें</span>
+                        </label>
+                        <a href="#" class="forgot-link" onclick="forgotPassword(event)" data-i18n="forgotPassword">पासवर्ड भूल गए?</a>
+                    </div>
                 </div>
 
                 <div id="loginMessage" class="message-box"></div>
 
-                <button type="submit" class="btn btn-primary login-btn" data-i18n="loginBtn">🚜 लॉगिन करें</button>
+                <button type="submit" class="btn btn-primary login-btn" id="loginSubmitBtn" data-i18n="btnLoginWithPassword">
+                    🚜 लॉगिन करें
+                </button>
             </form>
 
             <div id="loginSectionFooter">
@@ -101,7 +106,65 @@
                 </div>
             </div>
 
-            <!-- 2. Create Account (Register) Form -->
+            <!-- 3. Forgot Password / Reset Password Form -->
+            <form id="forgotForm" onsubmit="handleResetPassword(event)" style="display: none;">
+                <div class="forgot-header">
+                    <span class="forgot-icon">🔒</span>
+                    <h3 data-i18n="forgotTitle">पासवर्ड रीसेट करें</h3>
+                    <p class="forgot-subtitle" data-i18n="forgotSubtitle">अपनी पहचान सत्यापित करने के लिए रजिस्ट्रेशन में दी गई जानकारी दर्ज करें</p>
+                </div>
+
+                <!-- Step 1: Verify Identity -->
+                <div id="resetStep1">
+                    <div class="form-group">
+                        <label for="resetPhone" data-i18n="labelPhone">मोबाइल नंबर (10 अंक) *</label>
+                        <input type="tel" id="resetPhone" pattern="[0-9]{10}" maxlength="10" placeholder="जैसे: 9876543210" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="resetName" data-i18n="forgotLabelName">पूरा नाम (रजिस्ट्रेशन वाला) *</label>
+                        <input type="text" id="resetName" placeholder="जैसे: रामप्रसाद यादव" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="resetVillage" data-i18n="forgotLabelVillage">गांव / जिला (रजिस्ट्रेशन वाला) *</label>
+                        <input type="text" id="resetVillage" placeholder="जैसे: मवाना, मेरठ" required>
+                    </div>
+
+                    <div id="forgotMessage" class="message-box"></div>
+
+                    <button type="button" class="btn btn-primary login-btn" onclick="verifyResetIdentity()" data-i18n="forgotBtnVerify">
+                        🔍 पहचान सत्यापित करें
+                    </button>
+                </div>
+
+                <!-- Step 2: Set New Password (hidden until verified) -->
+                <div id="resetStep2" style="display: none;">
+                    <div class="reset-verified-badge">
+                        ✅ <span data-i18n="forgotVerified">पहचान सत्यापित! अब नया पासवर्ड बनाएं</span>
+                    </div>
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label for="resetNewPassword" data-i18n="labelNewPassword">नया पासवर्ड बनाएं *</label>
+                            <input type="password" id="resetNewPassword" placeholder="कम से कम 4 अंक" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="resetConfirmPassword" data-i18n="labelConfirmPassword">पासवर्ड दोबारा डालें *</label>
+                            <input type="password" id="resetConfirmPassword" placeholder="वही पासवर्ड दोबारा" required>
+                        </div>
+                    </div>
+
+                    <div id="resetMessage" class="message-box"></div>
+
+                    <button type="submit" class="btn btn-primary login-btn" data-i18n="forgotBtnReset">
+                        🔐 नया पासवर्ड सेट करें
+                    </button>
+                </div>
+
+                <div class="login-footer" style="margin-top: 18px;">
+                    <p><a href="#" onclick="cancelForgotPassword(); return false;" data-i18n="forgotBackToLogin">← लॉगिन पर वापस जाएं</a></p>
+                </div>
+            </form>
+
+            <!-- 4. Create Account (Register) Form -->
             <form id="registerForm" onsubmit="handleRegister(event)" style="display: none;">
                 <div class="form-group">
                     <label for="regFullName" data-i18n="labelFullName">पूरा नाम / Farmer Name *</label>

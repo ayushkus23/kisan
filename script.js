@@ -439,7 +439,23 @@ const translations = {
         errPasswordMismatch: "दोनों पासवर्ड आपस में मेल नहीं खा रहे हैं।",
         errPhoneExists: "इस मोबाइल नंबर से पहले ही खाता बना हुआ है। कृपया लॉगिन करें।",
         errWrongPassword: "पासवर्ड गलत है। कृपया पुनः प्रयास करें।",
-        regSuccess: "🎉 बधाई हो! आपका खाता सफलतापूर्वक बन गया है। कृपया प्रतीक्षा करें..."
+        errUserNotFound: "यह नंबर/नाम रजिस्टर नहीं है। पहले नया खाता बनाएं।",
+        regSuccess: "🎉 बधाई हो! आपका खाता सफलतापूर्वक बन गया है। कृपया प्रतीक्षा करें...",
+
+        // Forgot Password
+        forgotTitle: "पासवर्ड रीसेट करें",
+        forgotSubtitle: "अपनी पहचान सत्यापित करने के लिए रजिस्ट्रेशन में दी गई जानकारी दर्ज करें",
+        forgotLabelName: "पूरा नाम (रजिस्ट्रेशन वाला) *",
+        forgotLabelVillage: "गांव / जिला (रजिस्ट्रेशन वाला) *",
+        forgotBtnVerify: "🔍 पहचान सत्यापित करें",
+        forgotVerified: "पहचान सत्यापित! अब नया पासवर्ड बनाएं",
+        forgotBtnReset: "🔐 नया पासवर्ड सेट करें",
+        forgotBackToLogin: "← लॉगिन पर वापस जाएं",
+        forgotNameMismatch: "❌ नाम मेल नहीं खा रहा। रजिस्ट्रेशन में दिया गया नाम डालें।",
+        forgotVillageMismatch: "❌ गांव/जिला मेल नहीं खा रहा। रजिस्ट्रेशन में दिया गया गांव डालें।",
+        forgotResetSuccess: "✅ पासवर्ड सफलतापूर्वक बदल दिया गया! अब लॉगिन करें।",
+
+        btnLoginWithPassword: "🚜 लॉगिन करें"
     },
     en: {
         modalTitle: "Choose Language / अपनी भाषा चुनें",
@@ -694,7 +710,23 @@ const translations = {
         errPasswordMismatch: "Passwords do not match.",
         errPhoneExists: "An account with this mobile number already exists. Please login.",
         errWrongPassword: "Incorrect password. Please try again.",
-        regSuccess: "🎉 Congratulations! Your account has been created. Redirecting..."
+        errUserNotFound: "This number/name is not registered. Please create an account first.",
+        regSuccess: "🎉 Congratulations! Your account has been created. Redirecting...",
+
+        // Forgot Password
+        forgotTitle: "Reset Password",
+        forgotSubtitle: "Enter the details you provided during registration to verify your identity",
+        forgotLabelName: "Full Name (as registered) *",
+        forgotLabelVillage: "Village / District (as registered) *",
+        forgotBtnVerify: "🔍 Verify Identity",
+        forgotVerified: "Identity verified! Now set a new password",
+        forgotBtnReset: "🔐 Set New Password",
+        forgotBackToLogin: "← Back to Login",
+        forgotNameMismatch: "❌ Name does not match. Enter the name used during registration.",
+        forgotVillageMismatch: "❌ Village/District does not match. Enter the village used during registration.",
+        forgotResetSuccess: "✅ Password changed successfully! Please login now.",
+
+        btnLoginWithPassword: "🚜 Login"
     }
 };
 
@@ -1982,6 +2014,22 @@ function saveRegisteredUsers(users) {
     localStorage.setItem('tractorRegisteredUsers', JSON.stringify(users));
 }
 
+// ==========================================
+// 13. Password-Only Auth System (OTP removed for security — simulated OTP was insecure)
+// ==========================================
+let currentLoginMode = 'password'; // Always password mode now
+
+// OTP functions removed — simulated OTP was a security risk
+// (OTP showed on same screen, anyone could login as anyone)
+// Real SMS OTP will be added when Fast2SMS/Twilio is integrated
+function switchLoginMode() { /* no-op — password only now */ }
+function showOtpToast() { /* removed */ }
+function closeOtpToast() { /* removed */ }
+function autoFillOtp() { /* removed */ }
+function startOtpCountdown() { /* removed */ }
+function sendLoginOtp() { /* removed */ }
+function sendRegisterOtp() { /* removed */ }
+
 async function handleRegister(event) {
     event.preventDefault();
     const t = translations[currentLang] || translations.hi;
@@ -2067,7 +2115,7 @@ async function handleRegister(event) {
             if (insertError) {
                 console.warn('Supabase insert warning:', insertError.message);
             } else {
-                console.log('✅ User registered successfully in Supabase cloud!');
+                console.log('✅ User registered in Supabase cloud!');
             }
         } catch (e) {
             console.warn('Supabase insert exception:', e);
@@ -2113,6 +2161,8 @@ function showRegisterMessage(text, type) {
 async function handleLogin(event) {
     event.preventDefault();
     const t = translations[currentLang] || translations.hi;
+
+    // PASSWORD LOGIN MODE (secure — requires registered password)
     const usernameInput = document.getElementById('username');
     const passwordInput = document.getElementById('password');
     const username = usernameInput ? usernameInput.value.trim() : '';
@@ -2132,7 +2182,7 @@ async function handleLogin(event) {
 
     let foundUser = null;
 
-    // 1. Check Supabase first
+    // Check Supabase cloud database first
     if (sbClient) {
         try {
             const { data, error } = await sbClient
@@ -2156,23 +2206,24 @@ async function handleLogin(event) {
         }
     }
 
-    // 2. Fallback to LocalStorage
+    // Check local storage fallback (offline)
     if (!foundUser) {
         const users = getRegisteredUsers();
         foundUser = users.find(u => u.phone === username || (u.fullName && u.fullName.toLowerCase() === username.toLowerCase()));
     }
 
-    if (foundUser) {
-        if (foundUser.password !== password) {
-            showMessage(t.errWrongPassword, 'error');
-            return;
-        }
-        localStorage.setItem('tractorUser', foundUser.fullName);
-        localStorage.setItem('tractorUserProfile', JSON.stringify(foundUser));
-    } else {
-        // Allow demo/direct login
-        localStorage.setItem('tractorUser', username);
+    if (!foundUser) {
+        showMessage(t.errUserNotFound || 'यह नंबर/नाम रजिस्टर नहीं है। पहले नया खाता बनाएं।', 'error');
+        return;
     }
+
+    if (foundUser.password !== password) {
+        showMessage(t.errWrongPassword, 'error');
+        return;
+    }
+
+    localStorage.setItem('tractorUser', foundUser.fullName || foundUser.full_name);
+    localStorage.setItem('tractorUserProfile', JSON.stringify(foundUser));
 
     showMessage(t.loginSuccess, 'success');
 
@@ -2187,10 +2238,213 @@ function guestLogin() {
     window.location.replace('index.html');
 }
 
+// ==========================================
+// Forgot Password — 3-Step Verification Reset
+// ==========================================
+let resetVerifiedUser = null; // Stores verified user for password reset
+
 function forgotPassword(event) {
     event.preventDefault();
+    // Hide login & register forms, show forgot form
+    const loginForm = document.getElementById('loginForm');
+    const registerForm = document.getElementById('registerForm');
+    const forgotForm = document.getElementById('forgotForm');
+    const loginFooter = document.getElementById('loginSectionFooter');
+    const authTabs = document.querySelector('.auth-tabs');
+
+    if (loginForm) loginForm.style.display = 'none';
+    if (registerForm) registerForm.style.display = 'none';
+    if (loginFooter) loginFooter.style.display = 'none';
+    if (authTabs) authTabs.style.display = 'none';
+    if (forgotForm) forgotForm.style.display = 'block';
+
+    // Reset form state
+    resetVerifiedUser = null;
+    const step1 = document.getElementById('resetStep1');
+    const step2 = document.getElementById('resetStep2');
+    if (step1) step1.style.display = 'block';
+    if (step2) step2.style.display = 'none';
+    showForgotMessage('', '');
+}
+
+function cancelForgotPassword() {
+    const loginForm = document.getElementById('loginForm');
+    const forgotForm = document.getElementById('forgotForm');
+    const loginFooter = document.getElementById('loginSectionFooter');
+    const authTabs = document.querySelector('.auth-tabs');
+
+    if (forgotForm) forgotForm.style.display = 'none';
+    if (loginForm) loginForm.style.display = 'block';
+    if (loginFooter) loginFooter.style.display = 'block';
+    if (authTabs) authTabs.style.display = 'flex';
+
+    resetVerifiedUser = null;
+}
+
+async function verifyResetIdentity() {
     const t = translations[currentLang] || translations.hi;
-    alert(t.forgotAlert);
+    const phone = (document.getElementById('resetPhone')?.value || '').trim();
+    const name = (document.getElementById('resetName')?.value || '').trim();
+    const village = (document.getElementById('resetVillage')?.value || '').trim();
+
+    if (!phone || !name || !village) {
+        showForgotMessage(t.errFillFields, 'error');
+        return;
+    }
+
+    if (!/^[0-9]{10}$/.test(phone)) {
+        showForgotMessage(t.errPhoneInvalid, 'error');
+        return;
+    }
+
+    showForgotMessage('⏳ पहचान सत्यापित हो रही है...', 'info');
+
+    let foundUser = null;
+
+    // Check Supabase first
+    if (sbClient) {
+        try {
+            const { data } = await sbClient
+                .from('users_profile')
+                .select('*')
+                .eq('phone', phone)
+                .maybeSingle();
+
+            if (data) {
+                foundUser = {
+                    id: data.id,
+                    fullName: data.full_name,
+                    phone: data.phone,
+                    role: data.role,
+                    village: data.village,
+                    password: data.password
+                };
+            }
+        } catch (e) {
+            console.warn('Supabase reset check fallback:', e);
+        }
+    }
+
+    // localStorage fallback
+    if (!foundUser) {
+        const users = getRegisteredUsers();
+        foundUser = users.find(u => u.phone === phone);
+    }
+
+    if (!foundUser) {
+        showForgotMessage(t.errUserNotFound || 'यह नंबर रजिस्टर नहीं है।', 'error');
+        return;
+    }
+
+    // Verify Name (case-insensitive, trim spaces)
+    const regName = (foundUser.fullName || foundUser.full_name || '').trim().toLowerCase();
+    const enteredName = name.trim().toLowerCase();
+
+    // Verify Village (partial match — user might not type exact village)
+    const regVillage = (foundUser.village || '').trim().toLowerCase();
+    const enteredVillage = village.trim().toLowerCase();
+
+    if (regName !== enteredName) {
+        showForgotMessage(t.forgotNameMismatch || '❌ नाम मेल नहीं खा रहा। रजिस्ट्रेशन में दिया गया नाम डालें।', 'error');
+        return;
+    }
+
+    // Check if entered village is contained in registered village or vice versa
+    if (!regVillage.includes(enteredVillage) && !enteredVillage.includes(regVillage)) {
+        showForgotMessage(t.forgotVillageMismatch || '❌ गांव/जिला मेल नहीं खा रहा। रजिस्ट्रेशन में दिया गया गांव डालें।', 'error');
+        return;
+    }
+
+    // ✅ Verification passed!
+    resetVerifiedUser = foundUser;
+    const step1 = document.getElementById('resetStep1');
+    const step2 = document.getElementById('resetStep2');
+    if (step1) step1.style.display = 'none';
+    if (step2) step2.style.display = 'block';
+    showForgotMessage('', '');
+}
+
+async function handleResetPassword(event) {
+    event.preventDefault();
+    const t = translations[currentLang] || translations.hi;
+
+    if (!resetVerifiedUser) {
+        showResetMessage('❌ पहचान सत्यापित नहीं हुई।', 'error');
+        return;
+    }
+
+    const newPass = (document.getElementById('resetNewPassword')?.value || '');
+    const confirmPass = (document.getElementById('resetConfirmPassword')?.value || '');
+
+    if (!newPass || !confirmPass) {
+        showResetMessage(t.errFillFields, 'error');
+        return;
+    }
+
+    if (newPass.length < 4) {
+        showResetMessage(t.errPasswordLength, 'error');
+        return;
+    }
+
+    if (newPass !== confirmPass) {
+        showResetMessage(t.errPasswordMismatch, 'error');
+        return;
+    }
+
+    showResetMessage('⏳ पासवर्ड अपडेट हो रहा है...', 'info');
+
+    // Update in Supabase
+    if (sbClient) {
+        try {
+            const { error } = await sbClient
+                .from('users_profile')
+                .update({ password: newPass })
+                .eq('phone', resetVerifiedUser.phone);
+
+            if (error) {
+                console.warn('Supabase password update warning:', error.message);
+            } else {
+                console.log('✅ Password updated in Supabase!');
+            }
+        } catch (e) {
+            console.warn('Supabase update fallback:', e);
+        }
+    }
+
+    // Update in localStorage
+    const users = getRegisteredUsers();
+    const idx = users.findIndex(u => u.phone === resetVerifiedUser.phone);
+    if (idx !== -1) {
+        users[idx].password = newPass;
+        saveRegisteredUsers(users);
+    }
+
+    showResetMessage(t.forgotResetSuccess || '✅ पासवर्ड सफलतापूर्वक बदल दिया गया! अब लॉगिन करें।', 'success');
+
+    resetVerifiedUser = null;
+
+    // Go back to login after 2 seconds
+    setTimeout(() => {
+        cancelForgotPassword();
+    }, 2000);
+}
+
+function showForgotMessage(text, type) {
+    const box = document.getElementById('forgotMessage');
+    if (!box) return;
+    if (!text) { box.style.display = 'none'; return; }
+    box.textContent = text;
+    box.className = 'message-box ' + type;
+    box.style.display = 'block';
+}
+
+function showResetMessage(text, type) {
+    const box = document.getElementById('resetMessage');
+    if (!box) return;
+    if (!text) { box.style.display = 'none'; return; }
+    box.textContent = text;
+    box.className = 'message-box ' + type;
+    box.style.display = 'block';
 }
 
 function showSignUpNotice(event) {
