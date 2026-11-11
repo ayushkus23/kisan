@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="hi">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ट्रैक्टर मालिक डैशबोर्ड - Project Tractor</title>
+    <!-- Auth Guard: Redirect to login if user not logged in -->
+    <script>
+        (function () {
+            var user = localStorage.getItem('tractorUser');
+            if (!user || user === 'null' || user === 'undefined' || user.trim() === '') {
+                window.location.replace('login.html');
+            }
+        })();
+    </script>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="owner-portal-body">
+
+    <!-- Top Navigation Bar for Tractor Owners -->
+    <header class="navbar owner-navbar">
+        <div class="nav-left">
+            <a href="owner.html" class="owner-brand-logo">
+                <span class="logo-tractor-icon">🚜</span>
+                <div class="logo-text-group">
+                    <span class="logo-title" data-i18n="ownerPortalTitle">प्रोजेक्ट ट्रैक्टर</span>
+                    <span class="logo-tagline-badge" data-i18n="ownerBadgeTag">मालिक डैशबोर्ड</span>
+                </div>
+            </a>
+        </div>
+
+        <div class="nav-right owner-nav-right">
+            <!-- Owner Profile Chip -->
+            <div class="owner-profile-chip" id="ownerProfileChip">
+                <img src="images/dhan-tractor.jpg" alt="Owner" class="owner-chip-avatar">
+                <div class="owner-chip-meta">
+                    <strong id="ownerChipName">मालिक का नाम</strong>
+                    <span class="owner-chip-loc" id="ownerChipLoc">📍 गांव / जिला</span>
+                </div>
+            </div>
+
+            <!-- Switch to Farmer Portal -->
+            <a href="index.html" class="btn btn-switch-farmer" title="किसान पोर्टल पर जाएं" data-i18n="btnSwitchFarmer">
+                🌾 <span class="hide-mobile">किसान पोर्टल</span>
+            </a>
+
+            <!-- Language Switcher -->
+            <button type="button" class="lang-switch-btn nav-lang-btn" onclick="toggleOwnerLanguage()" title="भाषा बदलें / Change Language">
+                🌐 <span id="ownerLangTag">हिंदी</span>
+            </button>
+
+            <!-- Logout -->
+            <button type="button" class="btn btn-owner-logout" onclick="ownerLogout()" title="लॉगआउट" data-i18n="btnLogout">
+                🚪 <span class="hide-mobile">लॉगआउट</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Dashboard Container -->
+    <main class="owner-dashboard-wrap">
+
+        <!-- Hero Greeting Banner -->
+        <section class="owner-hero-banner">
+            <div class="owner-hero-content">
+                <div class="owner-badge-pill" data-i18n="ownerHeroPill">🚜 ट्रैक्टर मालिक कंट्रोल रूम</div>
+                <h1 id="ownerGreetingTitle">राम-राम, मालिक जी! 🙏</h1>
+                <p id="ownerGreetingSubtitle" data-i18n="ownerHeroSubtitle">
+                    आपके ट्रैक्टरों के लिए आये सभी बुकिंग अनुरोध, खेत का GPS रास्ता, और कमाई का लाइव ब्यौरा यहाँ देखें।
+                </p>
+            </div>
+            <div class="owner-hero-actions">
+                <button type="button" class="btn btn-add-tractor-quick" onclick="openOwnerTractorModal()" data-i18n="btnAddFleetTractor">
+                    ➕ नया ट्रैक्टर जोड़ें
+                </button>
+                <button type="button" class="btn btn-refresh-quick" onclick="refreshOwnerBookings()" title="ताजा डेटा लाएं">
+                    🔄 रीफ्रेश
+                </button>
+            </div>
+        </section>
+
+        <!-- KPI Summary Cards (4 Metrics) -->
+        <section class="owner-kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-icon-wrap bg-blue">📋</div>
+                <div class="kpi-data">
+                    <span class="kpi-label" data-i18n="kpiTotalRequests">कुल बुकिंग अनुरोध</span>
+                    <strong class="kpi-value" id="statTotalRequests">0</strong>
+                </div>
+            </div>
+
+            <div class="kpi-card highlight-pending">
+                <div class="kpi-icon-wrap bg-amber">⏳</div>
+                <div class="kpi-data">
+                    <span class="kpi-label" data-i18n="kpiPendingRequests">स्वीकृति की प्रतीक्षा (Pending)</span>
+                    <strong class="kpi-value" id="statPendingRequests">0</strong>
+                </div>
+            </div>
+
+            <div class="kpi-card highlight-accepted">
+                <div class="kpi-icon-wrap bg-green">✅</div>
+                <div class="kpi-data">
+                    <span class="kpi-label" data-i18n="kpiAcceptedRequests">स्वीकृत बुकिंग्स (Confirmed)</span>
+                    <strong class="kpi-value" id="statAcceptedRequests">0</strong>
+                </div>
+            </div>
+
+            <div class="kpi-card highlight-earnings">
+                <div class="kpi-icon-wrap bg-gold">💰</div>
+                <div class="kpi-data">
+                    <span class="kpi-label" data-i18n="kpiTotalEarnings">संभावित कुल कमाई</span>
+                    <strong class="kpi-value" id="statTotalEarnings">₹0</strong>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Incoming Booking Requests -->
+        <section class="owner-section-card">
+            <div class="section-card-header">
+                <div class="header-titles">
+                    <h2>📥 <span data-i18n="sectionRequestsTitle">आये हुए बुकिंग अनुरोध (Booking Orders)</span></h2>
+                    <p data-i18n="sectionRequestsSubtitle">किसान भाइयों ने आपके ट्रैक्टर के लिए यह अनुरोध भेजे हैं। खेत का रास्ता देखें और स्वीकार/अस्वीकार करें।</p>
+                </div>
+
+                <!-- Filter Tabs -->
+                <div class="owner-filter-tabs">
+                    <button type="button" class="owner-tab-btn active" data-filter="all" onclick="filterOwnerBookings('all', this)" data-i18n="tabAll">
+                        सभी (<span id="countTabAll">0</span>)
+                    </button>
+                    <button type="button" class="owner-tab-btn" data-filter="pending" onclick="filterOwnerBookings('pending', this)" data-i18n="tabPending">
+                        ⏳ नये अनुरोध (<span id="countTabPending">0</span>)
+                    </button>
+                    <button type="button" class="owner-tab-btn" data-filter="accepted" onclick="filterOwnerBookings('accepted', this)" data-i18n="tabAccepted">
+                        ✅ स्वीकृत (<span id="countTabAccepted">0</span>)
+                    </button>
+                    <button type="button" class="owner-tab-btn" data-filter="rejected" onclick="filterOwnerBookings('rejected', this)" data-i18n="tabRejected">
+                        ❌ अस्वीकृत (<span id="countTabRejected">0</span>)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Booking Cards List Container -->
+            <div id="ownerBookingsList" class="owner-bookings-grid">
+                <!-- Rendered dynamically by owner.js -->
+            </div>
+        </section>
+
+        <!-- Section: My Fleet / Registered Tractors -->
+        <section class="owner-section-card" style="margin-top: 24px;">
+            <div class="section-card-header">
+                <div class="header-titles">
+                    <h2>🚜 <span data-i18n="sectionFleetTitle">मेरे पंजीकृत ट्रैक्टर (My Tractor Fleet)</span></h2>
+                    <p data-i18n="sectionFleetSubtitle">आपके द्वारा पोर्टल पर जोड़े गए ट्रैक्टर जिनकी बुकिंग किसान भाई कर सकते हैं।</p>
+                </div>
+                <button type="button" class="btn btn-primary" onclick="openOwnerTractorModal()" data-i18n="btnAddTractor">
+                    ➕ ट्रैक्टर जोड़ें
+                </button>
+            </div>
+
+            <div id="ownerFleetList" class="owner-fleet-grid">
+                <!-- Rendered dynamically by owner.js -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modal 1: Live Farm Location & GPS Route Modal -->
+    <div id="ownerRouteModal" class="owner-modal-overlay" style="display: none;">
+        <div class="owner-modal-card">
+            <div class="owner-modal-header">
+                <div class="modal-title-with-icon">
+                    <span class="modal-icon">📍</span>
+                    <div>
+                        <h3 id="routeModalTitle">किसान के खेत का लाइव GPS रास्ता</h3>
+                        <p id="routeModalSubtitle">ड्राइवर को सीधे खेत तक पहुँचने के लिए मैप नेविगेशन</p>
+                    </div>
+                </div>
+                <button type="button" class="owner-modal-close" onclick="closeRouteModal()">&times;</button>
+            </div>
+
+            <div class="owner-modal-body">
+                <!-- Farm Info Box -->
+                <div class="farm-info-summary">
+                    <div class="farm-info-row">
+                        <span>👨‍🌾 <strong>किसान का नाम:</strong></span>
+                        <strong id="routeFarmerName">रामप्रसाद</strong>
+                    </div>
+                    <div class="farm-info-row">
+                        <span>📞 <strong>मोबाइल नंबर:</strong></span>
+                        <span id="routeFarmerPhone">9876543210</span>
+                    </div>
+                    <div class="farm-info-row">
+                        <span>🌾 <strong>खेत का गांव / पता:</strong></span>
+                        <span id="routeFarmerVillage">मवाना, मेरठ</span>
+                    </div>
+                    <div class="farm-info-row">
+                        <span>📏 <strong>अनुमानित दूरी:</strong></span>
+                        <span id="routeEstimatedDist" class="badge-dist">लगभग 3.5 किमी</span>
+                    </div>
+                </div>
+
+                <!-- Simulated Live GPS Radar & Route Canvas -->
+                <div class="live-route-radar-box">
+                    <div class="radar-scan-line"></div>
+                    <div class="map-point point-owner" title="आपका गैरेज / घर">
+                        <span class="point-emoji">🚜</span>
+                        <span class="point-label">आपका ट्रैक्टर</span>
+                    </div>
+                    <div class="route-connecting-line"></div>
+                    <div class="map-point point-farm" title="किसान का खेत">
+                        <span class="point-emoji">📍</span>
+                        <span class="point-label">किसान का खेत</span>
+                    </div>
+                    <div class="route-radar-tag">🛰️ GPS उपग्रह सिग्नल कनेक्टेड</div>
+                </div>
+
+                <!-- Navigation Action Buttons -->
+                <div class="route-actions-grid">
+                    <a id="btnOpenGoogleMaps" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-gmaps-nav">
+                        🚀 Google Maps पर नेविगेशन शुरू करें
+                    </a>
+                    <a id="btnCallFarmerModal" href="tel:" class="btn btn-call-outline">
+                        📞 किसान को कॉल करें
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 2: Add New Tractor Modal (Integrated for Owners) -->
+    <div id="ownerAddTractorModal" class="owner-modal-overlay" style="display: none;">
+        <div class="owner-modal-card">
+            <div class="owner-modal-header">
+                <div class="modal-title-with-icon">
+                    <span class="modal-icon">🚜</span>
+                    <div>
+                        <h3>अपना नया ट्रैक्टर जोड़ें</h3>
+                        <p>पोर्टल पर लिस्ट करें और किराये से कमाई शुरू करें</p>
+                    </div>
+                </div>
+                <button type="button" class="owner-modal-close" onclick="closeOwnerTractorModal()">&times;</button>
+            </div>
+
+            <form id="ownerAddTractorForm" onsubmit="handleOwnerAddTractor(event)">
+                <div class="form-group">
+                    <label for="newTractorBrand">ट्रैक्टर का मॉडल / ब्रांड *</label>
+                    <select id="newTractorBrand" required>
+                        <option value="">-- मॉडल चुनें --</option>
+                        <option value="Mahindra 575 DI (45 HP)">Mahindra 575 DI (45 HP)</option>
+                        <option value="Swaraj 855 FE (52 HP)">Swaraj 855 FE (52 HP)</option>
+                        <option value="John Deere 5310 (55 HP)">John Deere 5310 (55 HP)</option>
+                        <option value="Sonalika DI 745 (50 HP)">Sonalika DI 745 (50 HP)</option>
+                        <option value="Massey Ferguson 241 (42 HP)">Massey Ferguson 241 (42 HP)</option>
+                        <option value="Farmtrac 60 (50 HP)">Farmtrac 60 (50 HP)</option>
+                        <option value="Chhota Mini Tractor (24 HP)">Chhota Mini Tractor (24 HP)</option>
+                        <option value="Combine Harvester (Multi-Crop)">Combine Harvester (Multi-Crop)</option>
+                    </select>
+                </div>
+
+                <div class="form-row-2">
+                    <div class="form-group">
+                        <label for="newTractorRent">प्रति दिन किराया (₹) *</label>
+                        <input type="number" id="newTractorRent" placeholder="जैसे: 3500" min="500" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="newTractorVillage">ट्रैक्टर रखने का स्थान / गांव *</label>
+                        <input type="text" id="newTractorVillage" placeholder="जैसे: मवाना, मेरठ" required>
+                    </div>
+                </div>
+
+                <div id="addTractorMsg" class="message-box" style="display: none;"></div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 14px;">
+                    ✅ ट्रैक्टर लिस्ट करें
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="ownerToast" class="owner-toast-pill" style="display: none;">
+        <span id="ownerToastIcon">✅</span>
+        <span id="ownerToastText">सूचना यहाँ आएगी</span>
+    </div>
+
+    <!-- Supabase Client SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="owner.js"></script>
+</body>
+
+</html>
+

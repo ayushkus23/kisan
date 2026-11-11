@@ -200,6 +200,9 @@ const translations = {
         badgeBookingCountText: "बुकिंग",
         menuRegTractor: "अपना ट्रैक्टर जोड़ें",
         menuRegTractorSub: "किराये पर देकर कमाई करें",
+        navOwnerPortal: "मालिक डैशबोर्ड",
+        menuOwnerPortal: "ट्रैक्टर मालिक डैशबोर्ड",
+        menuOwnerPortalSub: "बुकिंग स्वीकारें व खेत का रास्ता देखें",
         menuLanguage: "भाषा बदलें (हिंदी / English)",
         menuTerms: "नियम व नीतियां (Terms & Policy)",
         menuHelpline: "किसान सहायता केंद्र (Call & WhatsApp)",
@@ -358,6 +361,8 @@ const translations = {
         noBookingsDesc: "आपने अभी तक कोई ट्रैक्टर बुक नहीं किया है। अपनी फसल के लिए उपयुक्त मशीन चुनें और तुरंत बुक करें।",
         btnBookNow: "🚜 मशीनें देखें व बुक करें",
         statusConfirmed: "🟢 बुकिंग स्वीकृत (Confirmed)",
+        statusPending: "⏳ स्वीकृति की प्रतीक्षा (Pending)",
+        statusRejected: "🔴 मालिक द्वारा अस्वीकृत (Rejected)",
         statusCancelled: "🔴 रद्द किया गया (Cancelled)",
         btnViewReceipt: "📄 रसीद देखें",
         btnCancelBooking: "बुकिंग रद्द करें",
@@ -471,6 +476,9 @@ const translations = {
         badgeBookingCountText: "bookings",
         menuRegTractor: "Register Your Tractor",
         menuRegTractorSub: "Earn daily by renting",
+        navOwnerPortal: "Owner Portal",
+        menuOwnerPortal: "Tractor Owner Dashboard",
+        menuOwnerPortalSub: "Accept bookings & view farm route",
         menuLanguage: "Change Language (हिंदी / English)",
         menuTerms: "Terms & Policies",
         menuHelpline: "Farmer Support Center (Call & WhatsApp)",
@@ -629,6 +637,8 @@ const translations = {
         noBookingsDesc: "You haven't booked any machines yet. Pick the right tractor for your crop and book instantly.",
         btnBookNow: "🚜 Browse Machines & Book",
         statusConfirmed: "🟢 Booking Confirmed",
+        statusPending: "⏳ Pending Confirmation",
+        statusRejected: "🔴 Rejected by Owner",
         statusCancelled: "🔴 Cancelled",
         btnViewReceipt: "📄 View Receipt",
         btnCancelBooking: "Cancel Booking",
@@ -1491,7 +1501,7 @@ function saveBooking(booking) {
             rate_unit: booking.duration ? booking.duration.split(' ')[1] : 'Hour',
             fuel_option: booking.fuelOption,
             estimated_cost: parseFloat(String(booking.total).replace(/,/g, '')) || 0,
-            status: booking.status || 'confirmed',
+            status: booking.status || 'pending',
             created_at: new Date().toISOString()
         }]).then(({ error }) => {
             if (error) console.warn('Supabase booking sync notice:', error.message);
@@ -1597,12 +1607,20 @@ function renderMyBookings() {
 
     container.innerHTML = bookings.map(b => {
         const isCancelled = b.status === 'cancelled';
-        const statusBadge = isCancelled
-            ? `<span class="booking-status-tag cancelled">${t.statusCancelled}</span>`
-            : `<span class="booking-status-tag confirmed">${t.statusConfirmed}</span>`;
+        const isRejected = b.status === 'rejected';
+        const isPending = b.status === 'pending';
+
+        let statusBadge = `<span class="booking-status-tag confirmed">${t.statusConfirmed}</span>`;
+        if (isCancelled) {
+            statusBadge = `<span class="booking-status-tag cancelled">${t.statusCancelled}</span>`;
+        } else if (isRejected) {
+            statusBadge = `<span class="booking-status-tag cancelled" style="background:#fee2e2; color:#991b1b; border:1px solid #fecaca;">${t.statusRejected}</span>`;
+        } else if (isPending) {
+            statusBadge = `<span class="booking-status-tag" style="background:#fef3c7; color:#92400e; border:1px solid #fde68a;">${t.statusPending}</span>`;
+        }
 
         return `
-            <div class="booking-record-card ${isCancelled ? 'cancelled-card' : ''}">
+            <div class="booking-record-card ${isCancelled || isRejected ? 'cancelled-card' : ''}">
                 <div class="record-top">
                     <div class="record-main-info">
                         <img src="${b.machinePhoto || 'images/dhan-tractor.jpg'}" alt="${b.machineTitle}" class="record-thumb">
@@ -2146,7 +2164,11 @@ async function handleRegister(event) {
     showRegisterMessage(t.regSuccess, 'success');
 
     setTimeout(() => {
-        window.location.replace('index.html');
+        if (role === 'owner') {
+            window.location.replace('owner.html');
+        } else {
+            window.location.replace('index.html');
+        }
     }, 900);
 }
 
@@ -2228,7 +2250,11 @@ async function handleLogin(event) {
     showMessage(t.loginSuccess, 'success');
 
     setTimeout(() => {
-        window.location.replace('index.html');
+        if (foundUser && foundUser.role === 'owner') {
+            window.location.replace('owner.html');
+        } else {
+            window.location.replace('index.html');
+        }
     }, 800);
 }
 

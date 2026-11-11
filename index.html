@@ -7,7 +7,7 @@
     <title>Project Tractor - Kisan Portal</title>
     <!-- First-time / Not-logged-in redirect to login page -->
     <script>
-        (function() {
+        (function () {
             var user = localStorage.getItem('tractorUser');
             if (!user || user === 'null' || user === 'undefined' || user.trim() === '') {
                 window.location.replace('login.html');
@@ -71,6 +71,13 @@
                     <span class="item-sub" data-i18n="menuRegTractorSub">किराये पर देकर कमाई करें</span>
                 </div>
             </button>
+            <a href="owner.html" class="drawer-item highlight-owner-drawer" onclick="closeDrawer()">
+                <span class="drawer-item-icon">👨‍🌾</span>
+                <div class="item-text-group">
+                    <span class="item-title" data-i18n="menuOwnerPortal">ट्रैक्टर मालिक डैशबोर्ड</span>
+                    <span class="item-sub" data-i18n="menuOwnerPortalSub">बुकिंग स्वीकारें व खेत का रास्ता देखें</span>
+                </div>
+            </a>
             <button type="button" class="drawer-item" onclick="openLanguageModal(); closeDrawer();">
                 <span class="drawer-item-icon">🌐</span>
                 <span data-i18n="menuLanguage">भाषा बदलें (हिंदी / English)</span>
@@ -106,11 +113,16 @@
             <div class="logo">🚜 <span data-i18n="brandName">प्रोजेक्ट ट्रैक्टर</span></div>
         </div>
         <div class="nav-right">
-            <button type="button" class="btn-nav-bookings" onclick="openMyBookingsModal()" title="मेरी बुकिंग्स / My Bookings">
+            <a href="owner.html" class="btn-nav-owner" title="ट्रैक्टर मालिक डैशबोर्ड / Owner Dashboard">
+                🚜 <span data-i18n="navOwnerPortal">मालिक डैशबोर्ड</span>
+            </a>
+            <button type="button" class="btn-nav-bookings" onclick="openMyBookingsModal()"
+                title="मेरी बुकिंग्स / My Bookings">
                 📋 <span data-i18n="navMyBookings">मेरी बुकिंग्स</span>
                 <span class="nav-booking-badge" id="navBookingBadge" style="display: none;">0</span>
             </button>
-            <button type="button" class="lang-switch-btn nav-lang-btn" onclick="openLanguageModal()" title="भाषा बदलें / Change Language">
+            <button type="button" class="lang-switch-btn nav-lang-btn" onclick="openLanguageModal()"
+                title="भाषा बदलें / Change Language">
                 🌐 <span id="currentLangTag">हिंदी</span> ▾
             </button>
             <button type="button" class="btn-nav-attach" onclick="openTractorRegModal()">
@@ -162,7 +174,8 @@
                     <span data-i18n="advisoryTag">आज की कृषि सलाह (Daily Farm Advisory)</span>
                 </div>
                 <p class="advisory-text" data-i18n="advisoryText">
-                    मौसम पूरी तरह साफ और शुष्क है। गेहूं व सरसों की बोवाई, खेत की गहरी जुताई और कंबाइन से धान कटाई के लिए आज का दिन सर्वोत्तम है।
+                    मौसम पूरी तरह साफ और शुष्क है। गेहूं व सरसों की बोवाई, खेत की गहरी जुताई और कंबाइन से धान कटाई के
+                    लिए आज का दिन सर्वोत्तम है।
                 </p>
                 <div class="advisory-footer">
                     <span class="badge-optimum">✅ जुताई व कटाई के लिए अनुकूल</span>
@@ -176,7 +189,8 @@
             <div class="hero-text">
                 <span class="hero-tag" data-i18n="heroBadge">🌾 किसान की जरूरत, सही मशीन</span>
                 <h1 data-i18n="heroTitle">अपनी फसल और काम के अनुसार सही ट्रैक्टर चुनें</h1>
-                <p class="tagline" data-i18n="heroTagline">ब्रांड नहीं, अपनी फसल की जरूरत देखें — धान, गेहूं, गन्ना, आलू या ढुलाई के लिए सबसे उपयुक्त मशीन और औजार किराये पर लें।</p>
+                <p class="tagline" data-i18n="heroTagline">ब्रांड नहीं, अपनी फसल की जरूरत देखें — धान, गेहूं, गन्ना, आलू
+                    या ढुलाई के लिए सबसे उपयुक्त मशीन और औजार किराये पर लें।</p>
             </div>
             <div class="hero-stats">
                 <div class="stat-card">
@@ -198,7 +212,8 @@
         <section class="crop-filter-section">
             <div class="section-header">
                 <h2 data-i18n="cropFilterTitle">🌾 आपकी फसल या काम क्या है?</h2>
-                <p data-i18n="cropFilterSubtitle">नीचे अपनी फसल या काम पर क्लिक करें, सिस्टम आपको सबसे सही ट्रैक्टर और औजार दिखाएगा:</p>
+                <p data-i18n="cropFilterSubtitle">नीचे अपनी फसल या काम पर क्लिक करें, सिस्टम आपको सबसे सही ट्रैक्टर और
+                    औजार दिखाएगा:</p>
             </div>
 
             <div class="crop-pills-container">
@@ -244,8 +259,11 @@
             <div class="search-sort-bar">
                 <div class="search-input-wrap">
                     <span class="search-icon">🔍</span>
-                    <input type="text" id="machineSearchInput" placeholder="मशीन, औजार या काम खोजें (उदा: रोटावेटर, कंबाइन, 4WD, लेवलर)..." oninput="handleSearchAndSort()" data-i18n-placeholder="searchPlaceholder">
-                    <button type="button" class="clear-search-btn" id="clearSearchBtn" onclick="clearSearch()" style="display: none;">&times;</button>
+                    <input type="text" id="machineSearchInput"
+                        placeholder="मशीन, औजार या काम खोजें (उदा: रोटावेटर, कंबाइन, 4WD, लेवलर)..."
+                        oninput="handleSearchAndSort()" data-i18n-placeholder="searchPlaceholder">
+                    <button type="button" class="clear-search-btn" id="clearSearchBtn" onclick="clearSearch()"
+                        style="display: none;">&times;</button>
                 </div>
                 <div class="sort-select-wrap">
                     <label for="fleetSortSelect" data-i18n="labelSortBy">क्रमबद्ध करें:</label>
@@ -269,7 +287,8 @@
                 <div class="callout-icon">📞</div>
                 <div>
                     <h3 data-i18n="calloutTitle">फोन या व्हाट्सएप पर सीधे सहायता पाएं</h3>
-                    <p data-i18n="calloutDesc">अगर फॉर्म भरने में परेशानी हो, तो हमें कॉल या व्हाट्सएप करें — हमारी टीम तुरंत आपके खेत पर ट्रैक्टर भेजने में मदद करेगी।</p>
+                    <p data-i18n="calloutDesc">अगर फॉर्म भरने में परेशानी हो, तो हमें कॉल या व्हाट्सएप करें — हमारी टीम
+                        तुरंत आपके खेत पर ट्रैक्टर भेजने में मदद करेगी।</p>
                 </div>
             </div>
             <div class="callout-actions">
@@ -287,7 +306,7 @@
     <div id="bookingModal" class="modal-overlay">
         <div class="modal-card booking-card">
             <button type="button" class="modal-close-btn" onclick="closeBookingModal()">&times;</button>
-            
+
             <div class="modal-photo-wrap">
                 <img id="modalMachinePhoto" src="images/dhan-tractor.jpg" alt="Machine Photo" class="modal-real-photo">
             </div>
@@ -312,21 +331,27 @@
             <form id="tractorBookingForm" onsubmit="handleTractorBookingSubmit(event)">
                 <!-- Fuel Option Toggle (With vs Without Diesel) -->
                 <div class="fuel-choice-section">
-                    <label class="fuel-choice-title" data-i18n="fuelChoiceTitle">⛽ डीजल का चुनाव करें (Fuel Option) *</label>
+                    <label class="fuel-choice-title" data-i18n="fuelChoiceTitle">⛽ डीजल का चुनाव करें (Fuel Option)
+                        *</label>
                     <div class="fuel-options-grid">
-                        <label class="fuel-option-card active" id="fuelOptionWithCard" onclick="handleFuelOptionChange('with-fuel')">
+                        <label class="fuel-option-card active" id="fuelOptionWithCard"
+                            onclick="handleFuelOptionChange('with-fuel')">
                             <input type="radio" name="fuelOption" id="fuelOptionWith" value="with-fuel" checked>
                             <div class="fuel-opt-info">
                                 <span class="fuel-opt-title" data-i18n="fuelWithTitle">डीजल व ड्राइवर सहित</span>
-                                <span class="fuel-opt-desc" data-i18n="fuelWithDesc">डीजल और ड्राइवर का खर्च मालिक का</span>
+                                <span class="fuel-opt-desc" data-i18n="fuelWithDesc">डीजल और ड्राइवर का खर्च मालिक
+                                    का</span>
                             </div>
                             <span class="fuel-opt-rate" id="fuelRateWith">₹600/घं</span>
                         </label>
-                        <label class="fuel-option-card" id="fuelOptionWithoutCard" onclick="handleFuelOptionChange('without-fuel')">
+                        <label class="fuel-option-card" id="fuelOptionWithoutCard"
+                            onclick="handleFuelOptionChange('without-fuel')">
                             <input type="radio" name="fuelOption" id="fuelOptionWithout" value="without-fuel">
                             <div class="fuel-opt-info">
-                                <span class="fuel-opt-title" data-i18n="fuelWithoutTitle">डीजल किसान का (सस्ता रेट)</span>
-                                <span class="fuel-opt-desc" data-i18n="fuelWithoutDesc">डीजल आप देंगे, सिर्फ मशीन व ड्राइवर</span>
+                                <span class="fuel-opt-title" data-i18n="fuelWithoutTitle">डीजल किसान का (सस्ता
+                                    रेट)</span>
+                                <span class="fuel-opt-desc" data-i18n="fuelWithoutDesc">डीजल आप देंगे, सिर्फ मशीन व
+                                    ड्राइवर</span>
                             </div>
                             <span class="fuel-opt-rate discount" id="fuelRateWithout">₹380/घं</span>
                         </label>
@@ -336,35 +361,43 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="farmerName" data-i18n="labelFarmerName">किसान का नाम *</label>
-                        <input type="text" id="farmerName" required placeholder="जैसे: रमेश कुमार" data-i18n-placeholder="placeholderFarmerName">
+                        <input type="text" id="farmerName" required placeholder="जैसे: रमेश कुमार"
+                            data-i18n-placeholder="placeholderFarmerName">
                     </div>
                     <div class="form-group">
                         <label for="farmerPhone" data-i18n="labelFarmerPhone">मोबाइल नंबर *</label>
-                        <input type="tel" id="farmerPhone" required pattern="[0-9]{10}" placeholder="10 अंकों का मोबाइल नंबर" data-i18n-placeholder="placeholderFarmerPhone">
+                        <input type="tel" id="farmerPhone" required pattern="[0-9]{10}"
+                            placeholder="10 अंकों का मोबाइल नंबर" data-i18n-placeholder="placeholderFarmerPhone">
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
                         <div class="label-with-action">
-                            <label for="farmerVillage" data-i18n="labelFarmerVillage">गांव / खेत का स्थान व जिला *</label>
-                            <button type="button" class="btn-detect-gps" id="btnDetectLocation" onclick="detectFarmerLocation()" title="GPS से खेत की लोकेशन लें">
+                            <label for="farmerVillage" data-i18n="labelFarmerVillage">गांव / खेत का स्थान व जिला
+                                *</label>
+                            <button type="button" class="btn-detect-gps" id="btnDetectLocation"
+                                onclick="detectFarmerLocation()" title="GPS से खेत की लोकेशन लें">
                                 📍 <span data-i18n="btnDetectGPS">GPS से खेत खोजें</span>
                             </button>
                         </div>
-                        <input type="text" id="farmerVillage" required placeholder="जैसे: रामपुर, मेरठ (या GPS बटन दबाएं)" data-i18n-placeholder="placeholderFarmerVillage">
+                        <input type="text" id="farmerVillage" required
+                            placeholder="जैसे: रामपुर, मेरठ (या GPS बटन दबाएं)"
+                            data-i18n-placeholder="placeholderFarmerVillage">
                         <div id="farmerGpsStatus" class="gps-status-pill" style="display: none;"></div>
                         <input type="hidden" id="farmerGpsLink" value="">
                     </div>
                     <div class="form-group">
                         <label for="workDuration" data-i18n="labelWorkDuration">कितने घंटे / बीघा चाहिए? *</label>
-                        <input type="number" id="workDuration" min="1" max="50" value="2" required oninput="calculateEstimate()">
+                        <input type="number" id="workDuration" min="1" max="50" value="2" required
+                            oninput="calculateEstimate()">
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label for="workCropName" data-i18n="labelWorkCrop">किस फसल के लिए काम करवाना है?</label>
-                    <input type="text" id="workCropName" placeholder="जैसे: धान का कीचड़, गेहूं बोवाई" data-i18n-placeholder="placeholderWorkCrop">
+                    <input type="text" id="workCropName" placeholder="जैसे: धान का कीचड़, गेहूं बोवाई"
+                        data-i18n-placeholder="placeholderWorkCrop">
                 </div>
 
                 <div class="modal-action-buttons">
@@ -385,7 +418,8 @@
             <button type="button" class="modal-close-btn" onclick="closeReceiptModal()">&times;</button>
             <div class="receipt-success-icon">✅</div>
             <h2 data-i18n="receiptTitle">बुकिंग पक्की हो गई!</h2>
-            <p class="receipt-sub" data-i18n="receiptSub">हमारी टीम आपके गांव के नजदीकी ड्राइवर से संपर्क करके जल्द पहुंचेगी।</p>
+            <p class="receipt-sub" data-i18n="receiptSub">हमारी टीम आपके गांव के नजदीकी ड्राइवर से संपर्क करके जल्द
+                पहुंचेगी।</p>
 
             <div class="receipt-details" id="receiptDetailsContent">
                 <!-- Injected via script.js -->
@@ -406,7 +440,8 @@
             <div class="reg-modal-header">
                 <div class="reg-icon">🚜</div>
                 <h2 data-i18n="regModalTitle">अपना ट्रैक्टर जोड़ें — रोज कमाई करें</h2>
-                <p data-i18n="regModalSubtitle">अपने खाली ट्रैक्टर को किराये पर देकर हर महीने ₹20,000 - ₹50,000 तक कमाएं।</p>
+                <p data-i18n="regModalSubtitle">अपने खाली ट्रैक्टर को किराये पर देकर हर महीने ₹20,000 - ₹50,000 तक
+                    कमाएं।</p>
             </div>
 
             <form id="tractorRegisterForm" onsubmit="handleTractorRegistration(event)">
@@ -414,11 +449,13 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="ownerName" data-i18n="regOwnerName">मालिक का नाम *</label>
-                        <input type="text" id="ownerName" required placeholder="जैसे: सुरेश सिंह" data-i18n-placeholder="regPlaceholderOwner">
+                        <input type="text" id="ownerName" required placeholder="जैसे: सुरेश सिंह"
+                            data-i18n-placeholder="regPlaceholderOwner">
                     </div>
                     <div class="form-group">
                         <label for="ownerPhone" data-i18n="regOwnerPhone">मोबाइल नंबर (WhatsApp) *</label>
-                        <input type="tel" id="ownerPhone" required pattern="[0-9]{10}" placeholder="10 अंकों का नंबर" data-i18n-placeholder="placeholderFarmerPhone">
+                        <input type="tel" id="ownerPhone" required pattern="[0-9]{10}" placeholder="10 अंकों का नंबर"
+                            data-i18n-placeholder="placeholderFarmerPhone">
                     </div>
                 </div>
 
@@ -426,16 +463,19 @@
                     <div class="form-group">
                         <div class="label-with-action">
                             <label for="ownerVillage" data-i18n="regOwnerLocation">गांव / कस्बा व जिला *</label>
-                            <button type="button" class="btn-detect-gps" onclick="detectOwnerLocation()" title="GPS से गैराज लोकेशन लें">
+                            <button type="button" class="btn-detect-gps" onclick="detectOwnerLocation()"
+                                title="GPS से गैराज लोकेशन लें">
                                 📍 <span data-i18n="btnDetectGPS">GPS लोकेशन</span>
                             </button>
                         </div>
-                        <input type="text" id="ownerVillage" required placeholder="जैसे: मवाना, मेरठ (या GPS बटन दबाएं)" data-i18n-placeholder="placeholderFarmerVillage">
+                        <input type="text" id="ownerVillage" required placeholder="जैसे: मवाना, मेरठ (या GPS बटन दबाएं)"
+                            data-i18n-placeholder="placeholderFarmerVillage">
                         <div id="ownerGpsStatus" class="gps-status-pill" style="display: none;"></div>
                     </div>
                     <div class="form-group">
                         <label for="ownerDL" data-i18n="regOwnerDL">ड्राइविंग लाइसेंस (DL) नंबर</label>
-                        <input type="text" id="ownerDL" placeholder="DL नंबर दर्ज करें" data-i18n-placeholder="regPlaceholderDL">
+                        <input type="text" id="ownerDL" placeholder="DL नंबर दर्ज करें"
+                            data-i18n-placeholder="regPlaceholderDL">
                     </div>
                 </div>
 
@@ -465,7 +505,8 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="tractorRC" data-i18n="regTractorRC">ट्रैक्टर नंबर (RC Plate) *</label>
-                        <input type="text" id="tractorRC" required placeholder="जैसे: UP 15 AB 1234" data-i18n-placeholder="regPlaceholderRC">
+                        <input type="text" id="tractorRC" required placeholder="जैसे: UP 15 AB 1234"
+                            data-i18n-placeholder="regPlaceholderRC">
                     </div>
                     <div class="form-group">
                         <label for="tractorRate" data-i18n="regTractorRate">आपका किराया रेट (₹/घंटा) *</label>
@@ -498,7 +539,9 @@
                 <div class="terms-agree-box">
                     <label class="check-box-label">
                         <input type="checkbox" id="agreeTerms" required>
-                        <span><span data-i18n="regAgreeText">मैं प्रोजेक्ट ट्रैक्टर के सभी</span> <a href="#" onclick="openTermsModal(event)" data-i18n="regTermsLink">नियम व नीतियों (Terms)</a> <span data-i18n="regAgreeSuffix">से सहमत हूँ।</span></span>
+                        <span><span data-i18n="regAgreeText">मैं प्रोजेक्ट ट्रैक्टर के सभी</span> <a href="#"
+                                onclick="openTermsModal(event)" data-i18n="regTermsLink">नियम व नीतियों (Terms)</a>
+                            <span data-i18n="regAgreeSuffix">से सहमत हूँ।</span></span>
                     </label>
                 </div>
 
@@ -524,7 +567,8 @@
                     <div class="term-number">1</div>
                     <div class="term-text">
                         <h4 data-i18n="term1Title">डीजल नीति (Fuel Policy) ⛽</h4>
-                        <p data-i18n="term1Desc">किराये के रेट में डीजल और ड्राइवर शामिल माना जाएगा जब तक कि बुकिंग के समय अलग से बात तय न हुई हो।</p>
+                        <p data-i18n="term1Desc">किराये के रेट में डीजल और ड्राइवर शामिल माना जाएगा जब तक कि बुकिंग के
+                            समय अलग से बात तय न हुई हो।</p>
                     </div>
                 </div>
 
@@ -532,7 +576,8 @@
                     <div class="term-number">2</div>
                     <div class="term-text">
                         <h4 data-i18n="term2Title">न्यूनतम बुकिंग व समय नियम (Minimum Booking) ⏱️</h4>
-                        <p data-i18n="term2Desc">कम से कम 1 या 2 घंटे की बुकिंग मान्य होगी ताकि ट्रैक्टर के आने-जाने का नुकसान न हो। 5 किमी से अधिक दूरी पर सामान्य ट्रेवल चार्ज लागू हो सकता है।</p>
+                        <p data-i18n="term2Desc">कम से कम 1 या 2 घंटे की बुकिंग मान्य होगी ताकि ट्रैक्टर के आने-जाने का
+                            नुकसान न हो। 5 किमी से अधिक दूरी पर सामान्य ट्रेवल चार्ज लागू हो सकता है।</p>
                     </div>
                 </div>
 
@@ -540,7 +585,8 @@
                     <div class="term-number">3</div>
                     <div class="term-text">
                         <h4 data-i18n="term3Title">टूट-फूट व खराबी नियम (Breakdown Policy) 🛠️</h4>
-                        <p data-i18n="term3Desc">खेत में काम के दौरान अगर मशीन खराब होती है, तो मरम्मत का खर्च ट्रैक्टर मालिक का होगा। किसान से केवल उतने ही समय का पैसा लिया जाएगा जितना काम सही हुआ है।</p>
+                        <p data-i18n="term3Desc">खेत में काम के दौरान अगर मशीन खराब होती है, तो मरम्मत का खर्च ट्रैक्टर
+                            मालिक का होगा। किसान से केवल उतने ही समय का पैसा लिया जाएगा जितना काम सही हुआ है।</p>
                     </div>
                 </div>
 
@@ -548,7 +594,8 @@
                     <div class="term-number">4</div>
                     <div class="term-text">
                         <h4 data-i18n="term4Title">समय की पाबंदी व अनुशासन (Discipline Policy) ❌</h4>
-                        <p data-i18n="term4Desc">बुकिंग कन्फर्म होने के बाद ट्रैक्टर समय पर खेत पर पहुँचना अनिवार्य है। शराब पीकर ड्राइविंग करना या गैर-जिम्मेदाराना व्यवहार करने पर खाता रद्द कर दिया जाएगा।</p>
+                        <p data-i18n="term4Desc">बुकिंग कन्फर्म होने के बाद ट्रैक्टर समय पर खेत पर पहुँचना अनिवार्य है।
+                            शराब पीकर ड्राइविंग करना या गैर-जिम्मेदाराना व्यवहार करने पर खाता रद्द कर दिया जाएगा।</p>
                     </div>
                 </div>
 
@@ -556,7 +603,8 @@
                     <div class="term-number">5</div>
                     <div class="term-text">
                         <h4 data-i18n="term5Title">भुगतान व 0% कमीशन नीति (Payment Policy) 💰</h4>
-                        <p data-i18n="term5Desc">काम पूरा होते ही किसान सीधे नकद या यूपीआई (UPI) से मालिक को भुगतान करेगा। प्रोजेक्ट ट्रैक्टर वर्तमान में 100% मुफ्त (0% कमीशन) सुविधा प्रदान कर रहा है।</p>
+                        <p data-i18n="term5Desc">काम पूरा होते ही किसान सीधे नकद या यूपीआई (UPI) से मालिक को भुगतान
+                            करेगा। प्रोजेक्ट ट्रैक्टर वर्तमान में 100% मुफ्त (0% कमीशन) सुविधा प्रदान कर रहा है।</p>
                     </div>
                 </div>
             </div>
@@ -575,15 +623,18 @@
             <button type="button" class="modal-close-btn" onclick="closeCallSupportModal()">&times;</button>
             <div class="support-icon">📞</div>
             <h2 data-i18n="callModalTitle">किसान सहायता केंद्र (Kisan Support)</h2>
-            <p data-i18n="callModalSub">ट्रैक्टर बुकिंग या किसी भी जानकारी के लिए कॉल या व्हाट्सएप सहायता प्राप्त करें।</p>
+            <p data-i18n="callModalSub">ट्रैक्टर बुकिंग या किसी भी जानकारी के लिए कॉल या व्हाट्सएप सहायता प्राप्त करें।
+            </p>
 
             <div class="support-options-list">
                 <div class="callback-card">
                     <h4 data-i18n="callbackTitle">📞 कॉल बैक का अनुरोध करें (Request Call Back)</h4>
-                    <p data-i18n="callbackDesc">अपना 10 अंकों का मोबाइल नंबर डालें, हमारी टीम 5-10 मिनट में आपको कॉल करेगी:</p>
+                    <p data-i18n="callbackDesc">अपना 10 अंकों का मोबाइल नंबर डालें, हमारी टीम 5-10 मिनट में आपको कॉल
+                        करेगी:</p>
                     <div class="callback-input-box">
                         <input type="tel" id="callbackPhone" placeholder="जैसे: 9876543210" maxlength="10">
-                        <button type="button" class="btn btn-primary" onclick="submitCallbackRequest()" data-i18n="btnRequestCallback">
+                        <button type="button" class="btn btn-primary" onclick="submitCallbackRequest()"
+                            data-i18n="btnRequestCallback">
                             कॉल बैक मंगाएं
                         </button>
                     </div>
@@ -622,7 +673,7 @@
     <div id="liveTrackingModal" class="modal-overlay">
         <div class="modal-card tracking-modal-card">
             <button type="button" class="modal-close-btn" onclick="closeLiveTrackingModal()">&times;</button>
-            
+
             <div class="tracking-header">
                 <div class="tracking-icon">🚜</div>
                 <div>
@@ -636,7 +687,7 @@
                 <div class="map-farm-bg">
                     <div class="map-radar-ripple"></div>
                     <div class="map-path-line"></div>
-                    
+
                     <!-- Destination Pin (Farmer's Field) -->
                     <div class="map-pin farm-pin" title="आपका खेत (Your Field)">
                         <span class="pin-badge">🌾 आपका खेत</span>
@@ -702,7 +753,8 @@
             <!-- Assigned Driver Profile & Call Action -->
             <div class="assigned-driver-card">
                 <div class="driver-profile-info">
-                    <img src="images/dhan-tractor.jpg" alt="Driver Photo" class="driver-avatar-img" id="trackingMachinePhoto">
+                    <img src="images/dhan-tractor.jpg" alt="Driver Photo" class="driver-avatar-img"
+                        id="trackingMachinePhoto">
                     <div>
                         <h4 id="trackingDriverName">ड्राइवर: राजू यादव</h4>
                         <p id="trackingMachineDetails">Mahindra 575 DI • 4WD</p>
