@@ -271,17 +271,16 @@ const translations = {
         newFarmerText: "नए किसान हैं?",
         createAccountLink: "नया अकाउंट बनाएं",
 
-        // Hero Banner
-        heroBadge: "🌾 किसान की जरूरत, सही मशीन",
-        heroTitle: "अपनी फसल और काम के अनुसार सही ट्रैक्टर चुनें",
-        heroTagline: "ब्रांड नहीं, अपनी फसल की जरूरत देखें — धान, गेहूं, गन्ना, आलू या ढुलाई के लिए सबसे उपयुक्त मशीन और औजार किराये पर लें।",
-        statGuaranteed: "काम की गारंटी",
-        statSupport: "किसान सहायता",
-        statNoAdvance: "बिना एडवांस बुकिंग",
+        // Hero Banner (Direct & Honest)
+        heroLeadLine: "फसल के टाइम पर गाड़ी, बिना एक्स्ट्रा पैसे",
+        btnHeroBookVehicle: "🚜 गाड़ी बुक करो",
+        heroHelpBtn: "कॉल / WhatsApp सहायता",
+        dailyInfoTitle: "आज की जानकारी (मंडी भाव, मौसम व सलाह)",
+        dailyInfoToggle: "देखने के लिए टैप करें ▾",
 
         // Filter Pills
-        cropFilterTitle: "🌾 आपकी फसल या काम क्या है?",
-        cropFilterSubtitle: "नीचे अपनी फसल या काम पर क्लिक करें, सिस्टम आपको सबसे सही ट्रैक्टर और औजार दिखाएगा:",
+        cropFilterTitle: "🌾 आपका काम क्या है?",
+        cropFilterSubtitle: "नीचे अपनी फसल या काम चुनें, उपयुक्त ट्रैक्टर व औजार तुरंत दिखेंगे:",
         filterAll: "सभी गाड़ियां (All)",
         filterDhan: "धान / चावल (Paddy)",
         filterGehu: "गेहूं व सरसों (Wheat)",
@@ -547,17 +546,16 @@ const translations = {
         newFarmerText: "New farmer?",
         createAccountLink: "Create New Account",
 
-        // Hero Banner
-        heroBadge: "🌾 Farmer Needs, Perfect Machine",
-        heroTitle: "Pick the Right Tractor Based on Your Crop & Work",
-        heroTagline: "Focus on your crop needs, not tractor brands — rent the ideal machine and attachments for Paddy, Wheat, Sugarcane, Vegetables or Haulage.",
-        statGuaranteed: "Work Guaranteed",
-        statSupport: "24x7 Helpline",
-        statNoAdvance: "Zero Advance Booking",
+        // Hero Banner (Direct & Honest)
+        heroLeadLine: "Vehicles on time during harvest, no extra charges",
+        btnHeroBookVehicle: "🚜 Book a Vehicle",
+        heroHelpBtn: "Call / WhatsApp Support",
+        dailyInfoTitle: "Today's Farm Info (Mandi Rates, Weather & Advisory)",
+        dailyInfoToggle: "Tap to view ▾",
 
         // Filter Pills
-        cropFilterTitle: "🌾 What is your Crop or Work Requirement?",
-        cropFilterSubtitle: "Click your crop or task below, and the system will recommend the most suitable tractor and implements:",
+        cropFilterTitle: "🌾 What is your farming work?",
+        cropFilterSubtitle: "Select your crop or work below, ideal tractors & implements appear instantly:",
         filterAll: "All Machines",
         filterDhan: "Paddy / Rice",
         filterGehu: "Wheat & Mustard",
@@ -939,45 +937,45 @@ function renderFleetCards(category = 'all') {
     grid.innerHTML = filtered.map(machine => {
         const title = machine.name[currentLang] || machine.name.hi;
         const sub = machine.subtitle[currentLang] || machine.subtitle.hi;
-        const badge = machine.badge[currentLang] || machine.badge.hi;
-        const crops = machine.suitableCrops[currentLang] || machine.suitableCrops.hi;
-        const work = machine.suitableWork[currentLang] || machine.suitableWork.hi;
-        const tool = machine.tool[currentLang] || machine.tool.hi;
         const rateUnit = machine.rateUnit[currentLang] || machine.rateUnit.hi;
         const imgUrl = machine.image || "images/dhan-tractor.jpg";
-        const rating = machine.rating || 4.8;
-        const reviews = machine.reviewsCount || 35;
+        const dieselLabel = selectedFuelOption === 'with-fuel'
+            ? (t.fuelWithShort || "डीजल सहित")
+            : (t.fuelWithoutShort || "डीजल किसान का");
+
+        // Verified badge ONLY if vehicle data has verified = true
+        const verifiedBadge = machine.verified === true
+            ? `<span class="card-verified-badge">✓ ${currentLang === 'hi' ? 'सत्यापित' : 'Verified'}</span>`
+            : '';
+
+        // Village and distance ONLY if exist in data
+        const villageInfo = machine.village
+            ? `<span class="card-meta-tag">📍 ${machine.village}</span>`
+            : '';
+        const distanceInfo = machine.distance
+            ? `<span class="card-meta-tag">📏 ${machine.distance}</span>`
+            : '';
+
+        // Rating badge only if rating exists
+        const ratingBadge = machine.rating
+            ? `<div class="card-rating-pill">⭐ ${machine.rating}</div>`
+            : '';
 
         return `
             <div class="machine-card">
-                <span class="card-top-badge">${badge}</span>
+                ${verifiedBadge}
                 <div class="machine-card-image">
                     <img src="${imgUrl}" alt="${title}" class="machine-real-photo" loading="lazy" onerror="this.onerror=null; this.src='images/dhan-tractor.jpg'">
-                    <div class="card-rating-pill">
-                        ⭐ ${rating} <span class="rating-sub">(${reviews} ${t.cardBookingsSuffix})</span>
-                    </div>
+                    ${ratingBadge}
                 </div>
                 <div class="machine-card-body">
                     <h4 class="machine-title">${title}</h4>
                     <p class="machine-subtitle">${sub}</p>
                     
-                    <div class="specs-list">
-                        <div class="spec-item">
-                            <span>🌾</span>
-                            <span><strong>${t.cardCrops}</strong> ${crops}</span>
-                        </div>
-                        <div class="spec-item">
-                            <span>⚙️</span>
-                            <span><strong>${t.cardBestFor}</strong> ${work}</span>
-                        </div>
-                        <div class="spec-item">
-                            <span>🛠️</span>
-                            <span><strong>${t.cardTool}</strong> ${tool}</span>
-                        </div>
-                        <div class="spec-item">
-                            <span>⚡</span>
-                            <span><strong>${t.cardPower}</strong> ${machine.power}</span>
-                        </div>
+                    <div class="card-quick-meta">
+                        <span class="card-diesel-badge">⛽ ${dieselLabel}</span>
+                        ${villageInfo}
+                        ${distanceInfo}
                     </div>
 
                     <div class="machine-card-footer">

@@ -134,121 +134,68 @@
         </div>
     </header>
 
-    <!-- Live Mandi Bhav Ticker -->
-    <div class="mandi-ticker-bar">
-        <div class="mandi-ticker-badge">
-            <span class="pulse-dot"></span>
-            <span data-i18n="mandiLiveTag">📊 आज के मंडी भाव (Agmarknet Live)</span>
-        </div>
-        <div class="mandi-ticker-wrap">
-            <div class="mandi-ticker-track" id="mandiTickerContent">
-                <!-- Injected via script.js -->
-            </div>
-        </div>
-    </div>
-
     <!-- Main Content Area -->
     <main class="main-content">
-        <!-- Live Weather & Agriculture Advisory Widget -->
-        <section class="weather-advisory-card">
-            <div class="weather-col-left">
-                <div class="weather-main-info">
-                    <span class="weather-icon">☀️</span>
-                    <div class="weather-temp-info">
-                        <span class="weather-temp">28°C</span>
-                        <span class="weather-condition" data-i18n="weatherCondition">धूप खिली है ☀️</span>
-                    </div>
-                </div>
-                <div class="weather-meta-row">
-                    <span class="weather-meta-item" data-i18n="weatherHumidity">💧 नमी: 42%</span>
-                    <span class="weather-meta-item" data-i18n="weatherWind">💨 हवा: 8 km/h</span>
-                    <span class="weather-meta-item" data-i18n="weatherRain">🌧️ बारिश: 0%</span>
-                </div>
-                <div class="weather-location-tag">
-                    📍 <span data-i18n="weatherCity">मेरठ, उत्तर प्रदेश (पश्चिमी क्षेत्र)</span>
-                </div>
+        <!-- 1. Hero Section: Direct, Honest & Action-Oriented -->
+        <section class="hero-banner hero-simplified">
+            <div class="hero-text-wrap">
+                <h1 class="hero-lead-line" data-i18n="heroLeadLine">फसल के टाइम पर गाड़ी, बिना एक्स्ट्रा पैसे</h1>
             </div>
-            <div class="weather-col-right">
-                <div class="advisory-pill">
-                    <span class="advisory-icon">🌾</span>
-                    <span data-i18n="advisoryTag">आज की कृषि सलाह (Daily Farm Advisory)</span>
-                </div>
-                <p class="advisory-text" data-i18n="advisoryText">
-                    मौसम पूरी तरह साफ और शुष्क है। गेहूं व सरसों की बोवाई, खेत की गहरी जुताई और कंबाइन से धान कटाई के
-                    लिए आज का दिन सर्वोत्तम है।
-                </p>
-                <div class="advisory-footer">
-                    <span class="badge-optimum">✅ जुताई व कटाई के लिए अनुकूल</span>
-                    <span class="advisory-time" data-i18n="advisoryTime">आज का अपडेट</span>
+            <div class="hero-action-group">
+                <button type="button" class="btn btn-hero-book-primary" onclick="document.getElementById('cropFilterSection').scrollIntoView({behavior: 'smooth'})" data-i18n="btnHeroBookVehicle">
+                    🚜 गाड़ी बुक करो
+                </button>
+                <div class="hero-sub-actions">
+                    <button type="button" class="btn btn-hero-sub" onclick="openMyBookingsModal()">
+                        📋 <span data-i18n="navMyBookings">मेरी बुकिंग्स</span>
+                    </button>
+                    <button type="button" class="btn btn-hero-sub" onclick="handleCallSupport()">
+                        📞 <span data-i18n="heroHelpBtn">कॉल / WhatsApp सहायता</span>
+                    </button>
                 </div>
             </div>
         </section>
 
-        <!-- Hero Banner with Real Agricultural Landscape -->
-        <section class="hero-banner">
-            <div class="hero-text">
-                <span class="hero-tag" data-i18n="heroBadge">🌾 किसान की जरूरत, सही मशीन</span>
-                <h1 data-i18n="heroTitle">अपनी फसल और काम के अनुसार सही ट्रैक्टर चुनें</h1>
-                <p class="tagline" data-i18n="heroTagline">ब्रांड नहीं, अपनी फसल की जरूरत देखें — धान, गेहूं, गन्ना, आलू
-                    या ढुलाई के लिए सबसे उपयुक्त मशीन और औजार किराये पर लें।</p>
-            </div>
-            <div class="hero-stats">
-                <div class="stat-card">
-                    <span class="stat-number">100%</span>
-                    <span class="stat-label" data-i18n="statGuaranteed">काम की गारंटी</span>
-                </div>
-                <div class="stat-card">
-                    <span class="stat-number">24x7</span>
-                    <span class="stat-label" data-i18n="statSupport">किसान सहायता</span>
-                </div>
-                <div class="stat-card">
-                    <span class="stat-number">₹0</span>
-                    <span class="stat-label" data-i18n="statNoAdvance">बिना एडवांस बुकिंग</span>
-                </div>
-            </div>
-        </section>
-
-        <!-- Crop & Need Selector (Filter Section with Real Crop Photos) -->
-        <section class="crop-filter-section">
+        <!-- 2. Crop & Work Selection (Large Icon Cards) -->
+        <section class="crop-filter-section" id="cropFilterSection">
             <div class="section-header">
-                <h2 data-i18n="cropFilterTitle">🌾 आपकी फसल या काम क्या है?</h2>
-                <p data-i18n="cropFilterSubtitle">नीचे अपनी फसल या काम पर क्लिक करें, सिस्टम आपको सबसे सही ट्रैक्टर और
-                    औजार दिखाएगा:</p>
+                <h2 data-i18n="cropFilterTitle">🌾 आपका काम क्या है?</h2>
+                <p data-i18n="cropFilterSubtitle">नीचे अपनी फसल या काम चुनें, उपयुक्त ट्रैक्टर व औजार तुरंत दिखेंगे:</p>
             </div>
 
             <div class="crop-pills-container">
                 <button type="button" class="crop-pill active" onclick="filterByCrop('all', this)">
-                    <img src="images/dhan-tractor.jpg" alt="All Tractors" class="crop-pill-img">
+                    <img src="images/dhan-tractor.jpg" alt="All Tractors" class="crop-pill-img" loading="lazy">
                     <span class="pill-text" data-i18n="filterAll">सभी गाड़ियां (All)</span>
                 </button>
                 <button type="button" class="crop-pill" onclick="filterByCrop('dhan', this)">
-                    <img src="images/crop-paddy.jpg" alt="Paddy Crop" class="crop-pill-img">
+                    <img src="images/crop-paddy.jpg" alt="Paddy Crop" class="crop-pill-img" loading="lazy">
                     <span class="pill-text" data-i18n="filterDhan">धान / चावल (Paddy)</span>
                 </button>
                 <button type="button" class="crop-pill" onclick="filterByCrop('gehu', this)">
-                    <img src="images/crop-wheat.jpg" alt="Wheat Crop" class="crop-pill-img">
+                    <img src="images/crop-wheat.jpg" alt="Wheat Crop" class="crop-pill-img" loading="lazy">
                     <span class="pill-text" data-i18n="filterGehu">गेहूं व सरसों (Wheat)</span>
                 </button>
                 <button type="button" class="crop-pill" onclick="filterByCrop('ganna', this)">
-                    <img src="images/crop-sugarcane.jpg" alt="Sugarcane Crop" class="crop-pill-img">
-                    <span class="pill-text" data-i18n="filterGanna">गन्ना व भारी जुताई (Sugarcane)</span>
+                    <img src="images/crop-sugarcane.jpg" alt="Sugarcane Crop" class="crop-pill-img" loading="lazy">
+                    <span class="pill-text" data-i18n="filterGanna">गन्ना व जुताई (Sugarcane)</span>
                 </button>
                 <button type="button" class="crop-pill" onclick="filterByCrop('sabzi', this)">
-                    <img src="images/crop-potato.jpg" alt="Potato & Veggies" class="crop-pill-img">
+                    <img src="images/crop-potato.jpg" alt="Potato & Veggies" class="crop-pill-img" loading="lazy">
                     <span class="pill-text" data-i18n="filterSabzi">आलू व सब्जियां (Veggies)</span>
                 </button>
                 <button type="button" class="crop-pill" onclick="filterByCrop('dhulai', this)">
-                    <img src="images/crop-haulage.jpg" alt="Haulage" class="crop-pill-img">
-                    <span class="pill-text" data-i18n="filterDhulai">मंडी व माल ढुलाई (Haulage)</span>
+                    <img src="images/crop-haulage.jpg" alt="Haulage" class="crop-pill-img" loading="lazy">
+                    <span class="pill-text" data-i18n="filterDhulai">मंडी व ढुलाई (Haulage)</span>
                 </button>
                 <button type="button" class="crop-pill" onclick="filterByCrop('bagwani', this)">
-                    <img src="images/crop-orchard.jpg" alt="Orchard Trees" class="crop-pill-img">
+                    <img src="images/crop-orchard.jpg" alt="Orchard Trees" class="crop-pill-img" loading="lazy">
                     <span class="pill-text" data-i18n="filterBagwani">बागवानी व स्प्रे (Orchard)</span>
                 </button>
             </div>
         </section>
 
-        <!-- Tractor & Machine Fleet Grid with Real Photos -->
+        <!-- 3. Recommended Vehicle Fleet List -->
         <section class="fleet-section">
             <div class="fleet-header">
                 <h3 id="fleetSectionTitle" data-i18n="fleetTitle">अनुशंसित गाड़ियां और मशीनें</h3>
@@ -287,8 +234,7 @@
                 <div class="callout-icon">📞</div>
                 <div>
                     <h3 data-i18n="calloutTitle">फोन या व्हाट्सएप पर सीधे सहायता पाएं</h3>
-                    <p data-i18n="calloutDesc">अगर फॉर्म भरने में परेशानी हो, तो हमें कॉल या व्हाट्सएप करें — हमारी टीम
-                        तुरंत आपके खेत पर ट्रैक्टर भेजने में मदद करेगी।</p>
+                    <p data-i18n="calloutDesc">अगर फॉर्म भरने में परेशानी हो, तो हमें कॉल या व्हाट्सएप करें — हमारी टीम तुरंत आपके खेत पर ट्रैक्टर भेजने में मदद करेगी।</p>
                 </div>
             </div>
             <div class="callout-actions">
@@ -299,6 +245,69 @@
                     💬 <span data-i18n="btnWhatsAppNow">व्हाट्सएप सहायता</span>
                 </button>
             </div>
+        </section>
+
+        <!-- 4. Collapsible Today's Information (Mandi Bhav, Weather & Farm Advisory) - Collapsed by default -->
+        <section class="daily-info-section">
+            <details class="daily-info-collapsible">
+                <summary class="daily-info-summary">
+                    <span class="summary-left">
+                        <span class="summary-icon">📊</span>
+                        <strong data-i18n="dailyInfoTitle">आज की जानकारी (मंडी भाव, मौसम व सलाह)</strong>
+                    </span>
+                    <span class="summary-toggle-pill" data-i18n="dailyInfoToggle">देखने के लिए टैप करें ▾</span>
+                </summary>
+
+                <div class="daily-info-body">
+                    <!-- Live Mandi Bhav Ticker -->
+                    <div class="mandi-ticker-bar">
+                        <div class="mandi-ticker-badge">
+                            <span class="pulse-dot"></span>
+                            <span data-i18n="mandiLiveTag">📊 आज के मंडी भाव (Agmarknet Live)</span>
+                        </div>
+                        <div class="mandi-ticker-wrap">
+                            <div class="mandi-ticker-track" id="mandiTickerContent">
+                                <!-- Injected via script.js -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Live Weather & Agriculture Advisory Widget -->
+                    <div class="weather-advisory-card">
+                        <div class="weather-col-left">
+                            <div class="weather-main-info">
+                                <span class="weather-icon">☀️</span>
+                                <div class="weather-temp-info">
+                                    <span class="weather-temp">28°C</span>
+                                    <span class="weather-condition" data-i18n="weatherCondition">धूप खिली है ☀️</span>
+                                </div>
+                            </div>
+                            <div class="weather-meta-row">
+                                <span class="weather-meta-item" data-i18n="weatherHumidity">💧 नमी: 42%</span>
+                                <span class="weather-meta-item" data-i18n="weatherWind">💨 हवा: 8 km/h</span>
+                                <span class="weather-meta-item" data-i18n="weatherRain">🌧️ बारिश: 0%</span>
+                            </div>
+                            <div class="weather-location-tag">
+                                📍 <span data-i18n="weatherCity">मेरठ, उत्तर प्रदेश (पश्चिमी क्षेत्र)</span>
+                            </div>
+                        </div>
+                        <div class="weather-col-right">
+                            <div class="advisory-pill">
+                                <span class="advisory-icon">🌾</span>
+                                <span data-i18n="advisoryTag">आज की कृषि सलाह (Daily Farm Advisory)</span>
+                            </div>
+                            <p class="advisory-text" data-i18n="advisoryText">
+                                मौसम पूरी तरह साफ और शुष्क है। गेहूं व सरसों की बोवाई, खेत की गहरी जुताई और कंबाइन से धान कटाई के
+                                लिए आज का दिन सर्वोत्तम है।
+                            </p>
+                            <div class="advisory-footer">
+                                <span class="badge-optimum">✅ जुताई व कटाई के लिए अनुकूल</span>
+                                <span class="advisory-time" data-i18n="advisoryTime">आज का अपडेट</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </details>
         </section>
     </main>
 
