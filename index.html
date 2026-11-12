@@ -46,7 +46,7 @@
                 <img src="images/dhan-tractor.jpg" alt="Farmer Avatar" class="drawer-real-avatar">
                 <div class="drawer-user-meta">
                     <h3 id="drawerUserName">नमस्ते, किसान भाई 🙏</h3>
-                    <span class="user-badge" data-i18n="drawerVerifiedBadge">सत्यापित किसान</span>
+                    <span class="user-badge" data-i18n="drawerVerifiedBadge">किसान प्रोफाइल</span>
                 </div>
             </div>
             <button type="button" class="drawer-close-btn" onclick="closeDrawer()">&times;</button>
@@ -331,10 +331,6 @@
                     <span class="rate-label" data-i18n="modalRateLabel">किराया दर:</span>
                     <span class="rate-value" id="modalMachineRate">₹600 / घंटा</span>
                 </div>
-                <div class="rate-item highlight">
-                    <span class="rate-label" data-i18n="modalEstimatedLabel">कुल अनुमानित खर्च:</span>
-                    <span class="rate-total" id="modalTotalEstimate">₹1,200</span>
-                </div>
             </div>
 
             <form id="tractorBookingForm" onsubmit="handleTractorBookingSubmit(event)">
@@ -367,6 +363,24 @@
                     </div>
                 </div>
 
+                <!-- Date & Time Slot Row (Advance Booking) -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="bookingDate" data-i18n="labelBookingDate">तारीख चुनें (किस दिन चाहिए?) *</label>
+                        <input type="date" id="bookingDate" required class="form-input-date" onchange="validateBookingDate()">
+                        <span class="input-helper-text" data-i18n="helperDateRange">आज से अगले 30 दिन तक बुक कर सकते हैं</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="bookingSlot" data-i18n="labelBookingSlot">समय स्लॉट चुनें *</label>
+                        <select id="bookingSlot" required class="form-select">
+                            <option value="morning" data-i18n="slotMorning">🌅 सुबह (06:00 AM - 10:00 AM)</option>
+                            <option value="day" selected data-i18n="slotDay">☀️ दोपहर (10:00 AM - 02:00 PM)</option>
+                            <option value="afternoon" data-i18n="slotAfternoon">🌤️ दोपहर बाद (02:00 PM - 06:00 PM)</option>
+                            <option value="custom" data-i18n="slotCustom">⏰ सटीक / सुविधानुसार समय</option>
+                        </select>
+                    </div>
+                </div>
+
                 <div class="form-row">
                     <div class="form-group">
                         <label for="farmerName" data-i18n="labelFarmerName">किसान का नाम *</label>
@@ -375,7 +389,7 @@
                     </div>
                     <div class="form-group">
                         <label for="farmerPhone" data-i18n="labelFarmerPhone">मोबाइल नंबर *</label>
-                        <input type="tel" id="farmerPhone" required pattern="[0-9]{10}"
+                        <input type="tel" id="farmerPhone" required pattern="[0-9]{10}" maxlength="10"
                             placeholder="10 अंकों का मोबाइल नंबर" data-i18n-placeholder="placeholderFarmerPhone">
                     </div>
                 </div>
@@ -397,9 +411,10 @@
                         <input type="hidden" id="farmerGpsLink" value="">
                     </div>
                     <div class="form-group">
-                        <label for="workDuration" data-i18n="labelWorkDuration">कितने घंटे / बीघा चाहिए? *</label>
+                        <label for="workDuration" data-i18n="labelWorkDurationHours">कितने घंटे चाहिए? (काम का समय) *</label>
                         <input type="number" id="workDuration" min="1" max="50" value="2" required
                             oninput="calculateEstimate()">
+                        <span class="input-helper-text" data-i18n="helperDurationHours">सटीक हिसाब के लिए सिर्फ घंटों में दर्ज करें</span>
                     </div>
                 </div>
 
@@ -407,6 +422,33 @@
                     <label for="workCropName" data-i18n="labelWorkCrop">किस फसल के लिए काम करवाना है?</label>
                     <input type="text" id="workCropName" placeholder="जैसे: धान का कीचड़, गेहूं बोवाई"
                         data-i18n-placeholder="placeholderWorkCrop">
+                </div>
+
+                <!-- Final Rate Breakdown Box Before Booking -->
+                <div class="price-breakdown-card">
+                    <div class="breakdown-header">
+                        <strong data-i18n="breakdownTitle">📊 किराए का पूरा विवरण (Final Rate Breakdown)</strong>
+                    </div>
+                    <div class="breakdown-row">
+                        <span data-i18n="breakdownBaseLabel">मूल किराया (Base Rate):</span>
+                        <span id="breakdownBaseRateText">₹600 x 2 घंटे = ₹1,200</span>
+                    </div>
+                    <div class="breakdown-row">
+                        <span data-i18n="breakdownDieselLabel">डीजल विकल्प (Fuel):</span>
+                        <span id="breakdownFuelText" class="badge-text-green">डीजल व ड्राइवर सहित</span>
+                    </div>
+                    <div class="breakdown-row">
+                        <span data-i18n="breakdownTravelLabel">दूरी / ट्रैवल चार्ज (5 किमी तक):</span>
+                        <span class="badge-text-free" data-i18n="breakdownTravelFree">₹0 (बिल्कुल मुफ्त)</span>
+                    </div>
+                    <div class="breakdown-divider"></div>
+                    <div class="breakdown-total-row">
+                        <span class="total-label" data-i18n="breakdownTotalLabel">कुल अंतिम राशि (Total Amount):</span>
+                        <strong class="total-val" id="modalTotalEstimate">₹1,200</strong>
+                    </div>
+                    <div class="final-rate-guarantee-note" data-i18n="noHiddenChargesNote">
+                        ✅ यही फाइनल रेट है, बाद में कोई छुपा चार्ज नहीं
+                    </div>
                 </div>
 
                 <div class="modal-action-buttons">
@@ -435,7 +477,10 @@
             </div>
 
             <div class="receipt-actions">
-                <button type="button" class="btn btn-primary" onclick="closeReceiptModal()" data-i18n="receiptCloseBtn">
+                <button type="button" class="btn btn-primary" id="receiptTrackBtn" onclick="trackFromReceipt()">
+                    📍 <span data-i18n="receiptTrackStatusBtn">बुकिंग स्टेटस देखें</span>
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="closeReceiptModal()" data-i18n="receiptCloseBtn">
                     ठीक है (Close)
                 </button>
             </div>
@@ -449,8 +494,7 @@
             <div class="reg-modal-header">
                 <div class="reg-icon">🚜</div>
                 <h2 data-i18n="regModalTitle">अपना ट्रैक्टर जोड़ें — रोज कमाई करें</h2>
-                <p data-i18n="regModalSubtitle">अपने खाली ट्रैक्टर को किराये पर देकर हर महीने ₹20,000 - ₹50,000 तक
-                    कमाएं।</p>
+                <p data-i18n="regModalSubtitle">अपने खाली ट्रैक्टर को किराये पर देकर अतिरिक्त कमाई करें।</p>
             </div>
 
             <form id="tractorRegisterForm" onsubmit="handleTractorRegistration(event)">
@@ -686,97 +730,85 @@
             <div class="tracking-header">
                 <div class="tracking-icon">🚜</div>
                 <div>
-                    <h2 data-i18n="trackingTitle">ट्रैक्टर लाइव ट्रैकिंग (Live Tracker)</h2>
-                    <p id="trackingOrderSubtitle">ऑर्डर • खेत की ओर रवाना</p>
+                    <h2 data-i18n="statusModalTitle">बुकिंग स्टेटस (Booking Status)</h2>
+                    <p id="trackingOrderSubtitle">ऑर्डर प्रगति विवरण</p>
                 </div>
             </div>
 
-            <!-- Simulated Live GPS Radar & Map View -->
-            <div class="tracking-map-viewport">
-                <div class="map-farm-bg">
-                    <div class="map-radar-ripple"></div>
-                    <div class="map-path-line"></div>
-
-                    <!-- Destination Pin (Farmer's Field) -->
-                    <div class="map-pin farm-pin" title="आपका खेत (Your Field)">
-                        <span class="pin-badge">🌾 आपका खेत</span>
-                        <div class="pin-marker red-marker">📍</div>
+            <!-- Real Booking Status Stepper (5 Steps: Requested, Accepted, Driver assigned, Reached, Work done) -->
+            <div class="booking-status-stepper-box">
+                <div class="real-status-stepper" id="statusStepperContainer">
+                    <div class="stepper-step active" id="stepNode1">
+                        <div class="stepper-circle">📝</div>
+                        <span class="stepper-label" data-i18n="stepRequested">अनुरोध भेजा</span>
                     </div>
-
-                    <!-- Tractor Pin (Moving towards Field) -->
-                    <div class="map-pin tractor-pin" id="mapTractorPin" title="ट्रैक्टर (Tractor)">
-                        <div class="tractor-marker-bubble">
-                            <span class="pulse-beacon"></span>
-                            🚜
-                        </div>
-                        <span class="pin-badge driver-tag" id="mapDriverTag">ड्राइवर रवाना</span>
+                    <div class="stepper-connector" id="stepConnector1"></div>
+                    <div class="stepper-step" id="stepNode2">
+                        <div class="stepper-circle">🤝</div>
+                        <span class="stepper-label" data-i18n="stepAccepted">स्वीकृत</span>
                     </div>
-
-                    <!-- Live Satellite Watermark -->
-                    <div class="map-status-overlay">
-                        <span class="live-dot-pulse"></span>
-                        <span>GPS LIVE SATELLITE RADAR</span>
+                    <div class="stepper-connector" id="stepConnector2"></div>
+                    <div class="stepper-step" id="stepNode3">
+                        <div class="stepper-circle">🚜</div>
+                        <span class="stepper-label" data-i18n="stepDriverAssigned">ड्राइवर असाइन</span>
+                    </div>
+                    <div class="stepper-connector" id="stepConnector3"></div>
+                    <div class="stepper-step" id="stepNode4">
+                        <div class="stepper-circle">📍</div>
+                        <span class="stepper-label" data-i18n="stepReached">खेत पर आगमन</span>
+                    </div>
+                    <div class="stepper-connector" id="stepConnector4"></div>
+                    <div class="stepper-step" id="stepNode5">
+                        <div class="stepper-circle">✅</div>
+                        <span class="stepper-label" data-i18n="stepWorkDone">काम पूरा हुआ</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Real-time Stats Cards -->
-            <div class="tracking-stats-grid">
-                <div class="track-stat-box">
-                    <span class="stat-meta" data-i18n="trackingDistance">खेत से दूरी</span>
-                    <strong class="stat-digit" id="trackDistance">2.1 किमी</strong>
-                </div>
-                <div class="track-stat-box highlight">
-                    <span class="stat-meta" data-i18n="trackingETA">पहुंचने का समय</span>
-                    <strong class="stat-digit" id="trackETA">11 मिनट</strong>
-                </div>
-                <div class="track-stat-box">
-                    <span class="stat-meta" data-i18n="trackingSpeed">ट्रैक्टर की गति</span>
-                    <strong class="stat-digit" id="trackSpeed">22 किमी/घं</strong>
-                </div>
+            <!-- Real Status Message Banner -->
+            <div class="status-live-banner" id="statusLiveBanner">
+                <p id="statusLiveMessage">📢 स्थिति: अनुरोध भेज दिया गया है। टीम व ट्रैक्टर मालिक जल्द आपको कॉल करेंगे।</p>
             </div>
 
-            <!-- Trip Milestone Stepper -->
-            <div class="trip-stepper">
-                <div class="step-node done">
-                    <span class="step-check">✓</span>
-                    <span class="step-label" data-i18n="stepConfirmed">बुकिंग स्वीकृत</span>
-                </div>
-                <div class="step-line done"></div>
-                <div class="step-node done">
-                    <span class="step-check">✓</span>
-                    <span class="step-label" data-i18n="stepAssigned">ड्राइवर असाइन</span>
-                </div>
-                <div class="step-line active"></div>
-                <div class="step-node active">
-                    <span class="step-pulse">🚜</span>
-                    <span class="step-label" data-i18n="stepOnWay">खेत की ओर रवाना</span>
-                </div>
-                <div class="step-line"></div>
-                <div class="step-node">
-                    <span class="step-circle">4</span>
-                    <span class="step-label" data-i18n="stepArrived">खेत पर आगमन</span>
-                </div>
-            </div>
-
-            <!-- Assigned Driver Profile & Call Action -->
-            <div class="assigned-driver-card">
-                <div class="driver-profile-info">
-                    <img src="images/dhan-tractor.jpg" alt="Driver Photo" class="driver-avatar-img"
-                        id="trackingMachinePhoto">
-                    <div>
-                        <h4 id="trackingDriverName">ड्राइवर: राजू यादव</h4>
-                        <p id="trackingMachineDetails">Mahindra 575 DI • 4WD</p>
+            <!-- Booking Order Summary Card -->
+            <div class="status-order-card">
+                <h4 class="status-card-heading">📋 बुकिंग विवरण (Order Details)</h4>
+                <div class="status-detail-grid">
+                    <div class="status-detail-item">
+                        <span class="detail-label">बुकिंग ID:</span>
+                        <strong class="detail-val" id="statusOrderId">TRAC-123456</strong>
+                    </div>
+                    <div class="status-detail-item">
+                        <span class="detail-label">गाड़ी / मशीन:</span>
+                        <strong class="detail-val" id="statusMachineTitle">Mahindra 575 DI</strong>
+                    </div>
+                    <div class="status-detail-item">
+                        <span class="detail-label">तारीख:</span>
+                        <strong class="detail-val" id="statusBookingDate">आज</strong>
+                    </div>
+                    <div class="status-detail-item">
+                        <span class="detail-label">समय स्लॉट:</span>
+                        <strong class="detail-val" id="statusBookingSlot">दोपहर (10:00 AM - 02:00 PM)</strong>
+                    </div>
+                    <div class="status-detail-item">
+                        <span class="detail-label">स्थान / गांव:</span>
+                        <strong class="detail-val" id="statusFarmerVillage">रामपुर</strong>
+                    </div>
+                    <div class="status-detail-item highlight-total">
+                        <span class="detail-label">कुल अंतिम राशि:</span>
+                        <strong class="detail-val text-green" id="statusTotalAmount">₹1,200</strong>
                     </div>
                 </div>
-                <div class="driver-card-actions">
-                    <button type="button" class="btn btn-call" onclick="handleCallDriver()">
-                        📞 <span data-i18n="btnCallDriver">कॉल सहायता</span>
-                    </button>
-                    <a id="btnOpenGoogleMaps" href="#" target="_blank" class="btn btn-map-link">
-                        🗺️ <span data-i18n="btnGoogleMaps">Google Maps</span>
-                    </a>
-                </div>
+            </div>
+
+            <!-- Action Buttons: Cancel Booking & Call Support -->
+            <div class="status-actions-row">
+                <button type="button" class="btn btn-danger-outline" id="btnCancelFromStatus" onclick="handleCancelFromStatusModal()">
+                    <span data-i18n="btnCancelBookingAction">❌ बुकिंग रद्द करें</span>
+                </button>
+                <button type="button" class="btn btn-call-support" onclick="handleCallSupport()">
+                    <span data-i18n="btnCallSupportAction">📞 सहायता कॉल करें</span>
+                </button>
             </div>
         </div>
     </div>

@@ -193,7 +193,7 @@ const translations = {
         brandSubtitle: "किसान भाइयों का अपना ट्रैक्टर पोर्टल",
 
         // Drawer Menu & Badges
-        drawerVerifiedBadge: "सत्यापित किसान",
+        drawerVerifiedBadge: "किसान प्रोफाइल",
         menuHome: "होम / डैशबोर्ड",
         menuMyBookings: "मेरी बुकिंग्स (My Bookings)",
         navMyBookings: "मेरी बुकिंग्स",
@@ -228,16 +228,26 @@ const translations = {
         advisoryText: "मौसम पूरी तरह साफ और शुष्क है। गेहूं व सरसों की बोवाई, खेत की गहरी जुताई और कंबाइन से धान कटाई के लिए आज का दिन सर्वोत्तम है।",
         advisoryTime: "आज का अपडेट",
 
-        // GPS & Live Location
+        // GPS & Booking Status (Real Tracking)
         btnDetectGPS: "GPS से खेत खोजें",
         locDetecting: "⏳ जीपीएस लोकेशन खोजी जा रही है...",
         locSuccess: "खेत की लोकेशन सेट हो गई: {loc}",
         locErr: "⚠️ लोकेशन नहीं मिल सकी। कृपया गांव का नाम टाइप करें।",
         gpsFieldLabel: "खेत का GPS मैप:",
-        btnTrackTractor: "🗺️ ट्रैक्टर ट्रैक करें",
-        trackingTitle: "ट्रैक्टर लाइव ट्रैकिंग (Live Tracker)",
-        trackingDistance: "खेत से दूरी",
-        trackingETA: "पहुंचने का समय",
+        btnTrackTractor: "📍 स्टेटस देखें",
+        statusModalTitle: "बुकिंग स्टेटस (Booking Status)",
+        statusModalSub: "रियल-टाइम बुकिंग प्रगति",
+        stepRequested: "अनुरोध भेजा",
+        stepAccepted: "स्वीकृत",
+        stepDriverAssigned: "ड्राइवर असाइन",
+        stepReached: "खेत पर आगमन",
+        stepWorkDone: "काम पूरा हुआ",
+        statusMsgRequested: "📢 स्थिति: अनुरोध भेज दिया गया है। टीम व ट्रैक्टर मालिक जल्द आपको कॉल करेंगे।",
+        statusMsgAccepted: "✅ ट्रैक्टर मालिक ने बुकिंग स्वीकार कर ली है! ड्राइवर जल्द खेत के लिए निकलेगा।",
+        statusMsgCancelled: "❌ यह बुकिंग रद्द कर दी गई है।",
+        statusMsgRejected: "⚠️ इस समय ट्रैक्टर मालिक उपलब्ध नहीं हैं। कृपया दूसरा वाहन बुक करें या सहायता पर कॉल करें।",
+        btnCancelBookingAction: "❌ बुकिंग रद्द करें",
+        btnCallSupportAction: "📞 सहायता कॉल करें",
         trackingSpeed: "ट्रैक्टर की गति",
         stepConfirmed: "बुकिंग स्वीकृत",
         stepAssigned: "ड्राइवर असाइन",
@@ -329,6 +339,13 @@ const translations = {
         // Booking Modal
         modalRateLabel: "किराया दर:",
         modalEstimatedLabel: "कुल अनुमानित खर्च:",
+        labelBookingDate: "तारीख चुनें (किस दिन चाहिए?) *",
+        helperDateRange: "आज से अगले 30 दिन तक बुक कर सकते हैं",
+        labelBookingSlot: "समय स्लॉट चुनें *",
+        slotMorning: "🌅 सुबह (06:00 AM - 10:00 AM)",
+        slotDay: "☀️ दोपहर (10:00 AM - 02:00 PM)",
+        slotAfternoon: "🌤️ दोपहर बाद (02:00 PM - 06:00 PM)",
+        slotCustom: "⏰ सटीक / सुविधानुसार समय",
         labelFarmerName: "किसान का नाम *",
         placeholderFarmerName: "जैसे: रमेश कुमार",
         labelFarmerPhone: "मोबाइल नंबर *",
@@ -336,8 +353,17 @@ const translations = {
         labelFarmerVillage: "गांव / खेत का स्थान व जिला *",
         placeholderFarmerVillage: "जैसे: रामपुर, मेरठ (या GPS बटन दबाएं)",
         labelWorkDuration: "कितने घंटे / बीघा चाहिए? *",
+        labelWorkDurationHours: "कितने घंटे चाहिए? (काम का समय) *",
+        helperDurationHours: "सटीक हिसाब के लिए सिर्फ घंटों में दर्ज करें",
         labelWorkCrop: "किस फसल के लिए काम करवाना है?",
         placeholderWorkCrop: "जैसे: धान का कीचड़, गेहूं बोवाई",
+        breakdownTitle: "📊 किराए का पूरा विवरण (Final Rate Breakdown)",
+        breakdownBaseLabel: "मूल किराया (Base Rate):",
+        breakdownDieselLabel: "डीजल विकल्प (Fuel):",
+        breakdownTravelLabel: "दूरी / ट्रैवल चार्ज (5 किमी तक):",
+        breakdownTravelFree: "₹0 (बिल्कुल मुफ्त)",
+        breakdownTotalLabel: "कुल अंतिम राशि (Total Amount):",
+        noHiddenChargesNote: "✅ यही फाइनल रेट है, बाद में कोई छुपा चार्ज नहीं",
         btnConfirmBooking: "बुकिंग पक्की करें",
         btnSendWhatsApp: "व्हाट्सएप पर बुकिंग भेजें",
 
@@ -345,13 +371,18 @@ const translations = {
         receiptTitle: "बुकिंग पक्की हो गई!",
         receiptSub: "हमारी टीम आपके गांव के नजदीकी ड्राइवर से संपर्क करके जल्द पहुंचेगी।",
         receiptCloseBtn: "ठीक है (Close)",
+        receiptTrackStatusBtn: "बुकिंग स्टेटस देखें",
         receiptOrderId: "ऑर्डर नंबर:",
+        receiptBookingDate: "चुनी गई तारीख:",
+        receiptBookingSlot: "समय स्लॉट:",
         receiptFarmer: "किसान का नाम:",
         receiptPhone: "मोबाइल नंबर:",
         receiptVillage: "स्थान / गांव:",
         receiptMachine: "चुनी गई मशीन:",
         receiptDuration: "समय / अवधि:",
         receiptTotal: "अनुमानित कुल बिल:",
+        errInvalidDate: "कृपया आज या अगले 30 दिनों में से सही तारीख चुनें।",
+        errInvalidPhone: "कृपया 10 अंकों का सही मोबाइल नंबर दर्ज करें।",
 
         // My Bookings Modal
         myBookingsTitle: "मेरी बुकिंग्स (My Bookings)",
@@ -369,7 +400,7 @@ const translations = {
 
         // Tractor Registration Modal
         regModalTitle: "अपना ट्रैक्टर जोड़ें — रोज कमाई करें",
-        regModalSubtitle: "अपने खाली ट्रैक्टर को किराये पर देकर हर महीने ₹20,000 - ₹50,000 तक कमाएं।",
+        regModalSubtitle: "अपने खाली ट्रैक्टर को किराये पर देकर अतिरिक्त कमाई करें।",
         regHeadingOwner: "1. मालिक व ड्राइवर की जानकारी",
         regOwnerName: "मालिक का नाम *",
         regPlaceholderOwner: "जैसे: सुरेश सिंह",
@@ -468,7 +499,7 @@ const translations = {
         brandSubtitle: "The Trusted Tractor Portal for Farmers",
 
         // Drawer Menu & Badges
-        drawerVerifiedBadge: "Verified Farmer",
+        drawerVerifiedBadge: "Farmer Profile",
         menuHome: "Home / Dashboard",
         menuMyBookings: "My Bookings",
         navMyBookings: "My Bookings",
@@ -503,16 +534,26 @@ const translations = {
         advisoryText: "The weather is completely clear and dry. Optimal condition for wheat/mustard sowing, deep ploughing, and combine harvesting.",
         advisoryTime: "Today's Update",
 
-        // GPS & Live Location
+        // GPS & Booking Status (Real Tracking)
         btnDetectGPS: "Auto-Detect GPS",
         locDetecting: "⏳ Detecting GPS location...",
         locSuccess: "Farm GPS set: {loc}",
         locErr: "⚠️ Location could not be detected. Please type village name.",
         gpsFieldLabel: "Field GPS Location:",
-        btnTrackTractor: "🗺️ Track Tractor",
-        trackingTitle: "Live Tractor Tracker",
-        trackingDistance: "Distance from Field",
-        trackingETA: "Estimated Time",
+        btnTrackTractor: "📍 View Status",
+        statusModalTitle: "Booking Status",
+        statusModalSub: "Real-time Booking Progress",
+        stepRequested: "Requested",
+        stepAccepted: "Accepted",
+        stepDriverAssigned: "Driver Assigned",
+        stepReached: "Reached Field",
+        stepWorkDone: "Work Done",
+        statusMsgRequested: "📢 Status: Booking requested. Our team & tractor owner will call you shortly.",
+        statusMsgAccepted: "✅ Tractor owner has accepted the booking! Driver will depart for your farm soon.",
+        statusMsgCancelled: "❌ This booking has been cancelled.",
+        statusMsgRejected: "⚠️ Tractor owner is currently unavailable. Please choose another machine or call support.",
+        btnCancelBookingAction: "❌ Cancel Booking",
+        btnCallSupportAction: "📞 Call Support",
         trackingSpeed: "Tractor Speed",
         stepConfirmed: "Booking Confirmed",
         stepAssigned: "Driver Assigned",
@@ -604,6 +645,13 @@ const translations = {
         // Booking Modal
         modalRateLabel: "Rental Rate:",
         modalEstimatedLabel: "Estimated Total Cost:",
+        labelBookingDate: "Select Date (When needed?) *",
+        helperDateRange: "Book for today or up to 30 days ahead",
+        labelBookingSlot: "Select Time Slot *",
+        slotMorning: "🌅 Morning (06:00 AM - 10:00 AM)",
+        slotDay: "☀️ Day (10:00 AM - 02:00 PM)",
+        slotAfternoon: "🌤️ Afternoon (02:00 PM - 06:00 PM)",
+        slotCustom: "⏰ Custom / Exact Time",
         labelFarmerName: "Farmer Name *",
         placeholderFarmerName: "e.g. Ramesh Kumar",
         labelFarmerPhone: "Mobile Number *",
@@ -611,8 +659,17 @@ const translations = {
         labelFarmerVillage: "Village / Field Location & District *",
         placeholderFarmerVillage: "e.g. Rampur, Meerut (or tap GPS button)",
         labelWorkDuration: "Hours or Acres Required? *",
+        labelWorkDurationHours: "How many hours needed? (Work Duration) *",
+        helperDurationHours: "Enter duration strictly in hours for accurate billing",
         labelWorkCrop: "Crop or Work Purpose:",
         placeholderWorkCrop: "e.g. Paddy Puddling, Wheat Sowing",
+        breakdownTitle: "📊 Final Rate Breakdown",
+        breakdownBaseLabel: "Base Rental Rate:",
+        breakdownDieselLabel: "Fuel Option:",
+        breakdownTravelLabel: "Travel Charge (up to 5 km):",
+        breakdownTravelFree: "₹0 (Free of cost)",
+        breakdownTotalLabel: "Total Amount:",
+        noHiddenChargesNote: "✅ This is the final rate, no hidden charges later",
         btnConfirmBooking: "Confirm Booking",
         btnSendWhatsApp: "Send Booking via WhatsApp",
 
@@ -620,13 +677,18 @@ const translations = {
         receiptTitle: "Booking Confirmed!",
         receiptSub: "Our team is contacting the nearest operator in your village and will arrive shortly.",
         receiptCloseBtn: "Close Receipt",
+        receiptTrackStatusBtn: "View Booking Status",
         receiptOrderId: "Order ID:",
+        receiptBookingDate: "Booking Date:",
+        receiptBookingSlot: "Time Slot:",
         receiptFarmer: "Farmer Name:",
         receiptPhone: "Mobile No:",
         receiptVillage: "Location / Village:",
         receiptMachine: "Selected Machine:",
         receiptDuration: "Duration:",
         receiptTotal: "Estimated Total Bill:",
+        errInvalidDate: "Please select a valid date between today and next 30 days.",
+        errInvalidPhone: "Please enter a valid 10-digit mobile number.",
 
         // My Bookings Modal
         myBookingsTitle: "My Bookings",
@@ -644,7 +706,7 @@ const translations = {
 
         // Tractor Registration Modal
         regModalTitle: "Register Your Tractor — Earn Everyday",
-        regModalSubtitle: "Earn ₹20,000 - ₹50,000 every month by renting your idle tractor to local farmers.",
+        regModalSubtitle: "Earn extra income by renting your idle tractor to local farmers.",
         regHeadingOwner: "1. Owner & Driver Information",
         regOwnerName: "Owner Name *",
         regPlaceholderOwner: "e.g. Suresh Singh",
@@ -1215,6 +1277,29 @@ function detectOwnerLocation() {
 // ==========================================
 // 7. Booking Modal Handlers & Fuel Selection
 // ==========================================
+function getFormattedDateString(dateObj) {
+    const yyyy = dateObj.getFullYear();
+    const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const dd = String(dateObj.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+}
+
+function validateBookingDate() {
+    const dateInput = document.getElementById('bookingDate');
+    if (!dateInput) return;
+    const t = translations[currentLang] || translations.hi;
+    const today = new Date();
+    const maxDate = new Date();
+    maxDate.setDate(today.getDate() + 30);
+    const minStr = getFormattedDateString(today);
+    const maxStr = getFormattedDateString(maxDate);
+
+    if (dateInput.value < minStr || dateInput.value > maxStr) {
+        alert(t.errInvalidDate || 'कृपया आज या अगले 30 दिनों में से सही तारीख चुनें।');
+        dateInput.value = minStr;
+    }
+}
+
 function openBookingModal(machineId) {
     selectedMachine = fleetData.find(m => m.id === machineId) || fleetData[0];
     const modal = document.getElementById('bookingModal');
@@ -1230,6 +1315,27 @@ function openBookingModal(machineId) {
     document.getElementById('modalMachineTitle').textContent = title;
     document.getElementById('modalMachineSubtitle').textContent = sub;
     document.getElementById('modalMachineCategory').textContent = badge;
+
+    // Advance Booking Date & Time Slot initialization
+    const dateInput = document.getElementById('bookingDate');
+    if (dateInput) {
+        const today = new Date();
+        const maxDate = new Date();
+        maxDate.setDate(today.getDate() + 30);
+        const minStr = getFormattedDateString(today);
+        const maxStr = getFormattedDateString(maxDate);
+
+        dateInput.min = minStr;
+        dateInput.max = maxStr;
+        if (!dateInput.value || dateInput.value < minStr || dateInput.value > maxStr) {
+            dateInput.value = minStr;
+        }
+    }
+
+    const slotSelect = document.getElementById('bookingSlot');
+    if (slotSelect && !slotSelect.value) {
+        slotSelect.value = 'day';
+    }
 
     // Reset Fuel Option to With Fuel
     selectedFuelOption = 'with-fuel';
@@ -1291,7 +1397,7 @@ function openBookingModal(machineId) {
         } catch (e) {}
     }
 
-    // Default duration
+    // Default duration in hours
     document.getElementById('workDuration').value = 2;
     calculateEstimate();
 
@@ -1344,11 +1450,31 @@ function calculateEstimate() {
         rateEl.textContent = `₹${appliedRate} / ${rateUnit}${fuelNote}`;
     }
 
+    // Live Breakdown Elements Update
+    const breakdownBaseRateEl = document.getElementById('breakdownBaseRateText');
+    if (breakdownBaseRateEl) {
+        const hrText = currentLang === 'hi' ? 'घंटे' : 'Hours';
+        breakdownBaseRateEl.textContent = `₹${appliedRate} x ${duration} ${hrText} = ₹${total.toLocaleString('en-IN')}`;
+    }
+
+    const breakdownFuelEl = document.getElementById('breakdownFuelText');
+    if (breakdownFuelEl) {
+        if (selectedFuelOption === 'with-fuel') {
+            breakdownFuelEl.textContent = currentLang === 'hi' ? 'डीजल व ड्राइवर सहित' : 'With Fuel & Driver';
+            breakdownFuelEl.className = 'badge-text-green';
+        } else {
+            breakdownFuelEl.textContent = currentLang === 'hi' ? 'डीजल किसान का (छूट लागू)' : 'Without Fuel (Discount applied)';
+            breakdownFuelEl.className = 'badge-text-orange';
+        }
+    }
+
     const totalEl = document.getElementById('modalTotalEstimate');
     if (totalEl) {
         totalEl.textContent = `₹${total.toLocaleString('en-IN')}`;
     }
 }
+
+let lastBookedOrderId = null;
 
 // Handle Booking Form Submit & LocalStorage Persistence
 function handleTractorBookingSubmit(event) {
@@ -1361,8 +1487,30 @@ function handleTractorBookingSubmit(event) {
     const duration = document.getElementById('workDuration').value;
     const gpsLink = document.getElementById('farmerGpsLink') ? document.getElementById('farmerGpsLink').value : '';
 
+    const bookingDateInput = document.getElementById('bookingDate');
+    const bookingDateVal = bookingDateInput ? bookingDateInput.value : '';
+
+    const slotSelect = document.getElementById('bookingSlot');
+    const bookingSlotVal = slotSelect ? slotSelect.value : 'day';
+    const bookingSlotText = slotSelect && slotSelect.selectedOptions[0]
+        ? slotSelect.selectedOptions[0].textContent.trim()
+        : 'दोपहर (10:00 AM - 02:00 PM)';
+
     if (!farmerName || !farmerPhone || !farmerVillage) {
         alert(t.errFillFields);
+        return;
+    }
+
+    // Phone validation (10 digits)
+    const phoneClean = farmerPhone.replace(/\D/g, '');
+    if (phoneClean.length !== 10) {
+        alert(t.errInvalidPhone || 'कृपया 10 अंकों का सही मोबाइल नंबर दर्ज करें।');
+        return;
+    }
+
+    // Date validation
+    if (!bookingDateVal) {
+        alert(t.errInvalidDate || 'कृपया तारीख चुनें।');
         return;
     }
 
@@ -1377,6 +1525,8 @@ function handleTractorBookingSubmit(event) {
     const orderId = 'TRAC-' + Math.floor(100000 + Math.random() * 900000);
     const fuelText = selectedFuelOption === 'with-fuel' ? t.fuelWithShort : t.fuelWithoutShort;
 
+    lastBookedOrderId = orderId;
+
     const bookingRecord = {
         orderId,
         machineId: selectedMachine.id,
@@ -1386,17 +1536,20 @@ function handleTractorBookingSubmit(event) {
         farmerPhone,
         farmerVillage,
         gpsLink: gpsLink || `https://maps.google.com/?q=${encodeURIComponent(farmerVillage)}`,
+        bookingDate: bookingDateVal,
+        bookingSlot: bookingSlotVal,
+        bookingSlotText,
         duration: `${duration} ${rateUnit}`,
         fuelOption: selectedFuelOption,
         fuelText,
         appliedRate,
         total: totalStr,
-        date: new Date().toLocaleDateString(currentLang === 'hi' ? 'hi-IN' : 'en-IN', {
+        date: bookingDateVal || new Date().toLocaleDateString(currentLang === 'hi' ? 'hi-IN' : 'en-IN', {
             day: 'numeric',
             month: 'short',
             year: 'numeric'
         }),
-        status: 'confirmed'
+        status: 'pending' // Real status: initially pending / requested
     };
 
     saveBooking(bookingRecord);
@@ -1408,6 +1561,8 @@ function handleTractorBookingSubmit(event) {
         farmerPhone,
         farmerVillage,
         gpsLink: bookingRecord.gpsLink,
+        bookingDate: bookingRecord.bookingDate,
+        bookingSlotText: bookingRecord.bookingSlotText,
         machineTitle: `${machineTitle} (${fuelText})`,
         duration: `${duration} ${rateUnit}`,
         total: `₹${totalStr}`
@@ -1427,11 +1582,27 @@ function showReceiptModal(data) {
         </div>
     ` : '';
 
+    const dateRow = data.bookingDate ? `
+        <div class="receipt-row">
+            <span>${t.receiptBookingDate || 'तारीख:'}</span>
+            <strong>${data.bookingDate}</strong>
+        </div>
+    ` : '';
+
+    const slotRow = data.bookingSlotText ? `
+        <div class="receipt-row">
+            <span>${t.receiptBookingSlot || 'समय स्लॉट:'}</span>
+            <span>${data.bookingSlotText}</span>
+        </div>
+    ` : '';
+
     content.innerHTML = `
         <div class="receipt-row">
             <span>${t.receiptOrderId}</span>
             <strong>${data.orderId}</strong>
         </div>
+        ${dateRow}
+        ${slotRow}
         <div class="receipt-row">
             <span>${t.receiptFarmer}</span>
             <span>${data.farmerName}</span>
@@ -1460,6 +1631,16 @@ function showReceiptModal(data) {
     `;
 
     modal.style.display = 'flex';
+}
+
+function trackFromReceipt() {
+    closeReceiptModal();
+    if (lastBookedOrderId) {
+        openLiveTrackingModal(lastBookedOrderId);
+    } else {
+        const bookings = getBookings();
+        if (bookings.length > 0) openLiveTrackingModal(bookings[0].orderId);
+    }
 }
 
 function closeReceiptModal() {
@@ -1617,6 +1798,8 @@ function renderMyBookings() {
             statusBadge = `<span class="booking-status-tag" style="background:#fef3c7; color:#92400e; border:1px solid #fde68a;">${t.statusPending}</span>`;
         }
 
+        const dateSlotText = b.bookingDate ? `${b.bookingDate} • ${b.bookingSlotText || ''}` : b.date;
+
         return `
             <div class="booking-record-card ${isCancelled || isRejected ? 'cancelled-card' : ''}">
                 <div class="record-top">
@@ -1624,12 +1807,14 @@ function renderMyBookings() {
                         <img src="${b.machinePhoto || 'images/dhan-tractor.jpg'}" alt="${b.machineTitle}" class="record-thumb">
                         <div>
                             <h4 class="record-title">${b.machineTitle}</h4>
-                            <span class="record-order-id">#${b.orderId} • ${b.date}</span>
+                            <span class="record-order-id">#${b.orderId} • ${dateSlotText}</span>
                         </div>
                     </div>
                     ${statusBadge}
                 </div>
                 <div class="record-grid">
+                    <div><strong>${t.receiptBookingDate || 'तारीख'}:</strong> ${b.bookingDate || b.date}</div>
+                    <div><strong>${t.receiptBookingSlot || 'समय स्लॉट'}:</strong> ${b.bookingSlotText || 'दिन (Day)'}</div>
                     <div><strong>${t.receiptFarmer}:</strong> ${b.farmerName} (${b.farmerPhone})</div>
                     <div><strong>${t.receiptVillage}:</strong> ${b.farmerVillage}</div>
                     <div><strong>${t.receiptDuration}:</strong> ${b.duration}</div>
@@ -1641,7 +1826,7 @@ function renderMyBookings() {
                         <strong>₹${b.total}</strong>
                     </div>
                     <div class="record-actions">
-                        ${!isCancelled ? `<button type="button" class="btn-track-booking" onclick="openLiveTrackingModal('${b.orderId}')">${t.btnTrackTractor}</button>` : ''}
+                        ${!isCancelled ? `<button type="button" class="btn-track-booking" onclick="openLiveTrackingModal('${b.orderId}')">📍 ${t.receiptTrackStatusBtn || 'स्टेटस देखें'}</button>` : ''}
                         <button type="button" class="btn-receipt-view" onclick="viewPastReceipt('${b.orderId}')">${t.btnViewReceipt}</button>
                         ${!isCancelled ? `<button type="button" class="btn-booking-cancel" onclick="cancelBooking('${b.orderId}')">${t.btnCancelBooking}</button>` : ''}
                     </div>
@@ -1687,40 +1872,121 @@ function viewPastReceipt(orderId) {
 }
 
 // ==========================================
-// 9. Live Tractor Tracking Modal
+// 9. Real Booking Status Modal (No Fake Radar / Driver)
 // ==========================================
+let currentTrackingOrderId = null;
+
 function openLiveTrackingModal(orderId) {
     closeMyBookingsModal();
     const bookings = getBookings();
-    const booking = bookings.find(b => b.orderId === orderId) || bookings[0];
+    const booking = (orderId ? bookings.find(b => b.orderId === orderId) : null) || bookings[0];
     const modal = document.getElementById('liveTrackingModal');
     if (!modal) return;
 
-    const subtitleEl = document.getElementById('trackingOrderSubtitle');
-    const machinePhoto = document.getElementById('trackingMachinePhoto');
-    const driverNameEl = document.getElementById('trackingDriverName');
-    const machineDetailsEl = document.getElementById('trackingMachineDetails');
-    const mapsBtn = document.getElementById('btnOpenGoogleMaps');
+    const t = translations[currentLang] || translations.hi;
 
-    if (booking) {
-        if (subtitleEl) subtitleEl.textContent = `ऑर्डर #${booking.orderId} • ${booking.farmerVillage}`;
-        if (machinePhoto) machinePhoto.src = booking.machinePhoto || 'images/dhan-tractor.jpg';
-        if (machineDetailsEl) machineDetailsEl.textContent = `${booking.machineTitle} • UP 15 AB 4589`;
-        if (mapsBtn) mapsBtn.href = booking.gpsLink || 'https://maps.google.com';
+    if (!booking) {
+        alert(t.noBookingsTitle || 'कोई सक्रिय बुकिंग नहीं मिली');
+        return;
     }
 
-    // Dynamic realistic ETA simulation
-    const dist = (1.5 + Math.random() * 1.5).toFixed(1);
-    const eta = Math.round(dist * 5 + 2);
-    const speed = Math.round(20 + Math.random() * 5);
+    currentTrackingOrderId = booking.orderId;
 
-    const distEl = document.getElementById('trackDistance');
-    const etaEl = document.getElementById('trackETA');
-    const speedEl = document.getElementById('trackSpeed');
+    // Set Header Subtitle
+    const subtitleEl = document.getElementById('trackingOrderSubtitle');
+    if (subtitleEl) {
+        subtitleEl.textContent = `ऑर्डर #${booking.orderId} • ${booking.farmerVillage}`;
+    }
 
-    if (distEl) distEl.textContent = `${dist} किमी`;
-    if (etaEl) etaEl.textContent = `${eta} मिनट`;
-    if (speedEl) speedEl.textContent = `${speed} किमी/घं`;
+    // Set Order Summary Card Fields
+    const statusOrderIdEl = document.getElementById('statusOrderId');
+    const statusMachineTitleEl = document.getElementById('statusMachineTitle');
+    const statusBookingDateEl = document.getElementById('statusBookingDate');
+    const statusBookingSlotEl = document.getElementById('statusBookingSlot');
+    const statusFarmerVillageEl = document.getElementById('statusFarmerVillage');
+    const statusTotalAmountEl = document.getElementById('statusTotalAmount');
+
+    if (statusOrderIdEl) statusOrderIdEl.textContent = booking.orderId;
+    if (statusMachineTitleEl) statusMachineTitleEl.textContent = booking.machineTitle;
+    if (statusBookingDateEl) statusBookingDateEl.textContent = booking.bookingDate || booking.date;
+    if (statusBookingSlotEl) statusBookingSlotEl.textContent = booking.bookingSlotText || '☀️ दोपहर (10:00 AM - 02:00 PM)';
+    if (statusFarmerVillageEl) statusFarmerVillageEl.textContent = booking.farmerVillage;
+    if (statusTotalAmountEl) statusTotalAmountEl.textContent = `₹${booking.total}`;
+
+    // Stepper Nodes
+    const step1 = document.getElementById('stepNode1');
+    const step2 = document.getElementById('stepNode2');
+    const step3 = document.getElementById('stepNode3');
+    const step4 = document.getElementById('stepNode4');
+    const step5 = document.getElementById('stepNode5');
+
+    const conn1 = document.getElementById('stepConnector1');
+    const conn2 = document.getElementById('stepConnector2');
+    const conn3 = document.getElementById('stepConnector3');
+    const conn4 = document.getElementById('stepConnector4');
+
+    const allSteps = [step1, step2, step3, step4, step5];
+    const allConns = [conn1, conn2, conn3, conn4];
+
+    allSteps.forEach(s => s && s.classList.remove('active', 'completed', 'cancelled'));
+    allConns.forEach(c => c && c.classList.remove('active', 'completed', 'cancelled'));
+
+    const bannerEl = document.getElementById('statusLiveBanner');
+    const msgEl = document.getElementById('statusLiveMessage');
+    const cancelBtn = document.getElementById('btnCancelFromStatus');
+
+    const status = (booking.status || 'pending').toLowerCase();
+    const isCancelled = status === 'cancelled';
+    const isRejected = status === 'rejected';
+    const isAccepted = status === 'accepted' || status === 'confirmed';
+    const isDriverAssigned = status === 'assigned';
+    const isReached = status === 'reached';
+    const isDone = status === 'completed' || status === 'done';
+
+    if (isCancelled) {
+        if (step1) step1.classList.add('cancelled');
+        if (bannerEl) bannerEl.className = 'status-live-banner banner-cancelled';
+        if (msgEl) msgEl.textContent = t.statusMsgCancelled;
+        if (cancelBtn) cancelBtn.style.display = 'none';
+    } else if (isRejected) {
+        if (step1) step1.classList.add('cancelled');
+        if (bannerEl) bannerEl.className = 'status-live-banner banner-rejected';
+        if (msgEl) msgEl.textContent = t.statusMsgRejected;
+        if (cancelBtn) cancelBtn.style.display = 'none';
+    } else if (isDone) {
+        allSteps.forEach(s => s && s.classList.add('completed'));
+        allConns.forEach(c => c && c.classList.add('completed'));
+        if (bannerEl) bannerEl.className = 'status-live-banner banner-done';
+        if (msgEl) msgEl.textContent = '✅ काम पूरा हो चुका है। किसान भाइयों का धन्यवाद!';
+        if (cancelBtn) cancelBtn.style.display = 'none';
+    } else if (isReached) {
+        [step1, step2, step3].forEach(s => s && s.classList.add('completed'));
+        [conn1, conn2, conn3].forEach(c => c && c.classList.add('completed'));
+        if (step4) step4.classList.add('active');
+        if (bannerEl) bannerEl.className = 'status-live-banner banner-active';
+        if (msgEl) msgEl.textContent = '📍 ट्रैक्टर खेत पर पहुँच चुका है।';
+        if (cancelBtn) cancelBtn.style.display = 'none';
+    } else if (isDriverAssigned) {
+        [step1, step2].forEach(s => s && s.classList.add('completed'));
+        [conn1, conn2].forEach(c => c && c.classList.add('completed'));
+        if (step3) step3.classList.add('active');
+        if (bannerEl) bannerEl.className = 'status-live-banner banner-active';
+        if (msgEl) msgEl.textContent = '🚜 ड्राइवर असाइन हो चुका है और खेत के लिए तैयार है।';
+        if (cancelBtn) cancelBtn.style.display = 'inline-flex';
+    } else if (isAccepted) {
+        if (step1) step1.classList.add('completed');
+        if (conn1) conn1.classList.add('completed');
+        if (step2) step2.classList.add('active');
+        if (bannerEl) bannerEl.className = 'status-live-banner banner-active';
+        if (msgEl) msgEl.textContent = t.statusMsgAccepted;
+        if (cancelBtn) cancelBtn.style.display = 'inline-flex';
+    } else {
+        // Pending / Requested (Default Initial State)
+        if (step1) step1.classList.add('active');
+        if (bannerEl) bannerEl.className = 'status-live-banner banner-pending';
+        if (msgEl) msgEl.textContent = t.statusMsgRequested;
+        if (cancelBtn) cancelBtn.style.display = 'inline-flex';
+    }
 
     modal.style.display = 'flex';
 }
@@ -1730,8 +1996,13 @@ function closeLiveTrackingModal() {
     if (modal) modal.style.display = 'none';
 }
 
-function handleCallDriver() {
-    handleCallSupport();
+function handleCancelFromStatusModal() {
+    if (!currentTrackingOrderId) return;
+    const t = translations[currentLang] || translations.hi;
+    if (!confirm(t.cancelConfirm)) return;
+
+    cancelBooking(currentTrackingOrderId);
+    openLiveTrackingModal(currentTrackingOrderId);
 }
 
 // ==========================================
@@ -1797,6 +2068,10 @@ function sendBookingViaWhatsApp() {
     const machineTitle = selectedMachine.name[currentLang] || selectedMachine.name.hi;
     const rateUnit = selectedMachine.rateUnit[currentLang] || selectedMachine.rateUnit.hi;
 
+    const dateVal = document.getElementById('bookingDate') ? document.getElementById('bookingDate').value : '';
+    const slotSelect = document.getElementById('bookingSlot');
+    const slotText = slotSelect && slotSelect.selectedOptions[0] ? slotSelect.selectedOptions[0].textContent.trim() : 'दोपहर (Day)';
+
     const discount = selectedMachine.fuelDiscount || 200;
     const appliedRate = selectedFuelOption === 'with-fuel'
         ? selectedMachine.rate
@@ -1805,17 +2080,21 @@ function sendBookingViaWhatsApp() {
     const fuelText = selectedFuelOption === 'with-fuel' ? t.fuelWithShort : t.fuelWithoutShort;
 
     const gpsLine = gpsLink ? `📍 *Khet Ka Google Maps Link:* ${gpsLink}\n` : '';
+    const dateLine = dateVal ? `📅 *Tarikh (Date):* ${dateVal}\n` : '';
+    const slotLine = slotText ? `⏰ *Samay Slot:* ${slotText}\n` : '';
 
-    const message = `🚜 *PROJECT TRACTOR - BOOKING ORDER* 🚜\n\n` +
+    const message = `🚜 *PROJECT TRACTOR - ADVANCE BOOKING* 🚜\n\n` +
         `👤 *Kisan Ka Naam:* ${farmerName}\n` +
         `📱 *Mobile Number:* ${farmerPhone}\n` +
         `📍 *Gaon / Khet Location:* ${farmerVillage}\n` +
+        dateLine +
+        slotLine +
         gpsLine +
         `🌾 *Fasal / Kaam:* ${cropName}\n` +
         `🚜 *Chuni Gayi Gaadi:* ${machineTitle}\n` +
         `⛽ *Diesel Option:* ${fuelText}\n` +
         `⏱️ *Samay / Avadhi:* ${duration} ${rateUnit}\n` +
-        `💰 *Anumanit Bill:* ₹${total.toLocaleString('en-IN')}\n\n` +
+        `💰 *Final Rate (Bina Chupa Charge):* ₹${total.toLocaleString('en-IN')}\n\n` +
         `Kripya jaldi se tractor bhejane ki pushti karein. Shukriya!`;
 
     const encoded = encodeURIComponent(message);
