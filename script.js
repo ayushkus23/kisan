@@ -2300,17 +2300,55 @@ function closeCallSupportModal() {
     if (modal) modal.style.display = 'none';
 }
 
-function submitCallbackRequest() {
+async function submitCallbackRequest() {
     const t = translations[currentLang] || translations.hi;
     const phoneInput = document.getElementById('callbackPhone');
     const phone = phoneInput ? phoneInput.value.trim() : '';
 
     if (!phone || phone.length < 10) {
-        alert(t.callbackErr);
+        alert(t.callbackErr || 'कृपया 10 अंकों का सही मोबाइल नंबर दर्ज करें।');
         return;
     }
 
-    alert(t.callbackSuccess.replace('{phone}', phone));
+    // Fetch logged in farmer profile if any
+    let farmerName = 'किसान भाई';
+    let village = 'किसान सहायता केंद्र';
+    try {
+        const profile = JSON.parse(localStorage.getItem('tractorUserProfile') || '{}');
+        if (profile.fullName) farmerName = profile.fullName;
+        if (profile.village) village = profile.village;
+    } catch (e) {}
+
+    const newReq = {
+        id: 'cb-' + Date.now(),
+        phone: phone,
+        farmer_name: farmerName,
+        village: village,
+        status: 'pending',
+        created_at: new Date().toISOString()
+    };
+
+    // 1. Save to LocalStorage with 24-hour auto-clean
+    try {
+        const existing = JSON.parse(localStorage.getItem('tractorCallbackRequests') || '[]');
+        const cutoff = Date.now() - 24 * 60 * 60 * 1000;
+        const fresh = existing.filter(r => new Date(r.created_at || r.requested_at).getTime() > cutoff);
+        fresh.unshift(newReq);
+        localStorage.setItem('tractorCallbackRequests', JSON.stringify(fresh));
+    } catch (e) {}
+
+    // 2. Save to Supabase Cloud Database & clean up >24h old requests
+    if (sbClient) {
+        try {
+            await sbClient.from('callback_requests').insert([newReq]);
+            const cutoffISO = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+            sbClient.from('callback_requests').delete().lt('created_at', cutoffISO).then();
+        } catch (err) {
+            console.warn('Supabase callback save error:', err);
+        }
+    }
+
+    alert(t.callbackSuccess ? t.callbackSuccess.replace('{phone}', phone) : `धन्यवाद! आपका कॉल बैक अनुरोध मिल गया है (${phone})। हमारी टीम 5-10 मिनट में संपर्क करेगी।`);
     if (phoneInput) phoneInput.value = '';
     closeCallSupportModal();
 }

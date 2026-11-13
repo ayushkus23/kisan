@@ -121,6 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
     applyOwnerLanguage(currentOwnerLang);
     loadOwnerBookings();
     loadOwnerFleet();
+    loadOwnerCallbacks();
 });
 
 function loadOwnerProfile() {
@@ -248,6 +249,7 @@ function refreshOwnerBookings() {
     showOwnerToast('⏳ ताजा डेटा लाया जा रहा है...', '🔄');
     loadOwnerBookings();
     loadOwnerFleet();
+    loadOwnerCallbacks();
 }
 
 // ==========================================
@@ -787,5 +789,161 @@ function showOwnerToast(msg, icon = '✅') {
     setTimeout(() => {
         toast.style.display = 'none';
     }, 3500);
+}
+
+// ==========================================
+// 12. Farmer Call Back Requests (24h Auto-Clean)
+// ==========================================
+let ownerCallbacks = [];
+
+async function loadOwnerCallbacks() {
+    const listEl = document.getElementById('ownerCallbackList');
+    const badgeEl = document.getElementById('badgePendingCalls');
+    if (!listEl) return;
+
+    const cutoff = Date.now() - 24 * 60 * 60 * 1000;
+    const cutoffISO = new Date(cutoff).toISOString();
+
+    let callbacks = [];
+
+    // 1. Fetch from Supabase
+    if (sbClient) {
+        try {
+            // Auto clean records older than 24h
+            sbClient.from('callback_requests').delete().lt('created_at', cutoffISO).then();
+
+            const { data, error } = await sbClient
+                .from('callback_requests')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (data && !error) {
+                callbacks = data;
+            }
+        } catch (e) {
+            console.warn('Supabase fetch callbacks error:', e);
+        }
+    }
+
+    // 2. Fallback / Merge with LocalStorage
+    try {
+        const local = JSON.parse(localStorage.getItem('tractorCallbackRequests') || '[]');
+        // Local clean older than 24h
+        const freshLocal = local.filter(r => new Date(r.created_at || r.requested_at).getTime() > cutoff);
+        localStorage.setItem('tractorCallbackRequests', JSON.stringify(freshLocal));
+
+        // Merge any not in Supabase list
+        freshLocal.forEach(locItem => {
+            if (!callbacks.some(c => c.id === locItem.id || (c.phone === locItem.phone && Math.abs(new Date(c.created_at).getTime() - new Date(locItem.created_at).getTime()) < 5000))) {
+                callbacks.push(locItem);
+            }
+        });
+    } catch (e) {}
+
+    // Sort newest first
+    callbacks.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+    ownerCallbacks = callbacks;
+
+    // Update pending badge
+    const pendingCount = callbacks.filter(c => c.status === 'pending').length;
+    if (badgeEl) {
+        badgeEl.textContent = `⏳ ${pendingCount} कॉल बाकी`;
+        badgeEl.style.display = callbacks.length > 0 ? 'inline-block' : 'none';
+    }
+
+    renderOwnerCallbacks();
+}
+
+function renderOwnerCallbacks() {
+    const listEl = document.getElementById('ownerCallbackList');
+    if (!listEl) return;
+
+    if (!ownerCallbacks || ownerCallbacks.length === 0) {
+        listEl.innerHTML = `
+            <div class="owner-empty-state" style="padding: 24px 16px;">
+                <div class="empty-icon">📞</div>
+                <h4>पिछले 24 घंटे में कोई कॉल अनुरोध नहीं</h4>
+                <p>जब भी कोई किसान सहायता केंद्र से कॉल बैक मांगेगा, उसका नंबर यहाँ तुरंत दिखेगा।</p>
+            </div>
+        `;
+        return;
+    }
+
+    listEl.innerHTML = ownerCallbacks.map(req => {
+        const isCalled = req.status === 'called';
+        const phone = req.phone || '';
+        const name = req.farmer_name || 'किसान भाई';
+        const village = req.village || 'किसान सहायता केंद्र';
+        const timeAgo = formatTimeAgo(req.created_at);
+        const waMsg = encodeURIComponent(`नमस्ते ${name}! आपने प्रोजेक्ट ट्रैक्टर किसान सहायता केंद्र पर कॉल बैक का अनुरोध किया था। बताइए आपकी क्या सहायता कर सकते हैं?`);
+
+        return `
+            <div class="callback-card-item ${isCalled ? 'status-called' : 'status-pending'}">
+                <div class="callback-info-main">
+                    <div class="callback-farmer-row">
+                        <span>👤 ${name}</span>
+                        <span class="callback-time-badge">⏱️ ${timeAgo}</span>
+                        ${isCalled ? '<span style="color:#10b981;font-size:12px;font-weight:700;">✅ कॉल हो चुकी</span>' : '<span style="color:#f97316;font-size:12px;font-weight:700;">⏳ कॉल बाकी</span>'}
+                    </div>
+                    <div class="callback-phone-row">
+                        📱 +91 ${phone}
+                    </div>
+                    <div class="callback-location-row">
+                        📍 ${village}
+                    </div>
+                </div>
+
+                <div class="callback-actions-row">
+                    <a href="tel:${phone}" class="btn-call-direct" title="सीधे फोन से कॉल करें">
+                        📞 अभी कॉल करें
+                    </a>
+                    <a href="https://wa.me/91${phone}?text=${waMsg}" target="_blank" class="btn-wa-direct" title="WhatsApp पर बात करें">
+                        💬 WhatsApp
+                    </a>
+                    ${!isCalled ? `
+                        <button type="button" class="btn-mark-called" onclick="markCallbackDone('${req.id}')" title="कॉल पूरी हुई मार्क करें">
+                            ✅ बात हो गई
+                        </button>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+async function markCallbackDone(id) {
+    const target = ownerCallbacks.find(c => c.id === id);
+    if (!target) return;
+
+    target.status = 'called';
+
+    // Update in LocalStorage
+    try {
+        const local = JSON.parse(localStorage.getItem('tractorCallbackRequests') || '[]');
+        const locTarget = local.find(c => c.id === id);
+        if (locTarget) locTarget.status = 'called';
+        localStorage.setItem('tractorCallbackRequests', JSON.stringify(local));
+    } catch (e) {}
+
+    // Update in Supabase
+    if (sbClient) {
+        try {
+            await sbClient.from('callback_requests').update({ status: 'called' }).eq('id', id);
+        } catch (e) {}
+    }
+
+    renderOwnerCallbacks();
+    showOwnerToast('✅ किसान से बात पूरी हुई दर्ज किया गया!', '📞');
+}
+
+function formatTimeAgo(isoString) {
+    if (!isoString) return 'अभी';
+    const diffMs = Date.now() - new Date(isoString).getTime();
+    const diffMins = Math.floor(diffMs / (1000 * 60));
+    if (diffMins < 1) return 'अभी-अभी';
+    if (diffMins < 60) return `${diffMins} मिनट पहले`;
+    const diffHours = Math.floor(diffMins / 60);
+    if (diffHours < 24) return `${diffHours} घंटे पहले`;
+    return 'आज';
 }
 

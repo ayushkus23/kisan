@@ -4380,3 +4380,159 @@ body {
         font-size: 12px;
     }
 }
+
+/* ==========================================
+   Callback Requests Cards (Owner Portal)
+   ========================================== */
+.owner-callbacks-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.callback-card-item {
+    background: #ffffff;
+    border: 1.5px solid #fed7aa;
+    border-left: 5px solid #f97316;
+    border-radius: 12px;
+    padding: 16px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.callback-card-item:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+}
+
+.callback-card-item.status-called {
+    border-color: #d1fae5;
+    border-left-color: #10b981;
+    background: #fbfdfc;
+    opacity: 0.85;
+}
+
+.callback-info-main {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.callback-farmer-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 16px;
+    font-weight: 700;
+    color: #1f2937;
+    flex-wrap: wrap;
+}
+
+.callback-time-badge {
+    font-size: 12px;
+    font-weight: 600;
+    color: #6b7280;
+    background: #f3f4f6;
+    padding: 2px 8px;
+    border-radius: 12px;
+}
+
+.callback-phone-row {
+    font-size: 15px;
+    font-weight: 700;
+    color: #15803d;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.callback-location-row {
+    font-size: 13px;
+    color: #4b5563;
+}
+
+.callback-actions-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.btn-call-direct {
+    background: #15803d;
+    color: #ffffff !important;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 8px 14px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 40px;
+    transition: background 0.2s;
+}
+
+.btn-call-direct:hover {
+    background: #166534;
+}
+
+.btn-wa-direct {
+    background: #25d366;
+    color: #ffffff !important;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 8px 14px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 40px;
+    transition: background 0.2s;
+}
+
+.btn-wa-direct:hover {
+    background: #128c7e;
+}
+
+.btn-mark-called {
+    background: #f3f4f6;
+    color: #374151;
+    border: 1px solid #d1d5db;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    min-height: 40px;
+    transition: background 0.2s;
+}
+
+.btn-mark-called:hover {
+    background: #e5e7eb;
+}
+
+@media (max-width: 600px) {
+    .callback-card-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .callback-actions-row {
+        width: 100%;
+    }
+
+    .btn-call-direct,
+    .btn-wa-direct,
+    .btn-mark-called {
+        flex: 1;
+        justify-content: center;
+        text-align: center;
+    }
+}
