@@ -699,9 +699,40 @@ body {
     font-weight: 600;
 }
 
+.card-footer-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    width: 100%;
+}
+
+.btn-card-speak {
+    min-height: 48px;
+    padding: 0 14px;
+    background: #eef7eb;
+    border: 1.5px solid #2e7d32;
+    color: #1b5e20;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    flex-shrink: 0;
+    transition: all 0.2s;
+}
+
+.btn-card-speak:hover,
+.btn-card-speak:active {
+    background: #2e7d32;
+    color: #ffffff;
+}
+
 /* One Large Book Button (Min 48px Tap Target) */
 .btn-book-card {
-    width: 100%;
+    flex: 1;
     min-height: 48px;
     background: #1b4d2e;
     color: #ffffff;
@@ -2708,11 +2739,82 @@ body {
 }
 
 .breakdown-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     font-size: 15px;
     color: #1f5130;
     margin-bottom: 12px;
     padding-bottom: 8px;
     border-bottom: 1px dashed #d5e5cf;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.btn-voice-speak {
+    background: #eef7eb;
+    border: 1.5px solid #2e7d32;
+    color: #1b5e20;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.2s;
+    min-height: 36px;
+}
+
+.btn-voice-speak:hover,
+.btn-voice-speak:active {
+    background: #2e7d32;
+    color: #ffffff;
+}
+
+.btn-receipt-voice {
+    margin: 8px auto 14px;
+    display: inline-flex;
+    padding: 8px 16px;
+    font-size: 14px;
+    min-height: 44px;
+}
+
+.btn-voice-mini {
+    background: rgba(255, 255, 255, 0.95);
+    border: 1.5px solid #2e7d32;
+    color: #1f5130;
+    padding: 4px 10px;
+    border-radius: 16px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 6px;
+    transition: all 0.2s;
+}
+
+.btn-voice-mini:hover {
+    background: #2e7d32;
+    color: #ffffff;
+}
+
+/* Audio Playing Glowing Animation */
+.btn-card-speak.audio-playing,
+.btn-voice-speak.audio-playing,
+.btn-voice-mini.audio-playing {
+    background: #1b4d2e !important;
+    color: #ffd966 !important;
+    border-color: #ffd966 !important;
+    animation: speakerPulse 1s infinite alternate ease-in-out;
+}
+
+@keyframes speakerPulse {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(27, 77, 46, 0.4); }
+    100% { transform: scale(1.04); box-shadow: 0 0 0 6px rgba(27, 77, 46, 0); }
 }
 
 .breakdown-row {
@@ -3788,6 +3890,58 @@ body {
     background: #059669;
 }
 
+.btn-action-dispatch {
+    background: #d97706;
+    color: #ffffff;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(217, 119, 6, 0.3);
+    transition: background 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-action-dispatch:hover {
+    background: #b45309;
+}
+
+.btn-action-complete {
+    background: #059669;
+    color: #ffffff;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(5, 150, 105, 0.3);
+    transition: background 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-action-complete:hover {
+    background: #047857;
+}
+
+.order-status-pill.status-assigned {
+    background: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fde68a;
+}
+
+.order-status-pill.status-completed {
+    background: #d1fae5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+}
+
 .btn-action-reject {
     background: #fef2f2;
     color: #dc2626;
@@ -4197,7 +4351,9 @@ body {
 
     .btn-action-route,
     .btn-action-accept,
-    .btn-action-reject {
+    .btn-action-reject,
+    .btn-action-dispatch,
+    .btn-action-complete {
         flex: 1;
         text-align: center;
     }

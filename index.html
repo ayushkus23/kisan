@@ -428,6 +428,9 @@
                 <div class="price-breakdown-card">
                     <div class="breakdown-header">
                         <strong data-i18n="breakdownTitle">📊 किराए का पूरा विवरण (Final Rate Breakdown)</strong>
+                        <button type="button" class="btn-voice-speak" onclick="speakFinalRate()" title="बोल कर सुनें">
+                            🔊 <span data-i18n="btnSpeakEstimate">बोल कर सुनें</span>
+                        </button>
                     </div>
                     <div class="breakdown-row">
                         <span data-i18n="breakdownBaseLabel">मूल किराया (Base Rate):</span>
@@ -471,6 +474,9 @@
             <h2 data-i18n="receiptTitle">बुकिंग पक्की हो गई!</h2>
             <p class="receipt-sub" data-i18n="receiptSub">हमारी टीम आपके गांव के नजदीकी ड्राइवर से संपर्क करके जल्द
                 पहुंचेगी।</p>
+            <button type="button" class="btn-voice-speak btn-receipt-voice" onclick="speakReceipt()" title="रसीद बोल कर सुनें">
+                🔊 <span data-i18n="btnSpeakReceipt">रसीद बोल कर सुनें</span>
+            </button>
 
             <div class="receipt-details" id="receiptDetailsContent">
                 <!-- Injected via script.js -->
@@ -768,6 +774,9 @@
             <!-- Real Status Message Banner -->
             <div class="status-live-banner" id="statusLiveBanner">
                 <p id="statusLiveMessage">📢 स्थिति: अनुरोध भेज दिया गया है। टीम व ट्रैक्टर मालिक जल्द आपको कॉल करेंगे।</p>
+                <button type="button" class="btn-voice-mini" onclick="speakBookingStatus()" title="स्टेटस बोल कर सुनें">
+                    🔊 <span data-i18n="btnSpeakStatus">सुनें</span>
+                </button>
             </div>
 
             <!-- Booking Order Summary Card -->

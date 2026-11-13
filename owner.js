@@ -325,7 +325,9 @@ function renderOwnerBookings() {
 
     container.innerHTML = filtered.map(b => {
         const isPending = b.status === 'pending';
-        const isAccepted = b.status === 'accepted' || b.status === 'confirmed';
+        const isAccepted = b.status === 'accepted';
+        const isAssigned = b.status === 'assigned';
+        const isCompleted = b.status === 'completed' || b.status === 'done';
         const isRejected = b.status === 'rejected';
         const isCancelled = b.status === 'cancelled';
 
@@ -334,7 +336,13 @@ function renderOwnerBookings() {
 
         if (isAccepted) {
             statusClass = 'status-accepted';
-            statusText = t.statusAccepted;
+            statusText = '🤝 स्वीकृत (Accepted)';
+        } else if (isAssigned) {
+            statusClass = 'status-assigned';
+            statusText = '🚜 ड्राइवर रवाना (On Way)';
+        } else if (isCompleted) {
+            statusClass = 'status-completed';
+            statusText = '✅ काम पूरा हुआ (Done)';
         } else if (isRejected) {
             statusClass = 'status-rejected';
             statusText = t.statusRejected;
@@ -409,7 +417,22 @@ function renderOwnerBookings() {
                         ` : ''}
 
                         ${isAccepted ? `
-                            <span class="badge-action-done">✅ स्वीकृत ऑर्डर</span>
+                            <button type="button" class="btn-action-dispatch" onclick="dispatchDriver('${b.orderId}')" title="ड्राइवर को खेत की ओर रवाना करें">
+                                🚜 ड्राइवर रवाना करें
+                            </button>
+                            <button type="button" class="btn-action-complete" onclick="completeBooking('${b.orderId}')" title="काम पूरा दर्ज करें">
+                                ✅ काम पूरा
+                            </button>
+                        ` : ''}
+
+                        ${isAssigned ? `
+                            <button type="button" class="btn-action-complete" onclick="completeBooking('${b.orderId}')" title="काम पूरा दर्ज करें">
+                                ✅ काम पूरा हुआ
+                            </button>
+                        ` : ''}
+
+                        ${isCompleted ? `
+                            <span class="badge-action-done" style="background:#e8f5e9;color:#2e7d32;">🏁 काम पूरा व पेमेंट प्राप्त</span>
                         ` : ''}
 
                         ${isRejected ? `
@@ -497,6 +520,50 @@ async function rejectBooking(orderId) {
             }
         } catch (e) {}
     }
+}
+
+async function updateOwnerBookingStatus(orderId, newStatus, toastMsg, toastIcon) {
+    const target = ownerBookings.find(b => b.orderId === orderId);
+    if (!target) return;
+
+    target.status = newStatus;
+    updateKpiMetrics();
+    renderOwnerBookings();
+    if (toastMsg) showOwnerToast(toastMsg, toastIcon || '✅');
+
+    // Sync to Supabase
+    if (sbClient) {
+        try {
+            await sbClient
+                .from('bookings')
+                .update({ status: newStatus })
+                .eq('id', orderId);
+        } catch (e) {
+            console.warn('Supabase status error:', e);
+        }
+    }
+
+    // Sync to localStorage
+    const local = localStorage.getItem('tractorBookings');
+    if (local) {
+        try {
+            const arr = JSON.parse(local);
+            const found = arr.find(b => b.orderId === orderId);
+            if (found) {
+                found.status = newStatus;
+                localStorage.setItem('tractorBookings', JSON.stringify(arr));
+            }
+        } catch (e) {}
+    }
+}
+
+async function dispatchDriver(orderId) {
+    await updateOwnerBookingStatus(orderId, 'assigned', '🚜 ड्राइवर खेत के लिए रवाना हो गया!', '🚜');
+}
+
+async function completeBooking(orderId) {
+    if (!confirm('क्या खेत का काम पूरा हो चुका है और किसान से किराया प्राप्त हो गया है?')) return;
+    await updateOwnerBookingStatus(orderId, 'completed', '✅ काम पूरा हुआ व पेमेंट प्राप्त!', '🏁');
 }
 
 // ==========================================

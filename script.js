@@ -364,6 +364,7 @@ const translations = {
         breakdownTravelFree: "₹0 (बिल्कुल मुफ्त)",
         breakdownTotalLabel: "कुल अंतिम राशि (Total Amount):",
         noHiddenChargesNote: "✅ यही फाइनल रेट है, बाद में कोई छुपा चार्ज नहीं",
+        btnSpeakEstimate: "बोल कर सुनें",
         btnConfirmBooking: "बुकिंग पक्की करें",
         btnSendWhatsApp: "व्हाट्सएप पर बुकिंग भेजें",
 
@@ -372,6 +373,8 @@ const translations = {
         receiptSub: "हमारी टीम आपके गांव के नजदीकी ड्राइवर से संपर्क करके जल्द पहुंचेगी।",
         receiptCloseBtn: "ठीक है (Close)",
         receiptTrackStatusBtn: "बुकिंग स्टेटस देखें",
+        btnSpeakReceipt: "रसीद बोल कर सुनें",
+        btnSpeakStatus: "सुनें",
         receiptOrderId: "ऑर्डर नंबर:",
         receiptBookingDate: "चुनी गई तारीख:",
         receiptBookingSlot: "समय स्लॉट:",
@@ -670,6 +673,7 @@ const translations = {
         breakdownTravelFree: "₹0 (Free of cost)",
         breakdownTotalLabel: "Total Amount:",
         noHiddenChargesNote: "✅ This is the final rate, no hidden charges later",
+        btnSpeakEstimate: "Listen Audio",
         btnConfirmBooking: "Confirm Booking",
         btnSendWhatsApp: "Send Booking via WhatsApp",
 
@@ -678,6 +682,8 @@ const translations = {
         receiptSub: "Our team is contacting the nearest operator in your village and will arrive shortly.",
         receiptCloseBtn: "Close Receipt",
         receiptTrackStatusBtn: "View Booking Status",
+        btnSpeakReceipt: "Listen Receipt",
+        btnSpeakStatus: "Listen",
         receiptOrderId: "Order ID:",
         receiptBookingDate: "Booking Date:",
         receiptBookingSlot: "Time Slot:",
@@ -1045,9 +1051,14 @@ function renderFleetCards(category = 'all') {
                             <span class="price-title">${t.cardPriceTitle}</span>
                             <span class="price-val">₹${machine.rate} <span class="price-unit">/ ${rateUnit}</span></span>
                         </div>
-                        <button type="button" class="btn-book-card" onclick="openBookingModal('${machine.id}')">
-                            ${t.cardBookBtn}
-                        </button>
+                        <div class="card-footer-actions">
+                            <button type="button" class="btn-card-speak" onclick="speakMachineCard('${machine.id}', event)" title="${t.btnSpeakEstimate || 'बोल कर सुनें'}">
+                                🔊 <span class="speak-btn-text">${t.btnSpeakStatus || 'सुनें'}</span>
+                            </button>
+                            <button type="button" class="btn-book-card" onclick="openBookingModal('${machine.id}')">
+                                ${t.cardBookBtn}
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1875,9 +1886,59 @@ function viewPastReceipt(orderId) {
 // 9. Real Booking Status Modal (No Fake Radar / Driver)
 // ==========================================
 let currentTrackingOrderId = null;
+let liveTrackingPollInterval = null;
 
-function openLiveTrackingModal(orderId) {
-    closeMyBookingsModal();
+function startLiveStatusPolling(orderId) {
+    stopLiveStatusPolling();
+    liveTrackingPollInterval = setInterval(async () => {
+        if (!currentTrackingOrderId) return;
+
+        // 1. Check if changed in localStorage
+        const localBookings = getBookings();
+        const localTarget = localBookings.find(b => b.orderId === currentTrackingOrderId);
+
+        // 2. If Supabase client is available, poll cloud database
+        if (sbClient) {
+            try {
+                const { data, error } = await sbClient
+                    .from('bookings')
+                    .select('status')
+                    .eq('id', currentTrackingOrderId)
+                    .single();
+
+                if (!error && data && data.status) {
+                    if (localTarget && localTarget.status !== data.status) {
+                        localTarget.status = data.status;
+                        localStorage.setItem('tractorBookings', JSON.stringify(localBookings));
+                        updateBookingBadges();
+                        renderMyBookings();
+                        openLiveTrackingModal(currentTrackingOrderId, true);
+                    }
+                }
+            } catch (e) {}
+        }
+    }, 3000);
+}
+
+function stopLiveStatusPolling() {
+    if (liveTrackingPollInterval) {
+        clearInterval(liveTrackingPollInterval);
+        liveTrackingPollInterval = null;
+    }
+}
+
+// Window storage listener for instant cross-tab sync between Farmer and Owner dashboard
+window.addEventListener('storage', (e) => {
+    if (e.key === 'tractorBookings' && currentTrackingOrderId) {
+        const modal = document.getElementById('liveTrackingModal');
+        if (modal && modal.style.display !== 'none') {
+            openLiveTrackingModal(currentTrackingOrderId, true);
+        }
+    }
+});
+
+function openLiveTrackingModal(orderId, isAutoUpdate) {
+    if (!isAutoUpdate) closeMyBookingsModal();
     const bookings = getBookings();
     const booking = (orderId ? bookings.find(b => b.orderId === orderId) : null) || bookings[0];
     const modal = document.getElementById('liveTrackingModal');
@@ -1886,11 +1947,12 @@ function openLiveTrackingModal(orderId) {
     const t = translations[currentLang] || translations.hi;
 
     if (!booking) {
-        alert(t.noBookingsTitle || 'कोई सक्रिय बुकिंग नहीं मिली');
+        if (!isAutoUpdate) alert(t.noBookingsTitle || 'कोई सक्रिय बुकिंग नहीं मिली');
         return;
     }
 
     currentTrackingOrderId = booking.orderId;
+    startLiveStatusPolling(booking.orderId);
 
     // Set Header Subtitle
     const subtitleEl = document.getElementById('trackingOrderSubtitle');
@@ -1957,7 +2019,7 @@ function openLiveTrackingModal(orderId) {
         allSteps.forEach(s => s && s.classList.add('completed'));
         allConns.forEach(c => c && c.classList.add('completed'));
         if (bannerEl) bannerEl.className = 'status-live-banner banner-done';
-        if (msgEl) msgEl.textContent = '✅ काम पूरा हो चुका है। किसान भाइयों का धन्यवाद!';
+        if (msgEl) msgEl.textContent = '✅ काम पूरा हो चुका है व पेमेंट प्राप्त। किसान भाइयों का धन्यवाद!';
         if (cancelBtn) cancelBtn.style.display = 'none';
     } else if (isReached) {
         [step1, step2, step3].forEach(s => s && s.classList.add('completed'));
@@ -1971,7 +2033,7 @@ function openLiveTrackingModal(orderId) {
         [conn1, conn2].forEach(c => c && c.classList.add('completed'));
         if (step3) step3.classList.add('active');
         if (bannerEl) bannerEl.className = 'status-live-banner banner-active';
-        if (msgEl) msgEl.textContent = '🚜 ड्राइवर असाइन हो चुका है और खेत के लिए तैयार है।';
+        if (msgEl) msgEl.textContent = '🚜 ट्रैक्टर मालिक ने ड्राइवर को खेत के लिए रवाना कर दिया है!';
         if (cancelBtn) cancelBtn.style.display = 'inline-flex';
     } else if (isAccepted) {
         if (step1) step1.classList.add('completed');
@@ -1992,6 +2054,7 @@ function openLiveTrackingModal(orderId) {
 }
 
 function closeLiveTrackingModal() {
+    stopLiveStatusPolling();
     const modal = document.getElementById('liveTrackingModal');
     if (modal) modal.style.display = 'none';
 }
@@ -2003,6 +2066,203 @@ function handleCancelFromStatusModal() {
 
     cancelBooking(currentTrackingOrderId);
     openLiveTrackingModal(currentTrackingOrderId);
+}
+
+// ==========================================
+// Voice Speech Assistant (High-Fidelity Studio Hindi Audio)
+// ==========================================
+let currentPlayingAudio = null;
+let availableVoices = [];
+
+// Local Studio MP3 files for instant, clear, offline-ready native Hindi speech
+const MACHINE_AUDIO_MAP = {
+    'dhan-4wd': 'audio/card-dhan-4wd.mp3',
+    'gehu-super-seeder': 'audio/card-super-seeder.mp3',
+    'gehu-laser-leveler': 'audio/card-laser-leveler.mp3',
+    'ganna-heavy-hauler': 'audio/card-heavy-duty.mp3',
+    'straw-reaper': 'audio/card-straw-reaper.mp3',
+    'sabzi-mini-tractor': 'audio/card-chhota-champion.mp3',
+    'dhulai-trolley-tractor': 'audio/card-trolley.mp3',
+    'bagwani-sprayer-mini': 'audio/card-bagwani-sprayer.mp3',
+    'combine-harvester': 'audio/card-combine-harvester.mp3'
+};
+
+const STATUS_AUDIO_MAP = {
+    'pending': 'audio/status-requested.mp3',
+    'requested': 'audio/status-requested.mp3',
+    'accepted': 'audio/status-accepted.mp3',
+    'assigned': 'audio/status-on-way.mp3',
+    'on_way': 'audio/status-on-way.mp3',
+    'in_transit': 'audio/status-on-way.mp3',
+    'completed': 'audio/status-completed.mp3',
+    'done': 'audio/status-completed.mp3'
+};
+
+function initVoiceAssistant() {
+    if (!('speechSynthesis' in window)) return;
+    const updateVoices = () => {
+        availableVoices = window.speechSynthesis.getVoices() || [];
+    };
+    updateVoices();
+    if (window.speechSynthesis.onvoiceschanged !== undefined) {
+        window.speechSynthesis.onvoiceschanged = updateVoices;
+    }
+}
+initVoiceAssistant();
+
+// Converts numbers to clean spoken Hindi words (prevents robotic "one two zero zero")
+function numberToHindiSpeech(numStr) {
+    const n = parseInt(String(numStr).replace(/[^\d]/g, ''), 10);
+    if (isNaN(n)) return numStr;
+    const lookup = {
+        200: 'दो सौ', 300: 'तीन सौ', 350: 'साढ़े तीन सौ', 400: 'चार सौ',
+        450: 'साढ़े चार सौ', 500: 'पांच सौ', 550: 'साढ़े पांच सौ', 600: 'छह सौ',
+        650: 'साढ़े छह सौ', 700: 'सात सौ', 800: 'आठ सौ', 900: 'नौ सौ',
+        1000: 'एक हजार', 1100: 'ग्यारह सौ', 1200: 'बारह सौ', 1300: 'तेरह सौ',
+        1400: 'चौदह सौ', 1500: 'पंद्रह सौ', 1600: 'सोलह सौ', 1700: 'सत्रह सौ',
+        1800: 'अठारह सौ', 2000: 'दो हजार', 2400: 'चौबीस सौ', 2500: 'पच्चीस सौ'
+    };
+    return lookup[n] || `${n}`;
+}
+
+function stopAnySpeech() {
+    if (currentPlayingAudio) {
+        try {
+            currentPlayingAudio.pause();
+            currentPlayingAudio.currentTime = 0;
+        } catch (e) {}
+        currentPlayingAudio = null;
+    }
+    if ('speechSynthesis' in window) {
+        try { window.speechSynthesis.cancel(); } catch (e) {}
+    }
+    document.querySelectorAll('.btn-card-speak, .btn-voice-speak, .btn-receipt-voice, .btn-voice-mini').forEach(b => b.classList.remove('audio-playing'));
+}
+
+function playLocalAudioFile(audioPath, triggerBtn, fallbackHiText, fallbackEnText) {
+    // If clicking the same button while playing, pause/stop it
+    if (currentPlayingAudio && currentPlayingAudio._audioSrc === audioPath && !currentPlayingAudio.paused) {
+        stopAnySpeech();
+        return;
+    }
+
+    stopAnySpeech();
+
+    if (triggerBtn) {
+        triggerBtn.classList.add('audio-playing');
+    }
+
+    const audio = new Audio(audioPath);
+    audio._audioSrc = audioPath;
+    currentPlayingAudio = audio;
+
+    audio.onended = () => {
+        if (triggerBtn) triggerBtn.classList.remove('audio-playing');
+        document.querySelectorAll('.btn-card-speak, .btn-voice-speak, .btn-receipt-voice, .btn-voice-mini').forEach(b => b.classList.remove('audio-playing'));
+        currentPlayingAudio = null;
+    };
+
+    audio.onerror = () => {
+        if (triggerBtn) triggerBtn.classList.remove('audio-playing');
+        currentPlayingAudio = null;
+        if (fallbackHiText) {
+            fallbackBrowserTTS(currentLang === 'hi' ? fallbackHiText : (fallbackEnText || fallbackHiText), currentLang === 'hi');
+        }
+    };
+
+    const playPromise = audio.play();
+    if (playPromise !== undefined) {
+        playPromise.catch(() => {
+            if (triggerBtn) triggerBtn.classList.remove('audio-playing');
+            currentPlayingAudio = null;
+            if (fallbackHiText) {
+                fallbackBrowserTTS(currentLang === 'hi' ? fallbackHiText : (fallbackEnText || fallbackHiText), currentLang === 'hi');
+            }
+        });
+    }
+}
+
+function fallbackBrowserTTS(text, isHindi) {
+    if (!('speechSynthesis' in window)) return;
+    if (!availableVoices.length) {
+        availableVoices = window.speechSynthesis.getVoices() || [];
+    }
+
+    const hindiVoice = availableVoices.find(v => 
+        (v.lang && (v.lang === 'hi-IN' || v.lang === 'hi_IN' || v.lang.toLowerCase().startsWith('hi'))) ||
+        (v.name && (v.name.includes('Hindi') || v.name.includes('हिन्दी') || v.name.includes('Kalpana') || v.name.includes('Hemant')))
+    );
+
+    const indianVoice = availableVoices.find(v => 
+        (v.lang && (v.lang === 'en-IN' || v.lang === 'en_IN')) ||
+        (v.name && (v.name.includes('India') || v.name.includes('Indian') || v.name.includes('Ravi') || v.name.includes('Heera')))
+    );
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    if (isHindi && hindiVoice) {
+        utterance.voice = hindiVoice;
+        utterance.lang = 'hi-IN';
+    } else if (indianVoice) {
+        utterance.voice = indianVoice;
+        utterance.lang = 'en-IN';
+    } else {
+        utterance.lang = isHindi ? 'hi-IN' : 'en-IN';
+    }
+
+    utterance.rate = 0.85;
+    utterance.pitch = 1.0;
+    window.speechSynthesis.speak(utterance);
+}
+
+function speakMachineCard(machineId, event) {
+    if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+    }
+    const btn = event && event.currentTarget ? event.currentTarget : (event && event.target ? event.target.closest('.btn-card-speak') : null);
+    const audioPath = MACHINE_AUDIO_MAP[machineId] || 'audio/card-dhan-4wd.mp3';
+
+    const machine = fleetData.find(m => m.id === machineId);
+    let fallbackHi = 'ट्रैक्टर बुकिंग सेवा';
+    let fallbackEn = 'Tractor rental service';
+
+    if (machine) {
+        const rateHindiWord = numberToHindiSpeech(machine.rate);
+        const rateUnit = (machine.rateUnit && machine.rateUnit.hi) || 'घंटा';
+        const work = (machine.suitableWork && machine.suitableWork.hi) || (machine.subtitle && machine.subtitle.hi) || 'खेत की जुताई';
+        const tool = (machine.tool && machine.tool.hi) || '';
+        const toolPhrase = tool ? ` ${tool} सहित।` : '';
+        fallbackHi = `${work} के लिए।${toolPhrase} किराया ${rateHindiWord} रुपये प्रति ${rateUnit}।`;
+        fallbackEn = `${(machine.suitableWork && machine.suitableWork.en) || 'Farm work'}. Rate ₹${machine.rate} per ${(machine.rateUnit && machine.rateUnit.en) || 'hour'}.`;
+    }
+
+    playLocalAudioFile(audioPath, btn, fallbackHi, fallbackEn);
+}
+
+function speakFinalRate() {
+    const btn = document.querySelector('.btn-voice-speak');
+    const audioPath = 'audio/final-rate-guarantee.mp3';
+    playLocalAudioFile(audioPath, btn, 'ट्रैक्टर बुकिंग फाइनल रेट गारंटी। बाद में कोई छुपा चार्ज नहीं।', 'Final rate guarantee. No hidden charges.');
+}
+
+function speakReceipt() {
+    const btn = document.querySelector('.btn-receipt-voice');
+    const audioPath = 'audio/booking-confirmed.mp3';
+    playLocalAudioFile(audioPath, btn, 'बधाई हो किसान भाई! आपकी ट्रैक्टर बुकिंग पक्की हो गई है। हमारी टीम जल्द आपके खेत पर पहुंचेगी।', 'Congratulations! Tractor booking confirmed. Team will arrive shortly.');
+}
+
+function speakBookingStatus() {
+    const btn = document.querySelector('.btn-voice-mini');
+    const bookings = getBookings();
+    const booking = (currentTrackingOrderId ? bookings.find(b => b.orderId === currentTrackingOrderId) : null) || bookings[0];
+    const st = booking && booking.status ? booking.status.toLowerCase() : 'requested';
+    const audioPath = STATUS_AUDIO_MAP[st] || 'audio/status-requested.mp3';
+
+    const msgEl = document.getElementById('statusLiveMessage');
+    const msg = msgEl ? msgEl.textContent : '';
+    const cleanMsg = msg.replace(/^[^\w\s\u0900-\u097F]+/, '').trim();
+
+    playLocalAudioFile(audioPath, btn, `बुकिंग स्थिति: ${cleanMsg}`, `Booking status: ${cleanMsg}`);
 }
 
 // ==========================================
