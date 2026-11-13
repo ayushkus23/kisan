@@ -2661,7 +2661,7 @@ async function handleRegister(event) {
         created_at: new Date().toISOString()
     };
 
-    // 2. Insert into Supabase Cloud
+    // 2. Insert into Supabase Cloud Table & Supabase Authentication
     if (sbClient) {
         try {
             const { error: insertError } = await sbClient
@@ -2670,7 +2670,25 @@ async function handleRegister(event) {
             if (insertError) {
                 console.warn('Supabase insert warning:', insertError.message);
             } else {
-                console.log('✅ User registered in Supabase cloud!');
+                console.log('✅ User registered in Supabase users_profile table!');
+            }
+
+            // Also register in Supabase Auth so user appears in Supabase Authentication Dashboard
+            if (sbClient.auth) {
+                const syntheticEmail = `${phone}@kisan.app`;
+                await sbClient.auth.signUp({
+                    email: syntheticEmail,
+                    password: password,
+                    options: {
+                        data: {
+                            full_name: fullName,
+                            phone: phone,
+                            village: village,
+                            role: role
+                        }
+                    }
+                });
+                console.log('✅ User registered in Supabase Authentication Users dashboard!');
             }
         } catch (e) {
             console.warn('Supabase insert exception:', e);
