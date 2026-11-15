@@ -1,0 +1,354 @@
+-- ====================================================================
+-- PROJECT TRACTOR - COMPLETE SUPABASE DATABASE SCHEMA (PHASE 1 + PHASE 2)
+-- Copy and run this ENTIRE script in Supabase Dashboard -> SQL Editor -> Run
+-- ====================================================================
+
+-- 1. Enable UUID Extension
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- --------------------------------------------------------------------
+-- Clean Reset: Drop old conflicting prototype tables if they exist
+-- --------------------------------------------------------------------
+DROP TABLE IF EXISTS public.bookings CASCADE;
+DROP TABLE IF EXISTS public.vehicles CASCADE;
+DROP TABLE IF EXISTS public.owners CASCADE;
+DROP TABLE IF EXISTS public.admins CASCADE;
+DROP SEQUENCE IF EXISTS public.booking_code_seq CASCADE;
+
+-- --------------------------------------------------------------------
+-- 2. TABLE: owners
+-- --------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS public.owners (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name TEXT NOT NULL,
+    mobile TEXT UNIQUE NOT NULL,
+    pin_hash TEXT,
+    dl_number TEXT,
+    village_district TEXT NOT NULL,
+    approved BOOLEAN DEFAULT false,
+    created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- --------------------------------------------------------------------
+-- 3. TABLE: vehicles
+-- --------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS public.vehicles (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    owner_id UUID REFERENCES public.owners(id) ON DELETE CASCADE,
+    brand_model TEXT NOT NULL,
+    drive_type TEXT DEFAULT '2WD' CHECK (drive_type IN ('2WD', '4WD', '2WD / 4WD')),
+    rc_number TEXT,
+    rate_per_hour NUMERIC NOT NULL,
+    rate_with_diesel NUMERIC,
+    rate_without_diesel NUMERIC,
+    rate_unit TEXT DEFAULT 'घंटा',
+    implements TEXT[] DEFAULT '{}',
+    village TEXT NOT NULL,
+    verified BOOLEAN DEFAULT false,
+    active BOOLEAN DEFAULT true,
+    image_url TEXT DEFAULT 'images/dhan-tractor.jpg',
+    power TEXT,
+    suitable_crops TEXT,
+    suitable_work TEXT,
+    category TEXT DEFAULT 'all',
+    created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- --------------------------------------------------------------------
+-- 4. TABLE: bookings
+-- --------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS public.bookings (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    booking_code TEXT UNIQUE NOT NULL, -- e.g. TRAC-0001
+    vehicle_id UUID REFERENCES public.vehicles(id) ON DELETE SET NULL,
+    farmer_name TEXT NOT NULL,
+    farmer_mobile TEXT NOT NULL,
+    village_location TEXT NOT NULL,
+    crop TEXT,
+    booking_date DATE NOT NULL,
+    time_slot TEXT NOT NULL,
+    hours NUMERIC NOT NULL CHECK (hours > 0),
+    fuel_option TEXT CHECK (fuel_option IN ('with-fuel', 'without-fuel')),
+    base_amount NUMERIC NOT NULL,
+    travel_charge NUMERIC DEFAULT 0,
+    total_amount NUMERIC NOT NULL,
+    status TEXT NOT NULL DEFAULT 'requested' CHECK (status IN ('requested', 'accepted', 'assigned', 'reached', 'done', 'cancelled')),
+    gps_link TEXT,
+    created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Sequence for readable booking codes: TRAC-0001, TRAC-0002...
+CREATE SEQUENCE IF NOT EXISTS public.booking_code_seq START WITH 1;
+
+CREATE OR REPLACE FUNCTION public.set_booking_code()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.booking_code IS NULL OR NEW.booking_code = '' THEN
+        NEW.booking_code := 'TRAC-' || LPAD(NEXTVAL('public.booking_code_seq')::TEXT, 4, '0');
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trigger_set_booking_code ON public.bookings;
+CREATE TRIGGER trigger_set_booking_code
+BEFORE INSERT ON public.bookings
+FOR EACH ROW
+EXECUTE FUNCTION public.set_booking_code();
+
+-- --------------------------------------------------------------------
+-- 5. TABLE: admins
+-- --------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS public.admins (
+    id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+    email TEXT UNIQUE NOT NULL,
+    role TEXT DEFAULT 'admin',
+    created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- ====================================================================
+-- ROW LEVEL SECURITY (RLS) POLICIES
+-- ====================================================================
+ALTER TABLE public.owners ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.vehicles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.bookings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.admins ENABLE ROW LEVEL SECURITY;
+
+-- Vehicles RLS: Anyone can view active vehicles
+DROP POLICY IF EXISTS "Public can view active vehicles" ON public.vehicles;
+CREATE POLICY "Public can view active vehicles"
+ON public.vehicles FOR SELECT
+TO anon, authenticated
+USING (active = true);
+
+-- Bookings RLS:
+-- 1. Farmers can insert new bookings with initial status 'requested'
+DROP POLICY IF EXISTS "Public can insert requested booking" ON public.bookings;
+CREATE POLICY "Public can insert requested booking"
+ON public.bookings FOR INSERT
+TO anon, authenticated
+WITH CHECK (status = 'requested');
+
+-- 2. Secure RPC: Farmer Lookup by BOTH Booking Code AND Mobile Number
+-- Strictly prevents enumeration; no one can list other farmers' bookings
+DROP FUNCTION IF EXISTS public.lookup_farmer_booking(TEXT, TEXT);
+CREATE OR REPLACE FUNCTION public.lookup_farmer_booking(p_code TEXT, p_mobile TEXT)
+RETURNS SETOF public.bookings
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+    SELECT * FROM public.bookings
+    WHERE UPPER(TRIM(booking_code)) = UPPER(TRIM(p_code))
+      AND RIGHT(REGEXP_REPLACE(farmer_mobile, '[^0-9]', '', 'g'), 10) = RIGHT(REGEXP_REPLACE(p_mobile, '[^0-9]', '', 'g'), 10)
+    LIMIT 1;
+$$;
+
+-- 3. Secure RPC: Farmer Cancellation by BOTH Booking Code AND Mobile Number
+DROP FUNCTION IF EXISTS public.cancel_farmer_booking(TEXT, TEXT);
+CREATE OR REPLACE FUNCTION public.cancel_farmer_booking(p_code TEXT, p_mobile TEXT)
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+    v_updated INT;
+BEGIN
+    UPDATE public.bookings
+    SET status = 'cancelled'
+    WHERE UPPER(TRIM(booking_code)) = UPPER(TRIM(p_code))
+      AND RIGHT(REGEXP_REPLACE(farmer_mobile, '[^0-9]', '', 'g'), 10) = RIGHT(REGEXP_REPLACE(p_mobile, '[^0-9]', '', 'g'), 10)
+      AND status IN ('requested', 'accepted');
+    GET DIAGNOSTICS v_updated = ROW_COUNT;
+    RETURN v_updated > 0;
+END;
+$$;
+
+-- 4. Secure RPC: Fetch Multiple Device Bookings for "My Bookings"
+DROP FUNCTION IF EXISTS public.lookup_device_bookings(TEXT[], TEXT);
+CREATE OR REPLACE FUNCTION public.lookup_device_bookings(p_codes TEXT[], p_mobile TEXT)
+RETURNS SETOF public.bookings
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+    SELECT * FROM public.bookings
+    WHERE booking_code = ANY(p_codes)
+      AND (
+          p_mobile IS NULL 
+          OR p_mobile = '' 
+          OR RIGHT(REGEXP_REPLACE(farmer_mobile, '[^0-9]', '', 'g'), 10) = RIGHT(REGEXP_REPLACE(p_mobile, '[^0-9]', '', 'g'), 10)
+      )
+    ORDER BY created_at DESC;
+$$;
+
+-- ====================================================================
+-- SEED DATA: 1 Approved Partner + Initial Active Fleet
+-- (Vehicles clearly show Verified badge only if verified = true)
+-- ====================================================================
+INSERT INTO public.owners (id, name, mobile, village_district, approved)
+VALUES (
+    '11111111-1111-1111-1111-111111111111',
+    'प्रोजेक्ट ट्रैक्टर अधिकृत पार्टनर (Verified Demo Partner)',
+    '9876543210',
+    'मेरठ, उत्तर प्रदेश',
+    true
+)
+ON CONFLICT (mobile) DO UPDATE SET approved = true;
+
+INSERT INTO public.vehicles (
+    id, owner_id, brand_model, drive_type, rate_per_hour, rate_with_diesel, rate_without_diesel,
+    rate_unit, implements, village, verified, active, image_url, power, suitable_crops, suitable_work, category
+) VALUES
+(
+    '22222222-2222-2222-2222-000000000001',
+    '11111111-1111-1111-1111-111111111111',
+    'धान 4WD मड-मास्टर ट्रैक्टर (Mahindra 575 DI)',
+    '4WD',
+    600, 600, 380,
+    'घंटा',
+    ARRAY['केज व्हील', '6 फीट वेट रोटावेटर'],
+    'मेरठ (पश्चिमी यूपी)',
+    true, true,
+    'images/dhan-tractor.jpg',
+    '45-50 HP (4WD)',
+    'धान / चावल (Paddy)',
+    'कड़वा जुताई (Puddling), कीचड़ तैयार करना',
+    'dhan'
+),
+(
+    '22222222-2222-2222-2222-000000000002',
+    '11111111-1111-1111-1111-111111111111',
+    'सुपर-सीडर व रोटावेटर ट्रैक्टर (Swaraj 855 FE)',
+    '2WD',
+    550, 550, 350,
+    'घंटा',
+    ARRAY['7 फीट सुपर सीडर', 'मल्टी-क्रॉप ड्रिल'],
+    'मेरठ (पश्चिमी यूपी)',
+    true, true,
+    'images/gehu-tractor.jpg',
+    '50-55 HP',
+    'गेहूं, सरसों, चना, मटर',
+    'बारीक जुताई व सटीक बीज/खाद बोवाई (बिना पराली जलाए)',
+    'gehu'
+),
+(
+    '22222222-2222-2222-2222-000000000003',
+    '11111111-1111-1111-1111-111111111111',
+    'लेज़र लैंड लेवलर ट्रैक्टर (John Deere 5310)',
+    '2WD',
+    750, 750, 500,
+    'घंटा',
+    ARRAY['लेज़र ट्रांसमीटर पोल', '7 फीट लेवलर बकेट'],
+    'मेरठ (पश्चिमी यूपी)',
+    true, true,
+    'images/gehu-tractor.jpg',
+    '55-60 HP',
+    'धान, गेहूं, गन्ना, सभी फसलें',
+    'खेत को 100% समतल करना (30% पानी व खाद बचत)',
+    'gehu'
+),
+(
+    '22222222-2222-2222-2222-000000000004',
+    '11111111-1111-1111-1111-111111111111',
+    'हाई-टॉर्क हैवी ड्यूटी ट्रैक्टर (Sonalika DI 745)',
+    '2WD',
+    700, 700, 450,
+    'घंटा',
+    ARRAY['3-बॉटम एमबी हल', '15 टन हैवी ट्रॉली हुक'],
+    'मेरठ (पश्चिमी यूपी)',
+    true, true,
+    'images/ganna-tractor.jpg',
+    '55-65 HP',
+    'गन्ना, कपास, मक्का',
+    'गहरी जुताई, ट्रेन्च बनाना और 15 टन ढुलाई',
+    'ganna'
+),
+(
+    '22222222-2222-2222-2222-000000000005',
+    '11111111-1111-1111-1111-111111111111',
+    'सुपर स्ट्रा रीपर व भूसा मशीन',
+    '2WD',
+    1100, 1100, 750,
+    'एकड़',
+    ARRAY['डबल कटर बार', 'हैवी ब्लोअर', 'ट्रॉली अटैचमेंट'],
+    'मेरठ (पश्चिमी यूपी)',
+    true, true,
+    'images/combine-harvester.jpg',
+    '50-60 HP',
+    'गेहूं, जौ (कटाई के बाद)',
+    'पराली काटकर बारीक पौष्टिक भूसा बनाना',
+    'gehu'
+),
+(
+    '22222222-2222-2222-2222-000000000006',
+    '11111111-1111-1111-1111-111111111111',
+    'छोटा चैंपियन नैरो ट्रैक्टर',
+    '2WD',
+    380, 380, 240,
+    'घंटा',
+    ARRAY['पोटैटो डिगर', '4 फीट मिनी रोटावेटर'],
+    'मेरठ (पश्चिमी यूपी)',
+    false, true, -- Verified = false: badge will NOT show!
+    'images/compact-tractor.jpg',
+    '24-28 HP (Narrow Width)',
+    'आलू, प्याज, टमाटर, सब्जियां',
+    'क्यारियां बनाना, संकरी जुताई और आलू खुदाई',
+    'sabzi'
+),
+(
+    '22222222-2222-2222-2222-000000000007',
+    '11111111-1111-1111-1111-111111111111',
+    'हाइड्रोलिक ट्रॉली ट्रैक्टर सेट (Farmtrac 60)',
+    '2WD',
+    450, 450, 290,
+    'घंटा',
+    ARRAY['डबल एक्सल हाइड्रोलिक लिफ्ट ट्रॉली'],
+    'मेरठ (पश्चिमी यूपी)',
+    true, true,
+    'images/dhulai-tractor.jpg',
+    '42-45 HP',
+    'सभी फसलें व मंडी ढुलाई',
+    'मंडी ढुलाई (एक लीवर से तुरंत खाली होना)',
+    'dhulai'
+),
+(
+    '22222222-2222-2222-2222-000000000008',
+    '11111111-1111-1111-1111-111111111111',
+    'ऑर्चर्ड ब्लोअर-स्प्रेयर ट्रैक्टर',
+    '4WD',
+    350, 350, 220,
+    'घंटा',
+    ARRAY['600 लीटर ब्लोअर स्प्रेयर', 'मल्चर'],
+    'मेरठ (पश्चिमी यूपी)',
+    true, true,
+    'images/bagwani-tractor.jpg',
+    '20-25 HP 4WD',
+    'आम, अमरूद, किन्नू, सब्जियां',
+    'कीटनाशक व खाद का तेज ब्लोअर स्प्रे',
+    'bagwani'
+),
+(
+    '22222222-2222-2222-2222-000000000009',
+    '11111111-1111-1111-1111-111111111111',
+    'मल्टी-क्रॉप कंबाइन हार्वेस्टर',
+    '4WD',
+    1400, 1400, 950,
+    'एकड़',
+    ARRAY['14 फीट कटर बार', 'ग्रेन क्लीनर टैंक'],
+    'मेरठ (पश्चिमी यूपी)',
+    true, true,
+    'images/combine-harvester.jpg',
+    '75-100 HP',
+    'धान, गेहूं, सोयाबीन',
+    'खड़ी फसल की कटाई, मड़ाई और दाना अलग करना',
+    'dhan'
+)
+ON CONFLICT (id) DO UPDATE SET
+    brand_model = EXCLUDED.brand_model,
+    rate_per_hour = EXCLUDED.rate_per_hour,
+    rate_with_diesel = EXCLUDED.rate_with_diesel,
+    rate_without_diesel = EXCLUDED.rate_without_diesel,
+    active = EXCLUDED.active;
+

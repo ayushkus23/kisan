@@ -28,7 +28,7 @@ const brandRealPhotos = {
 };
 
 // 1. Tractor & Machine Catalog with REAL Agricultural Photographs, Fuel Discount & Farmer Ratings
-const fleetData = [
+let fleetData = [
     {
         id: "dhan-4wd",
         categories: ["dhan"],
@@ -369,12 +369,17 @@ const translations = {
         btnSendWhatsApp: "व्हाट्सएप पर बुकिंग भेजें",
 
         // Receipt Modal
-        receiptTitle: "बुकिंग पक्की हो गई!",
-        receiptSub: "हमारी टीम आपके गांव के नजदीकी ड्राइवर से संपर्क करके जल्द पहुंचेगी।",
+        receiptTitle: "आपका अनुरोध मिल गया, टीम जल्द कॉल करेगी",
+        receiptSub: "ट्रैक्टर मालिक द्वारा स्वीकार करने के बाद बुकिंग पक्की होगी। हमारी टीम जल्द आपसे संपर्क करेगी।",
         receiptCloseBtn: "ठीक है (Close)",
         receiptTrackStatusBtn: "बुकिंग स्टेटस देखें",
         btnSpeakReceipt: "रसीद बोल कर सुनें",
         btnSpeakStatus: "सुनें",
+        btnTrackStatusSearch: "स्टेटस देखें",
+        lookupErrNotFound: "बुकिंग नहीं मिली! कृपया अपना बुकिंग कोड (उदा. TRAC-0001) और वही 10 अंकों का मोबाइल नंबर दर्ज करें जो बुकिंग के समय दिया था।",
+        lookupLoading: "⏳ डेटाबेस से लाइव स्टेटस जांच रहे हैं...",
+        bookingSubmitting: "⏳ अनुरोध भेजा जा रहा है...",
+        bookingNetworkError: "⚠️ सर्वर से संपर्क नहीं हो पाया। चिंता न करें! नीचे दिए गए व्हाट्सएप बटन पर क्लिक करके सीधे अपनी बुकिंग भेजें।",
         receiptOrderId: "ऑर्डर नंबर:",
         receiptBookingDate: "चुनी गई तारीख:",
         receiptBookingSlot: "समय स्लॉट:",
@@ -678,12 +683,17 @@ const translations = {
         btnSendWhatsApp: "Send Booking via WhatsApp",
 
         // Receipt Modal
-        receiptTitle: "Booking Confirmed!",
-        receiptSub: "Our team is contacting the nearest operator in your village and will arrive shortly.",
+        receiptTitle: "Request Received, Team Will Call Soon",
+        receiptSub: "Booking will be confirmed once an owner accepts. Our team will contact you shortly.",
         receiptCloseBtn: "Close Receipt",
         receiptTrackStatusBtn: "View Booking Status",
         btnSpeakReceipt: "Listen Receipt",
         btnSpeakStatus: "Listen",
+        btnTrackStatusSearch: "Track Status",
+        lookupErrNotFound: "Booking not found! Please check your booking code (e.g. TRAC-0001) and the exact 10-digit mobile number entered during booking.",
+        lookupLoading: "⏳ Fetching live status from database...",
+        bookingSubmitting: "⏳ Submitting request...",
+        bookingNetworkError: "⚠️ Server connection error. Don't worry! Click the WhatsApp button below to send your booking directly.",
         receiptOrderId: "Order ID:",
         receiptBookingDate: "Booking Date:",
         receiptBookingSlot: "Time Slot:",
@@ -931,6 +941,74 @@ function handleTractorRegistration(event) {
 }
 
 // ==========================================
+// 4.5. Load Active Vehicles from Supabase Database
+// ==========================================
+async function loadVehiclesFromDatabase() {
+    if (!sbClient) {
+        console.log('ℹ️ Supabase client not active; using demo catalog with clear demo flag');
+        fleetData.forEach(m => m.isDemo = true);
+        renderFleetCards(currentFilter);
+        return;
+    }
+
+    try {
+        const { data, error } = await sbClient
+            .from('vehicles')
+            .select('*')
+            .eq('active', true)
+            .order('created_at', { ascending: true });
+
+        if (!error && Array.isArray(data) && data.length > 0) {
+            fleetData = data.map(v => {
+                const is4WD = (v.drive_type || '').includes('4WD');
+                const catArray = (v.category && v.category !== 'all')
+                    ? [v.category, 'all']
+                    : (is4WD ? ['dhan', 'gehu', 'all'] : ['gehu', 'ganna', 'dhulai', 'all']);
+
+                const implementsList = Array.isArray(v.implements) && v.implements.length > 0
+                    ? v.implements.join(' + ')
+                    : 'रोटावेटर / कल्टीवेटर';
+
+                return {
+                    id: v.id,
+                    categories: catArray,
+                    image: v.image_url || 'images/dhan-tractor.jpg',
+                    rate: Number(v.rate_per_hour),
+                    rateWithDiesel: Number(v.rate_with_diesel || v.rate_per_hour),
+                    rateWithoutDiesel: Number(v.rate_without_diesel || Math.max(v.rate_per_hour - 200, 200)),
+                    fuelDiscount: Number(v.rate_with_diesel && v.rate_without_diesel ? (v.rate_with_diesel - v.rate_without_diesel) : 200),
+                    rateUnit: { hi: v.rate_unit || 'घंटा', en: v.rate_unit === 'एकड़' ? 'Acre' : 'Hour' },
+                    badge: { 
+                        hi: v.drive_type ? `${v.drive_type} स्पेशल` : 'सत्यापित ट्रैक्टर', 
+                        en: v.drive_type ? `${v.drive_type} Special` : 'Verified Tractor' 
+                    },
+                    name: { hi: v.brand_model, en: v.brand_model },
+                    subtitle: { hi: `गांव / क्षेत्र: ${v.village}`, en: `Village: ${v.village}` },
+                    suitableCrops: { hi: v.suitable_crops || 'धान, गेहूं, गन्ना', en: v.suitable_crops || 'Paddy, Wheat, Sugarcane' },
+                    suitableWork: { hi: v.suitable_work || 'खेत जुताई व कृषि कार्य', en: v.suitable_work || 'Farm tillage and operations' },
+                    tool: { hi: implementsList, en: implementsList },
+                    power: v.power || (is4WD ? '45-50 HP (4WD)' : '50 HP'),
+                    village: v.village,
+                    verified: v.verified === true, // Only true if verified = true in DB
+                    rating: 4.9,
+                    reviewsCount: 35,
+                    isDemo: false
+                };
+            });
+            console.log(`✅ Loaded ${fleetData.length} active vehicles from Supabase`);
+        } else {
+            console.log('ℹ️ No active vehicles in DB yet; using demo catalog with clear demo flag');
+            fleetData.forEach(m => m.isDemo = true);
+        }
+    } catch (err) {
+        console.warn('loadVehiclesFromDatabase fallback error:', err);
+        fleetData.forEach(m => m.isDemo = true);
+    }
+
+    renderFleetCards(currentFilter);
+}
+
+// ==========================================
 // 5. Render Fleet Cards with Real Photos, Search, Sort & Ratings
 // ==========================================
 function renderFleetCards(category = 'all') {
@@ -1016,6 +1094,11 @@ function renderFleetCards(category = 'all') {
             ? `<span class="card-verified-badge">✓ ${currentLang === 'hi' ? 'सत्यापित' : 'Verified'}</span>`
             : '';
 
+        // Demo badge if loaded as unverified demo catalog
+        const demoBadge = machine.isDemo === true
+            ? `<span class="demo-catalog-badge">${currentLang === 'hi' ? 'डेमो' : 'Demo'}</span>`
+            : '';
+
         // Village and distance ONLY if exist in data
         const villageInfo = machine.village
             ? `<span class="card-meta-tag">📍 ${machine.village}</span>`
@@ -1037,7 +1120,7 @@ function renderFleetCards(category = 'all') {
                     ${ratingBadge}
                 </div>
                 <div class="machine-card-body">
-                    <h4 class="machine-title">${title}</h4>
+                    <h4 class="machine-title">${title} ${demoBadge}</h4>
                     <p class="machine-subtitle">${sub}</p>
                     
                     <div class="card-quick-meta">
@@ -1486,9 +1569,12 @@ function calculateEstimate() {
 }
 
 let lastBookedOrderId = null;
+let lastBookedMobile = null;
 
-// Handle Booking Form Submit & LocalStorage Persistence
-function handleTractorBookingSubmit(event) {
+// ==========================================
+// 7. Real Booking Submission (Supabase + LocalStorage Device History)
+// ==========================================
+async function handleTractorBookingSubmit(event) {
     event.preventDefault();
     const t = translations[currentLang] || translations.hi;
 
@@ -1533,20 +1619,109 @@ function handleTractorBookingSubmit(event) {
         : (selectedMachine.rate - discount);
     const totalNum = parseFloat(duration) * appliedRate;
     const totalStr = totalNum.toLocaleString('en-IN');
-    const orderId = 'TRAC-' + Math.floor(100000 + Math.random() * 900000);
     const fuelText = selectedFuelOption === 'with-fuel' ? t.fuelWithShort : t.fuelWithoutShort;
 
-    lastBookedOrderId = orderId;
+    // Show loading state on submit button
+    const submitBtn = document.querySelector('.btn-confirm-booking');
+    const originalBtnHtml = submitBtn ? submitBtn.innerHTML : '';
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `⏳ ${t.bookingSubmitting || 'अनुरोध भेजा जा रहा है...'}`;
+    }
 
-    const bookingRecord = {
-        orderId,
+    // Generate clean readable booking code (e.g. TRAC-5421)
+    let realBookingCode = 'TRAC-' + Math.floor(1000 + Math.random() * 9000);
+
+    // Save to Supabase Cloud Database with status 'requested'
+    if (sbClient) {
+        try {
+            const insertPayload = {
+                booking_code: realBookingCode,
+                vehicle_id: (selectedMachine.id && selectedMachine.id.length > 20) ? selectedMachine.id : null,
+                farmer_name: farmerName,
+                farmer_mobile: phoneClean,
+                village_location: farmerVillage,
+                crop: (selectedMachine.categories && selectedMachine.categories.length) ? selectedMachine.categories[0] : 'all',
+                booking_date: bookingDateVal,
+                time_slot: bookingSlotText,
+                hours: parseFloat(duration) || 1,
+                fuel_option: selectedFuelOption,
+                base_amount: appliedRate * parseFloat(duration),
+                travel_charge: 0,
+                total_amount: totalNum,
+                status: 'requested',
+                gps_link: gpsLink || `https://maps.google.com/?q=${encodeURIComponent(farmerVillage)}`
+            };
+
+            const { error } = await sbClient
+                .from('bookings')
+                .insert([insertPayload]);
+
+            if (error) {
+                console.warn('Supabase booking insert notice:', error);
+                alert(`⚠️ सूचना: आपका अनुरोध सर्वर पर दर्ज नहीं हो सका (${error.message || 'Connecting'})\n\nचिंता न करें! आप नीचे दिए गए व्हाट्सएप बटन से सीधे अपनी बुकिंग भेज सकते हैं।`);
+            } else {
+                console.log('✅ Real booking stored in Supabase with code:', realBookingCode);
+            }
+        } catch (err) {
+            console.warn('Booking submit network error:', err);
+            alert(t.bookingNetworkError || '⚠️ नेटवर्क समस्या: सर्ver से संपर्क नहीं हो पाया। चिंता न करें! नीचे दिए गए व्हाट्सएप बटन पर क्लिक करके सीधे अपनी बुकिंग भेजें।');
+        }
+    }
+
+    // Restore submit button
+    if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnHtml;
+    }
+
+    // Fallback readable booking code if DB not yet migrated or offline
+    if (!realBookingCode) {
+        realBookingCode = 'TRAC-' + Math.floor(1000 + Math.random() * 9000);
+    }
+
+    lastBookedOrderId = realBookingCode;
+    lastBookedMobile = phoneClean;
+
+    // Store in Device Booking History (localStorage)
+    const myHistory = JSON.parse(localStorage.getItem('myBookingHistory') || '[]');
+    const existingIdx = myHistory.findIndex(h => h.code === realBookingCode);
+    const historyItem = {
+        code: realBookingCode,
+        mobile: phoneClean,
+        farmerName,
+        village: farmerVillage,
+        machineTitle,
+        machinePhoto: selectedMachine.image || "images/dhan-tractor.jpg",
+        duration: `${duration} ${rateUnit}`,
+        total: totalStr,
+        totalNum,
+        date: bookingDateVal,
+        slot: bookingSlotText,
+        status: 'requested',
+        gpsLink: gpsLink || `https://maps.google.com/?q=${encodeURIComponent(farmerVillage)}`,
+        fuelText,
+        createdAt: new Date().toISOString()
+    };
+
+    if (existingIdx >= 0) {
+        myHistory[existingIdx] = historyItem;
+    } else {
+        myHistory.unshift(historyItem);
+    }
+    localStorage.setItem('myBookingHistory', JSON.stringify(myHistory));
+
+    // Keep legacy tractorBookings array synchronized for backward compatibility
+    const legacyBookings = getBookings();
+    legacyBookings.unshift({
+        orderId: realBookingCode,
         machineId: selectedMachine.id,
         machineTitle,
         machinePhoto: selectedMachine.image || "images/dhan-tractor.jpg",
         farmerName,
-        farmerPhone,
+        farmerPhone: phoneClean,
         farmerVillage,
-        gpsLink: gpsLink || `https://maps.google.com/?q=${encodeURIComponent(farmerVillage)}`,
+        gpsLink: historyItem.gpsLink,
         bookingDate: bookingDateVal,
         bookingSlot: bookingSlotVal,
         bookingSlotText,
@@ -1555,25 +1730,23 @@ function handleTractorBookingSubmit(event) {
         fuelText,
         appliedRate,
         total: totalStr,
-        date: bookingDateVal || new Date().toLocaleDateString(currentLang === 'hi' ? 'hi-IN' : 'en-IN', {
-            day: 'numeric',
-            month: 'short',
-            year: 'numeric'
-        }),
-        status: 'pending' // Real status: initially pending / requested
-    };
+        date: bookingDateVal,
+        status: 'requested'
+    });
+    localStorage.setItem('tractorBookings', JSON.stringify(legacyBookings));
 
-    saveBooking(bookingRecord);
+    updateBookingBadges();
     closeBookingModal();
 
+    // Show confirmation receipt modal with real booking code
     showReceiptModal({
-        orderId,
+        orderId: realBookingCode,
         farmerName,
-        farmerPhone,
+        farmerPhone: phoneClean,
         farmerVillage,
-        gpsLink: bookingRecord.gpsLink,
-        bookingDate: bookingRecord.bookingDate,
-        bookingSlotText: bookingRecord.bookingSlotText,
+        gpsLink: historyItem.gpsLink,
+        bookingDate: bookingDateVal,
+        bookingSlotText,
         machineTitle: `${machineTitle} (${fuelText})`,
         duration: `${duration} ${rateUnit}`,
         total: `₹${totalStr}`
@@ -1610,7 +1783,7 @@ function showReceiptModal(data) {
     content.innerHTML = `
         <div class="receipt-row">
             <span>${t.receiptOrderId}</span>
-            <strong>${data.orderId}</strong>
+            <strong style="color: #1f5130; font-size: 16px;">${data.orderId}</strong>
         </div>
         ${dateRow}
         ${slotRow}
@@ -1647,10 +1820,14 @@ function showReceiptModal(data) {
 function trackFromReceipt() {
     closeReceiptModal();
     if (lastBookedOrderId) {
-        openLiveTrackingModal(lastBookedOrderId);
+        openLiveTrackingModal(lastBookedOrderId, lastBookedMobile);
     } else {
-        const bookings = getBookings();
-        if (bookings.length > 0) openLiveTrackingModal(bookings[0].orderId);
+        const myHistory = JSON.parse(localStorage.getItem('myBookingHistory') || '[]');
+        if (myHistory.length > 0) {
+            openLiveTrackingModal(myHistory[0].code, myHistory[0].mobile);
+        } else {
+            openLiveTrackingModal();
+        }
     }
 }
 
@@ -1675,83 +1852,51 @@ function saveBooking(booking) {
     bookings.unshift(booking);
     localStorage.setItem('tractorBookings', JSON.stringify(bookings));
     updateBookingBadges();
-
-    // Sync to Supabase Cloud Database
-    if (sbClient) {
-        sbClient.from('bookings').insert([{
-            id: booking.orderId,
-            machine_id: booking.machineId,
-            machine_name: booking.machineTitle,
-            farmer_name: booking.farmerName,
-            farmer_phone: booking.farmerPhone,
-            village: booking.farmerVillage,
-            gps_link: booking.gpsLink,
-            booking_date: booking.date,
-            work_duration: parseFloat(booking.duration) || 1,
-            rate_unit: booking.duration ? booking.duration.split(' ')[1] : 'Hour',
-            fuel_option: booking.fuelOption,
-            estimated_cost: parseFloat(String(booking.total).replace(/,/g, '')) || 0,
-            status: booking.status || 'pending',
-            created_at: new Date().toISOString()
-        }]).then(({ error }) => {
-            if (error) console.warn('Supabase booking sync notice:', error.message);
-            else console.log('✅ Booking successfully stored in Supabase!');
-        }).catch(e => console.warn('Supabase booking error:', e));
-    }
 }
 
 async function syncBookingsFromSupabase() {
     if (!sbClient) return;
     try {
-        const { data, error } = await sbClient
-            .from('bookings')
-            .select('*')
-            .order('created_at', { ascending: false });
+        const localHistory = JSON.parse(localStorage.getItem('myBookingHistory') || '[]');
+        const codes = localHistory.map(h => h.code).filter(Boolean);
+        if (codes.length === 0) return;
+
+        const defaultMobile = localHistory[0] ? localHistory[0].mobile : '';
+        const { data, error } = await sbClient.rpc('lookup_device_bookings', {
+            p_codes: codes,
+            p_mobile: defaultMobile
+        });
 
         if (!error && Array.isArray(data) && data.length > 0) {
-            const mapped = data.map(b => ({
-                orderId: b.id,
-                machineId: b.machine_id,
-                machineTitle: b.machine_name,
-                machinePhoto: "images/dhan-tractor.jpg",
-                farmerName: b.farmer_name,
-                farmerPhone: b.farmer_phone,
-                farmerVillage: b.village,
-                gpsLink: b.gps_link,
-                duration: `${b.work_duration} ${b.rate_unit || 'घंटा'}`,
-                fuelOption: b.fuel_option,
-                fuelText: b.fuel_option === 'with-fuel' ? 'डीजल सहित' : 'डीजल किसान का',
-                appliedRate: 0,
-                total: Number(b.estimated_cost).toLocaleString('en-IN'),
-                date: b.booking_date || new Date(b.created_at).toLocaleDateString('hi-IN'),
-                status: b.status || 'confirmed'
-            }));
-
-            const local = getBookings();
-            const map = new Map();
-            local.forEach(item => map.set(item.orderId, item));
-            mapped.forEach(item => map.set(item.orderId, item));
-            const merged = Array.from(map.values());
-
-            localStorage.setItem('tractorBookings', JSON.stringify(merged));
+            data.forEach(dbRow => {
+                const target = localHistory.find(h => h.code === dbRow.booking_code);
+                if (target) {
+                    target.status = dbRow.status;
+                    target.total = Number(dbRow.total_amount).toLocaleString('en-IN');
+                    target.date = dbRow.booking_date;
+                    target.slot = dbRow.time_slot;
+                }
+            });
+            localStorage.setItem('myBookingHistory', JSON.stringify(localHistory));
             updateBookingBadges();
             if (document.getElementById('myBookingsList')) {
                 renderMyBookings();
             }
         }
     } catch (e) {
-        console.warn('Supabase syncBookings fallback:', e);
+        console.warn('syncBookingsFromSupabase fallback:', e);
     }
 }
 
 function updateBookingBadges() {
-    const bookings = getBookings().filter(b => b.status !== 'cancelled');
-    const count = bookings.length;
+    const myHistory = JSON.parse(localStorage.getItem('myBookingHistory') || '[]');
+    const activeBookings = myHistory.filter(b => b.status !== 'cancelled');
+    const count = activeBookings.length;
     const t = translations[currentLang] || translations.hi;
 
     const drawerBadge = document.getElementById('drawerBookingCount');
     if (drawerBadge) {
-        drawerBadge.textContent = `${count} ${t.badgeBookingCountText}`;
+        drawerBadge.textContent = `${count} ${t.badgeBookingCountText || 'बुकिंग'}`;
     }
 
     const navBadge = document.getElementById('navBookingBadge');
@@ -1777,13 +1922,32 @@ function closeMyBookingsModal() {
     if (modal) modal.style.display = 'none';
 }
 
-function renderMyBookings() {
+async function renderMyBookings() {
     const container = document.getElementById('myBookingsList');
     if (!container) return;
-    const bookings = getBookings();
     const t = translations[currentLang] || translations.hi;
 
-    if (bookings.length === 0) {
+    let localHistory = JSON.parse(localStorage.getItem('myBookingHistory') || '[]');
+    if (localHistory.length === 0) {
+        // Fallback to legacy
+        const legacy = getBookings();
+        if (legacy.length > 0) {
+            localHistory = legacy.map(b => ({
+                code: b.orderId,
+                mobile: b.farmerPhone,
+                farmerName: b.farmerName,
+                village: b.farmerVillage,
+                machineTitle: b.machineTitle,
+                total: b.total,
+                date: b.bookingDate || b.date,
+                slot: b.bookingSlotText,
+                status: b.status || 'requested'
+            }));
+            localStorage.setItem('myBookingHistory', JSON.stringify(localHistory));
+        }
+    }
+
+    if (localHistory.length === 0) {
         container.innerHTML = `
             <div class="empty-bookings-box">
                 <div class="empty-icon">🚜</div>
@@ -1795,41 +1959,74 @@ function renderMyBookings() {
         return;
     }
 
-    container.innerHTML = bookings.map(b => {
-        const isCancelled = b.status === 'cancelled';
-        const isRejected = b.status === 'rejected';
-        const isPending = b.status === 'pending';
+    // Try fetching live status from database for device codes
+    const codes = localHistory.map(h => h.code).filter(Boolean);
+    if (sbClient && codes.length > 0) {
+        try {
+            const { data, error } = await sbClient.rpc('lookup_device_bookings', {
+                p_codes: codes,
+                p_mobile: localHistory[0] ? localHistory[0].mobile : ''
+            });
 
-        let statusBadge = `<span class="booking-status-tag confirmed">${t.statusConfirmed}</span>`;
+            if (!error && Array.isArray(data) && data.length > 0) {
+                data.forEach(dbRow => {
+                    const target = localHistory.find(h => h.code === dbRow.booking_code);
+                    if (target) {
+                        target.status = dbRow.status;
+                        target.total = Number(dbRow.total_amount).toLocaleString('en-IN');
+                        target.date = dbRow.booking_date;
+                        target.slot = dbRow.time_slot;
+                    }
+                });
+                localStorage.setItem('myBookingHistory', JSON.stringify(localHistory));
+            }
+        } catch (e) {
+            console.warn('renderMyBookings RPC fallback:', e);
+        }
+    }
+
+    container.innerHTML = localHistory.map(b => {
+        const status = (b.status || 'requested').toLowerCase();
+        const isCancelled = status === 'cancelled';
+        const isDone = status === 'done' || status === 'completed';
+        const isReached = status === 'reached';
+        const isAssigned = status === 'assigned';
+        const isAccepted = status === 'accepted';
+
+        let statusBadge = `<span class="booking-status-tag" style="background:#fef3c7; color:#92400e; border:1px solid #fde68a;">🟡 अनुरोध भेजा (लंबित)</span>`;
         if (isCancelled) {
-            statusBadge = `<span class="booking-status-tag cancelled">${t.statusCancelled}</span>`;
-        } else if (isRejected) {
-            statusBadge = `<span class="booking-status-tag cancelled" style="background:#fee2e2; color:#991b1b; border:1px solid #fecaca;">${t.statusRejected}</span>`;
-        } else if (isPending) {
-            statusBadge = `<span class="booking-status-tag" style="background:#fef3c7; color:#92400e; border:1px solid #fde68a;">${t.statusPending}</span>`;
+            statusBadge = `<span class="booking-status-tag cancelled">❌ रद्द किया गया</span>`;
+        } else if (isDone) {
+            statusBadge = `<span class="booking-status-tag confirmed" style="background:#def7ec; color:#03543f;">✅ काम पूरा हुआ</span>`;
+        } else if (isReached) {
+            statusBadge = `<span class="booking-status-tag" style="background:#e1effe; color:#1e429f;">📍 खेत पर मौजूद</span>`;
+        } else if (isAssigned) {
+            statusBadge = `<span class="booking-status-tag" style="background:#e1effe; color:#1e429f;">🚜 ड्राइवर रवाना</span>`;
+        } else if (isAccepted) {
+            statusBadge = `<span class="booking-status-tag confirmed">🟢 मालिक द्वारा स्वीकृत</span>`;
         }
 
-        const dateSlotText = b.bookingDate ? `${b.bookingDate} • ${b.bookingSlotText || ''}` : b.date;
+        const dateSlotText = b.date ? `${b.date} • ${b.slot || ''}` : '';
 
         return `
-            <div class="booking-record-card ${isCancelled || isRejected ? 'cancelled-card' : ''}">
+            <div class="booking-record-card ${isCancelled ? 'cancelled-card' : ''}">
                 <div class="record-top">
                     <div class="record-main-info">
                         <img src="${b.machinePhoto || 'images/dhan-tractor.jpg'}" alt="${b.machineTitle}" class="record-thumb">
                         <div>
                             <h4 class="record-title">${b.machineTitle}</h4>
-                            <span class="record-order-id">#${b.orderId} • ${dateSlotText}</span>
+                            <span class="record-order-id">#${b.code} • ${dateSlotText}</span>
                         </div>
                     </div>
                     ${statusBadge}
                 </div>
                 <div class="record-grid">
-                    <div><strong>${t.receiptBookingDate || 'तारीख'}:</strong> ${b.bookingDate || b.date}</div>
-                    <div><strong>${t.receiptBookingSlot || 'समय स्लॉट'}:</strong> ${b.bookingSlotText || 'दिन (Day)'}</div>
-                    <div><strong>${t.receiptFarmer}:</strong> ${b.farmerName} (${b.farmerPhone})</div>
-                    <div><strong>${t.receiptVillage}:</strong> ${b.farmerVillage}</div>
-                    <div><strong>${t.receiptDuration}:</strong> ${b.duration}</div>
-                    <div><strong>${t.fuelOptionLabel}:</strong> ${b.fuelText || t.fuelWithShort}</div>
+                    <div><strong>${t.receiptBookingDate || 'तारीख'}:</strong> ${b.date || 'आज'}</div>
+                    <div><strong>${t.receiptBookingSlot || 'समय स्लॉट'}:</strong> ${b.slot || 'दिन (Day)'}</div>
+                    <div><strong>${t.receiptFarmer}:</strong> ${b.farmerName || 'किसान'} (${b.mobile || ''})</div>
+                    <div><strong>${t.receiptVillage}:</strong> ${b.village || ''}</div>
+                    <div><strong>${t.receiptDuration}:</strong> ${b.duration || '2 घंटा'}</div>
+                    <div><strong>${t.fuelOptionLabel}:</strong> ${b.fuelText || 'डीजल सहित'}</div>
                 </div>
                 <div class="record-bottom">
                     <div class="record-price">
@@ -1837,9 +2034,17 @@ function renderMyBookings() {
                         <strong>₹${b.total}</strong>
                     </div>
                     <div class="record-actions">
-                        ${!isCancelled ? `<button type="button" class="btn-track-booking" onclick="openLiveTrackingModal('${b.orderId}')">📍 ${t.receiptTrackStatusBtn || 'स्टेटस देखें'}</button>` : ''}
-                        <button type="button" class="btn-receipt-view" onclick="viewPastReceipt('${b.orderId}')">${t.btnViewReceipt}</button>
-                        ${!isCancelled ? `<button type="button" class="btn-booking-cancel" onclick="cancelBooking('${b.orderId}')">${t.btnCancelBooking}</button>` : ''}
+                        <button type="button" class="btn-track-booking" onclick="openLiveTrackingModal('${b.code}', '${b.mobile}')">
+                            📍 ${t.receiptTrackStatusBtn || 'स्टेटस देखें'}
+                        </button>
+                        <button type="button" class="btn-receipt-view" onclick="viewPastReceipt('${b.code}')">
+                            ${t.btnViewReceipt || 'रसीद देखें'}
+                        </button>
+                        ${(!isCancelled && !isDone) ? `
+                            <button type="button" class="btn-booking-cancel" onclick="cancelBooking('${b.code}', '${b.mobile}')">
+                                ${t.btnCancelBooking || 'बुकिंग रद्द करें'}
+                            </button>
+                        ` : ''}
                     </div>
                 </div>
             </div>
@@ -1847,77 +2052,86 @@ function renderMyBookings() {
     }).join('');
 }
 
-function cancelBooking(orderId) {
+async function cancelBooking(code, mobile) {
     const t = translations[currentLang] || translations.hi;
-    if (!confirm(t.cancelConfirm)) return;
+    if (!confirm(t.cancelConfirm || 'क्या आप वाकई इस ट्रैक्टर बुकिंग को रद्द करना चाहते हैं?')) return;
 
-    const bookings = getBookings();
-    const target = bookings.find(b => b.orderId === orderId);
-    if (target) {
-        target.status = 'cancelled';
-        localStorage.setItem('tractorBookings', JSON.stringify(bookings));
-        updateBookingBadges();
-        renderMyBookings();
-
-        if (sbClient) {
-            sbClient.from('bookings').update({ status: 'cancelled' }).eq('id', orderId).then();
+    if (sbClient) {
+        try {
+            const { data, error } = await sbClient.rpc('cancel_farmer_booking', {
+                p_code: code,
+                p_mobile: mobile || ''
+            });
+            if (error) {
+                console.warn('cancel_farmer_booking notice:', error);
+            }
+        } catch (e) {
+            console.warn('cancelBooking RPC error:', e);
         }
     }
+
+    // Update local cache
+    const myHistory = JSON.parse(localStorage.getItem('myBookingHistory') || '[]');
+    const target = myHistory.find(h => h.code === code);
+    if (target) {
+        target.status = 'cancelled';
+        localStorage.setItem('myBookingHistory', JSON.stringify(myHistory));
+    }
+
+    const legacy = getBookings();
+    const lTarget = legacy.find(b => b.orderId === code);
+    if (lTarget) {
+        lTarget.status = 'cancelled';
+        localStorage.setItem('tractorBookings', JSON.stringify(legacy));
+    }
+
+    updateBookingBadges();
+    renderMyBookings();
+    alert('✅ आपकी बुकिंग रद्द कर दी गई है।');
 }
 
 function viewPastReceipt(orderId) {
-    const bookings = getBookings();
-    const b = bookings.find(item => item.orderId === orderId);
+    const myHistory = JSON.parse(localStorage.getItem('myBookingHistory') || '[]');
+    const b = myHistory.find(item => item.code === orderId) || getBookings().find(item => item.orderId === orderId);
     if (!b) return;
     closeMyBookingsModal();
     showReceiptModal({
-        orderId: b.orderId,
+        orderId: b.code || b.orderId,
         farmerName: b.farmerName,
-        farmerPhone: b.farmerPhone,
-        farmerVillage: b.farmerVillage,
+        farmerPhone: b.mobile || b.farmerPhone,
+        farmerVillage: b.village || b.farmerVillage,
         gpsLink: b.gpsLink,
-        machineTitle: `${b.machineTitle} (${b.fuelText || ''})`,
+        machineTitle: b.machineTitle,
         duration: b.duration,
         total: `₹${b.total}`
     });
 }
 
 // ==========================================
-// 9. Real Booking Status Modal (No Fake Radar / Driver)
+// 9. Real Booking Status & Tracking (Lookup by Code + Mobile)
 // ==========================================
-let currentTrackingOrderId = null;
+let currentTrackingCode = null;
+let currentTrackingMobile = null;
 let liveTrackingPollInterval = null;
 
-function startLiveStatusPolling(orderId) {
+function startLiveStatusPolling(code, mobile) {
     stopLiveStatusPolling();
     liveTrackingPollInterval = setInterval(async () => {
-        if (!currentTrackingOrderId) return;
-
-        // 1. Check if changed in localStorage
-        const localBookings = getBookings();
-        const localTarget = localBookings.find(b => b.orderId === currentTrackingOrderId);
-
-        // 2. If Supabase client is available, poll cloud database
+        if (!currentTrackingCode || !currentTrackingMobile) return;
         if (sbClient) {
             try {
-                const { data, error } = await sbClient
-                    .from('bookings')
-                    .select('status')
-                    .eq('id', currentTrackingOrderId)
-                    .single();
+                const { data, error } = await sbClient.rpc('lookup_farmer_booking', {
+                    p_code: currentTrackingCode.toUpperCase(),
+                    p_mobile: currentTrackingMobile
+                });
 
-                if (!error && data && data.status) {
-                    if (localTarget && localTarget.status !== data.status) {
-                        localTarget.status = data.status;
-                        localStorage.setItem('tractorBookings', JSON.stringify(localBookings));
-                        updateBookingBadges();
-                        renderMyBookings();
-                        openLiveTrackingModal(currentTrackingOrderId, true);
-                    }
+                if (!error && Array.isArray(data) && data.length > 0) {
+                    const row = data[0];
+                    renderStatusDetails(row);
                 }
             } catch (e) {}
         }
-    }, 3000);
+    }, 4000);
 }
 
 function stopLiveStatusPolling() {
@@ -1929,38 +2143,170 @@ function stopLiveStatusPolling() {
 
 // Window storage listener for instant cross-tab sync between Farmer and Owner dashboard
 window.addEventListener('storage', (e) => {
-    if (e.key === 'tractorBookings' && currentTrackingOrderId) {
+    if ((e.key === 'myBookingHistory' || e.key === 'tractorBookings') && currentTrackingCode && currentTrackingMobile) {
         const modal = document.getElementById('liveTrackingModal');
         if (modal && modal.style.display !== 'none') {
-            openLiveTrackingModal(currentTrackingOrderId, true);
+            fetchBookingStatus(currentTrackingCode, currentTrackingMobile, true);
         }
     }
 });
 
-function openLiveTrackingModal(orderId, isAutoUpdate) {
+function openLiveTrackingModal(orderCode, mobile, isAutoUpdate) {
     if (!isAutoUpdate) closeMyBookingsModal();
-    const bookings = getBookings();
-    const booking = (orderId ? bookings.find(b => b.orderId === orderId) : null) || bookings[0];
     const modal = document.getElementById('liveTrackingModal');
     if (!modal) return;
 
-    const t = translations[currentLang] || translations.hi;
+    modal.style.display = 'flex';
 
-    if (!booking) {
-        if (!isAutoUpdate) alert(t.noBookingsTitle || 'कोई सक्रिय बुकिंग नहीं मिली');
+    const inputCode = document.getElementById('trackInputCode');
+    const inputMobile = document.getElementById('trackInputMobile');
+    const feedbackEl = document.getElementById('trackLookupFeedback');
+
+    if (feedbackEl) feedbackEl.style.display = 'none';
+
+    // If orderCode provided, fill input
+    if (orderCode && inputCode) {
+        inputCode.value = orderCode;
+    }
+
+    // If mobile provided, fill input; otherwise search local history for this code
+    if (mobile && inputMobile) {
+        inputMobile.value = mobile;
+    } else if (orderCode && inputMobile) {
+        const myHistory = JSON.parse(localStorage.getItem('myBookingHistory') || '[]');
+        const match = myHistory.find(h => h.code.toUpperCase() === orderCode.toUpperCase());
+        if (match && match.mobile) {
+            inputMobile.value = match.mobile;
+            mobile = match.mobile;
+        }
+    }
+
+    const codeToTrack = inputCode ? inputCode.value.trim() : (orderCode || '');
+    const mobileToTrack = inputMobile ? inputMobile.value.trim() : (mobile || '');
+
+    if (codeToTrack && mobileToTrack) {
+        fetchBookingStatus(codeToTrack, mobileToTrack, isAutoUpdate);
+    } else {
+        // Clear order detail fields to avoid showing stale or hardcoded sample data
+        resetStatusDetailsBlank();
+    }
+}
+
+function handleManualStatusLookup() {
+    const inputCode = document.getElementById('trackInputCode');
+    const inputMobile = document.getElementById('trackInputMobile');
+    const feedbackEl = document.getElementById('trackLookupFeedback');
+
+    const code = inputCode ? inputCode.value.trim() : '';
+    const mobile = inputMobile ? inputMobile.value.trim() : '';
+
+    if (!code) {
+        if (feedbackEl) {
+            feedbackEl.className = 'track-lookup-msg msg-error';
+            feedbackEl.textContent = '⚠️ कृपया बुकिंग कोड दर्ज करें (उदा. TRAC-0001)';
+            feedbackEl.style.display = 'block';
+        }
         return;
     }
 
-    currentTrackingOrderId = booking.orderId;
-    startLiveStatusPolling(booking.orderId);
-
-    // Set Header Subtitle
-    const subtitleEl = document.getElementById('trackingOrderSubtitle');
-    if (subtitleEl) {
-        subtitleEl.textContent = `ऑर्डर #${booking.orderId} • ${booking.farmerVillage}`;
+    const phoneClean = mobile.replace(/\D/g, '');
+    if (phoneClean.length !== 10) {
+        if (feedbackEl) {
+            feedbackEl.className = 'track-lookup-msg msg-error';
+            feedbackEl.textContent = '⚠️ कृपया वही 10 अंकों का मोबाइल नंबर दर्ज करें जो बुकिंग में दिया था';
+            feedbackEl.style.display = 'block';
+        }
+        return;
     }
 
-    // Set Order Summary Card Fields
+    fetchBookingStatus(code, phoneClean, false);
+}
+
+async function fetchBookingStatus(code, mobile, isAutoUpdate) {
+    const feedbackEl = document.getElementById('trackLookupFeedback');
+    const searchBtn = document.getElementById('btnLookupBooking');
+    const t = translations[currentLang] || translations.hi;
+
+    currentTrackingCode = code;
+    currentTrackingMobile = mobile;
+
+    if (!isAutoUpdate) {
+        if (searchBtn) searchBtn.disabled = true;
+        if (feedbackEl) {
+            feedbackEl.className = 'track-lookup-msg msg-loading';
+            feedbackEl.textContent = t.lookupLoading || '⏳ डेटाबेस से लाइव स्टेटस जांच रहे हैं...';
+            feedbackEl.style.display = 'block';
+        }
+    }
+
+    let foundBooking = null;
+
+    // 1. Query Supabase using secure RPC with BOTH Code AND Mobile
+    if (sbClient) {
+        try {
+            const { data, error } = await sbClient.rpc('lookup_farmer_booking', {
+                p_code: code.toUpperCase(),
+                p_mobile: mobile
+            });
+
+            if (!error && Array.isArray(data) && data.length > 0) {
+                foundBooking = data[0];
+            } else if (error) {
+                console.warn('lookup_farmer_booking RPC error:', error);
+            }
+        } catch (err) {
+            console.warn('fetchBookingStatus network fallback:', err);
+        }
+    }
+
+    // 2. Local history fallback if offline or table pending
+    if (!foundBooking) {
+        const myHistory = JSON.parse(localStorage.getItem('myBookingHistory') || '[]');
+        const localMatch = myHistory.find(h =>
+            h.code.toUpperCase() === code.toUpperCase() &&
+            h.mobile.replace(/\D/g, '') === mobile.replace(/\D/g, '')
+        );
+
+        if (localMatch) {
+            foundBooking = {
+                booking_code: localMatch.code,
+                crop: localMatch.machineTitle,
+                booking_date: localMatch.date,
+                time_slot: localMatch.slot,
+                village_location: localMatch.village,
+                total_amount: String(localMatch.total).replace(/[^\d.]/g, ''),
+                status: localMatch.status || 'requested'
+            };
+        }
+    }
+
+    if (searchBtn) searchBtn.disabled = false;
+
+    if (!foundBooking) {
+        resetStatusDetailsBlank();
+        if (feedbackEl) {
+            feedbackEl.className = 'track-lookup-msg msg-error';
+            feedbackEl.innerHTML = `❌ ${t.lookupErrNotFound || 'बुकिंग कोड या मोबाइल नंबर सही नहीं है। कृपया जांच कर दोबारा प्रयास करें।'}`;
+            feedbackEl.style.display = 'block';
+        }
+        stopLiveStatusPolling();
+        return;
+    }
+
+    if (feedbackEl) feedbackEl.style.display = 'none';
+
+    renderStatusDetails(foundBooking);
+    startLiveStatusPolling(code, mobile);
+}
+
+function renderStatusDetails(booking) {
+    const t = translations[currentLang] || translations.hi;
+
+    const subtitleEl = document.getElementById('trackingOrderSubtitle');
+    if (subtitleEl) {
+        subtitleEl.textContent = `ऑर्डर #${booking.booking_code} • ${booking.village_location}`;
+    }
+
     const statusOrderIdEl = document.getElementById('statusOrderId');
     const statusMachineTitleEl = document.getElementById('statusMachineTitle');
     const statusBookingDateEl = document.getElementById('statusBookingDate');
@@ -1968,12 +2314,12 @@ function openLiveTrackingModal(orderId, isAutoUpdate) {
     const statusFarmerVillageEl = document.getElementById('statusFarmerVillage');
     const statusTotalAmountEl = document.getElementById('statusTotalAmount');
 
-    if (statusOrderIdEl) statusOrderIdEl.textContent = booking.orderId;
-    if (statusMachineTitleEl) statusMachineTitleEl.textContent = booking.machineTitle;
-    if (statusBookingDateEl) statusBookingDateEl.textContent = booking.bookingDate || booking.date;
-    if (statusBookingSlotEl) statusBookingSlotEl.textContent = booking.bookingSlotText || '☀️ दोपहर (10:00 AM - 02:00 PM)';
-    if (statusFarmerVillageEl) statusFarmerVillageEl.textContent = booking.farmerVillage;
-    if (statusTotalAmountEl) statusTotalAmountEl.textContent = `₹${booking.total}`;
+    if (statusOrderIdEl) statusOrderIdEl.textContent = booking.booking_code;
+    if (statusMachineTitleEl) statusMachineTitleEl.textContent = booking.crop ? `${booking.crop} (ट्रैक्टर सेवा)` : 'ट्रैक्टर सेवा';
+    if (statusBookingDateEl) statusBookingDateEl.textContent = booking.booking_date;
+    if (statusBookingSlotEl) statusBookingSlotEl.textContent = booking.time_slot;
+    if (statusFarmerVillageEl) statusFarmerVillageEl.textContent = booking.village_location;
+    if (statusTotalAmountEl) statusTotalAmountEl.textContent = `₹${Number(booking.total_amount).toLocaleString('en-IN')}`;
 
     // Stepper Nodes
     const step1 = document.getElementById('stepNode1');
@@ -1997,7 +2343,7 @@ function openLiveTrackingModal(orderId, isAutoUpdate) {
     const msgEl = document.getElementById('statusLiveMessage');
     const cancelBtn = document.getElementById('btnCancelFromStatus');
 
-    const status = (booking.status || 'pending').toLowerCase();
+    const status = (booking.status || 'requested').toLowerCase();
     const isCancelled = status === 'cancelled';
     const isRejected = status === 'rejected';
     const isAccepted = status === 'accepted' || status === 'confirmed';
@@ -2008,12 +2354,12 @@ function openLiveTrackingModal(orderId, isAutoUpdate) {
     if (isCancelled) {
         if (step1) step1.classList.add('cancelled');
         if (bannerEl) bannerEl.className = 'status-live-banner banner-cancelled';
-        if (msgEl) msgEl.textContent = t.statusMsgCancelled;
+        if (msgEl) msgEl.textContent = t.statusMsgCancelled || '❌ यह बुकिंग रद्द कर दी गई है।';
         if (cancelBtn) cancelBtn.style.display = 'none';
     } else if (isRejected) {
         if (step1) step1.classList.add('cancelled');
         if (bannerEl) bannerEl.className = 'status-live-banner banner-rejected';
-        if (msgEl) msgEl.textContent = t.statusMsgRejected;
+        if (msgEl) msgEl.textContent = t.statusMsgRejected || '⚠️ ट्रैक्टर मालिक अभी उपलब्ध नहीं हैं। कृपया दूसरी मशीन चुनें।';
         if (cancelBtn) cancelBtn.style.display = 'none';
     } else if (isDone) {
         allSteps.forEach(s => s && s.classList.add('completed'));
@@ -2040,17 +2386,54 @@ function openLiveTrackingModal(orderId, isAutoUpdate) {
         if (conn1) conn1.classList.add('completed');
         if (step2) step2.classList.add('active');
         if (bannerEl) bannerEl.className = 'status-live-banner banner-active';
-        if (msgEl) msgEl.textContent = t.statusMsgAccepted;
+        if (msgEl) msgEl.textContent = t.statusMsgAccepted || '✅ ट्रैक्टर मालिक ने बुकिंग स्वीकार कर ली है! ड्राइवर जल्द रवाना होगा।';
         if (cancelBtn) cancelBtn.style.display = 'inline-flex';
     } else {
         // Pending / Requested (Default Initial State)
         if (step1) step1.classList.add('active');
         if (bannerEl) bannerEl.className = 'status-live-banner banner-pending';
-        if (msgEl) msgEl.textContent = t.statusMsgRequested;
+        if (msgEl) msgEl.textContent = t.statusMsgRequested || '📢 स्थिति: अनुरोध भेज दिया गया है। टीम व ट्रैक्टर मालिक जल्द आपको कॉल करेंगे।';
         if (cancelBtn) cancelBtn.style.display = 'inline-flex';
     }
+}
 
-    modal.style.display = 'flex';
+function resetStatusDetailsBlank() {
+    const statusOrderIdEl = document.getElementById('statusOrderId');
+    const statusMachineTitleEl = document.getElementById('statusMachineTitle');
+    const statusBookingDateEl = document.getElementById('statusBookingDate');
+    const statusBookingSlotEl = document.getElementById('statusBookingSlot');
+    const statusFarmerVillageEl = document.getElementById('statusFarmerVillage');
+    const statusTotalAmountEl = document.getElementById('statusTotalAmount');
+    const subtitleEl = document.getElementById('trackingOrderSubtitle');
+    const bannerEl = document.getElementById('statusLiveBanner');
+    const msgEl = document.getElementById('statusLiveMessage');
+    const cancelBtn = document.getElementById('btnCancelFromStatus');
+
+    if (statusOrderIdEl) statusOrderIdEl.textContent = '—';
+    if (statusMachineTitleEl) statusMachineTitleEl.textContent = '—';
+    if (statusBookingDateEl) statusBookingDateEl.textContent = '—';
+    if (statusBookingSlotEl) statusBookingSlotEl.textContent = '—';
+    if (statusFarmerVillageEl) statusFarmerVillageEl.textContent = '—';
+    if (statusTotalAmountEl) statusTotalAmountEl.textContent = '—';
+    if (subtitleEl) subtitleEl.textContent = 'अपना बुकिंग कोड व मोबाइल नंबर दर्ज करें';
+
+    const step1 = document.getElementById('stepNode1');
+    const step2 = document.getElementById('stepNode2');
+    const step3 = document.getElementById('stepNode3');
+    const step4 = document.getElementById('stepNode4');
+    const step5 = document.getElementById('stepNode5');
+
+    const conn1 = document.getElementById('stepConnector1');
+    const conn2 = document.getElementById('stepConnector2');
+    const conn3 = document.getElementById('stepConnector3');
+    const conn4 = document.getElementById('stepConnector4');
+
+    [step1, step2, step3, step4, step5].forEach(s => s && s.classList.remove('active', 'completed', 'cancelled'));
+    [conn1, conn2, conn3, conn4].forEach(c => c && c.classList.remove('active', 'completed', 'cancelled'));
+
+    if (bannerEl) bannerEl.className = 'status-live-banner banner-pending';
+    if (msgEl) msgEl.textContent = '📢 कृपया ऊपर अपना बुकिंग कोड व 10 अंकों का मोबाइल नंबर डालकर "स्टेटस देखें" दबाएं।';
+    if (cancelBtn) cancelBtn.style.display = 'none';
 }
 
 function closeLiveTrackingModal() {
@@ -2059,13 +2442,44 @@ function closeLiveTrackingModal() {
     if (modal) modal.style.display = 'none';
 }
 
-function handleCancelFromStatusModal() {
-    if (!currentTrackingOrderId) return;
+async function handleCancelFromStatusModal() {
+    if (!currentTrackingCode || !currentTrackingMobile) return;
     const t = translations[currentLang] || translations.hi;
-    if (!confirm(t.cancelConfirm)) return;
+    if (!confirm(t.cancelConfirm || 'क्या आप वाकई इस ट्रैक्टर बुकिंग को रद्द करना चाहते हैं?')) return;
 
-    cancelBooking(currentTrackingOrderId);
-    openLiveTrackingModal(currentTrackingOrderId);
+    if (sbClient) {
+        try {
+            const { data, error } = await sbClient.rpc('cancel_farmer_booking', {
+                p_code: currentTrackingCode.toUpperCase(),
+                p_mobile: currentTrackingMobile
+            });
+            if (error) {
+                console.warn('cancel_farmer_booking RPC error:', error);
+            }
+        } catch (e) {
+            console.warn('cancel RPC exception:', e);
+        }
+    }
+
+    // Update local storage
+    const myHistory = JSON.parse(localStorage.getItem('myBookingHistory') || '[]');
+    const target = myHistory.find(h => h.code.toUpperCase() === currentTrackingCode.toUpperCase());
+    if (target) {
+        target.status = 'cancelled';
+        localStorage.setItem('myBookingHistory', JSON.stringify(myHistory));
+    }
+
+    const legacy = getBookings();
+    const lTarget = legacy.find(b => b.orderId === currentTrackingCode);
+    if (lTarget) {
+        lTarget.status = 'cancelled';
+        localStorage.setItem('tractorBookings', JSON.stringify(legacy));
+    }
+
+    updateBookingBadges();
+    renderMyBookings();
+    fetchBookingStatus(currentTrackingCode, currentTrackingMobile, true);
+    alert('✅ आपकी बुकिंग सफलतापूर्वक रद्द कर दी गई है।');
 }
 
 // ==========================================
@@ -2139,8 +2553,20 @@ function stopAnySpeech() {
     document.querySelectorAll('.btn-card-speak, .btn-voice-speak, .btn-receipt-voice, .btn-voice-mini').forEach(b => b.classList.remove('audio-playing'));
 }
 
-function playLocalAudioFile(audioPath, triggerBtn, fallbackHiText, fallbackEnText) {
-    // If clicking the same button while playing, pause/stop it
+function playVoiceMessage(hindiAudioPath, triggerBtn, fallbackHiText, englishText) {
+    stopAnySpeech();
+
+    // 1. If English mode is selected, speak in natural English
+    if (currentLang === 'en') {
+        speakEnglishText(englishText, triggerBtn);
+        return;
+    }
+
+    // 2. In Hindi mode, play studio-quality native Hindi MP3
+    playLocalHindiAudio(hindiAudioPath, triggerBtn, fallbackHiText);
+}
+
+function playLocalHindiAudio(audioPath, triggerBtn, fallbackHiText) {
     if (currentPlayingAudio && currentPlayingAudio._audioSrc === audioPath && !currentPlayingAudio.paused) {
         stopAnySpeech();
         return;
@@ -2166,7 +2592,7 @@ function playLocalAudioFile(audioPath, triggerBtn, fallbackHiText, fallbackEnTex
         if (triggerBtn) triggerBtn.classList.remove('audio-playing');
         currentPlayingAudio = null;
         if (fallbackHiText) {
-            fallbackBrowserTTS(currentLang === 'hi' ? fallbackHiText : (fallbackEnText || fallbackHiText), currentLang === 'hi');
+            fallbackBrowserTTS(fallbackHiText, true);
         }
     };
 
@@ -2176,10 +2602,57 @@ function playLocalAudioFile(audioPath, triggerBtn, fallbackHiText, fallbackEnTex
             if (triggerBtn) triggerBtn.classList.remove('audio-playing');
             currentPlayingAudio = null;
             if (fallbackHiText) {
-                fallbackBrowserTTS(currentLang === 'hi' ? fallbackHiText : (fallbackEnText || fallbackHiText), currentLang === 'hi');
+                fallbackBrowserTTS(fallbackHiText, true);
             }
         });
     }
+}
+
+function speakEnglishText(text, triggerBtn) {
+    stopAnySpeech();
+
+    if (triggerBtn) triggerBtn.classList.add('audio-playing');
+
+    if (!('speechSynthesis' in window)) {
+        if (triggerBtn) triggerBtn.classList.remove('audio-playing');
+        return;
+    }
+
+    if (!availableVoices.length) {
+        availableVoices = window.speechSynthesis.getVoices() || [];
+    }
+
+    const indianVoice = availableVoices.find(v => 
+        (v.lang && (v.lang === 'en-IN' || v.lang === 'en_IN')) ||
+        (v.name && (v.name.includes('India') || v.name.includes('Indian') || v.name.includes('Ravi') || v.name.includes('Heera')))
+    );
+    const anyEnglish = availableVoices.find(v => v.lang && v.lang.toLowerCase().startsWith('en'));
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    if (indianVoice) {
+        utterance.voice = indianVoice;
+        utterance.lang = 'en-IN';
+    } else if (anyEnglish) {
+        utterance.voice = anyEnglish;
+        utterance.lang = 'en-US';
+    } else {
+        utterance.lang = 'en-IN';
+    }
+
+    utterance.rate = 0.90;
+    utterance.pitch = 1.0;
+
+    utterance.onend = () => {
+        if (triggerBtn) triggerBtn.classList.remove('audio-playing');
+        document.querySelectorAll('.btn-card-speak, .btn-voice-speak, .btn-receipt-voice, .btn-voice-mini').forEach(b => b.classList.remove('audio-playing'));
+    };
+
+    utterance.onerror = () => {
+        if (triggerBtn) triggerBtn.classList.remove('audio-playing');
+        document.querySelectorAll('.btn-card-speak, .btn-voice-speak, .btn-receipt-voice, .btn-voice-mini').forEach(b => b.classList.remove('audio-playing'));
+    };
+
+    window.speechSynthesis.speak(utterance);
 }
 
 function fallbackBrowserTTS(text, isHindi) {
@@ -2224,7 +2697,7 @@ function speakMachineCard(machineId, event) {
 
     const machine = fleetData.find(m => m.id === machineId);
     let fallbackHi = 'ट्रैक्टर बुकिंग सेवा';
-    let fallbackEn = 'Tractor rental service';
+    let enText = 'Tractor rental service';
 
     if (machine) {
         const rateHindiWord = numberToHindiSpeech(machine.rate);
@@ -2233,22 +2706,45 @@ function speakMachineCard(machineId, event) {
         const tool = (machine.tool && machine.tool.hi) || '';
         const toolPhrase = tool ? ` ${tool} सहित।` : '';
         fallbackHi = `${work} के लिए।${toolPhrase} किराया ${rateHindiWord} रुपये प्रति ${rateUnit}।`;
-        fallbackEn = `${(machine.suitableWork && machine.suitableWork.en) || 'Farm work'}. Rate ₹${machine.rate} per ${(machine.rateUnit && machine.rateUnit.en) || 'hour'}.`;
+
+        const titleEn = (machine.name && machine.name.en) || machine.name.hi;
+        const workEn = (machine.suitableWork && machine.suitableWork.en) || (machine.subtitle && machine.subtitle.en) || 'field operations';
+        const cropEn = (machine.suitableCrops && machine.suitableCrops.en) || 'crops';
+        const toolEn = (machine.tool && machine.tool.en) || '';
+        const toolPhraseEn = toolEn ? ` Equipped with ${toolEn}.` : '.';
+        const rateUnitEn = (machine.rateUnit && machine.rateUnit.en) || 'hour';
+        const fuelEn = selectedFuelOption === 'with-fuel' ? 'including fuel and driver' : 'fuel provided by farmer';
+        enText = `${titleEn}. Designed for ${workEn} in ${cropEn}${toolPhraseEn} Rental rate is ₹${machine.rate} per ${rateUnitEn}, ${fuelEn}.`;
     }
 
-    playLocalAudioFile(audioPath, btn, fallbackHi, fallbackEn);
+    playVoiceMessage(audioPath, btn, fallbackHi, enText);
 }
 
 function speakFinalRate() {
     const btn = document.querySelector('.btn-voice-speak');
     const audioPath = 'audio/final-rate-guarantee.mp3';
-    playLocalAudioFile(audioPath, btn, 'ट्रैक्टर बुकिंग फाइनल रेट गारंटी। बाद में कोई छुपा चार्ज नहीं।', 'Final rate guarantee. No hidden charges.');
+    const durationInput = document.getElementById('workDuration');
+    const duration = durationInput ? durationInput.value : '2';
+    const totalEl = document.getElementById('modalTotalEstimate');
+    const totalRaw = totalEl ? totalEl.textContent.replace(/[^\d]/g, '') : '1200';
+    const fuelEn = selectedFuelOption === 'with-fuel' ? 'including fuel and driver' : 'fuel by farmer';
+    const enText = `Final rate guarantee. Total estimated rent for ${duration} hours is ₹${totalRaw}, ${fuelEn}. No hidden charges later.`;
+
+    playVoiceMessage(audioPath, btn, 'ट्रैक्टर बुकिंग फाइनल रेट गारंटी। बाद में कोई छुपा चार्ज नहीं।', enText);
 }
 
 function speakReceipt() {
     const btn = document.querySelector('.btn-receipt-voice');
     const audioPath = 'audio/booking-confirmed.mp3';
-    playLocalAudioFile(audioPath, btn, 'बधाई हो किसान भाई! आपकी ट्रैक्टर बुकिंग पक्की हो गई है। हमारी टीम जल्द आपके खेत पर पहुंचेगी।', 'Congratulations! Tractor booking confirmed. Team will arrive shortly.');
+    const totalEl = document.getElementById('receiptDetailsContent');
+    let totalRaw = '1200';
+    if (totalEl) {
+        const strongs = totalEl.querySelectorAll('strong');
+        if (strongs.length > 0) totalRaw = strongs[strongs.length - 1].textContent.replace(/[^\d]/g, '');
+    }
+    const enText = `Congratulations! Tractor booking confirmed. Estimated total bill is ₹${totalRaw}. Our nearest driver team will contact you shortly and arrive at your farm.`;
+
+    playVoiceMessage(audioPath, btn, 'बधाई हो किसान भाई! आपकी ट्रैक्टर बुकिंग पक्की हो गई है। हमारी टीम जल्द आपके खेत पर पहुंचेगी।', enText);
 }
 
 function speakBookingStatus() {
@@ -2261,8 +2757,9 @@ function speakBookingStatus() {
     const msgEl = document.getElementById('statusLiveMessage');
     const msg = msgEl ? msgEl.textContent : '';
     const cleanMsg = msg.replace(/^[^\w\s\u0900-\u097F]+/, '').trim();
+    const enText = `Booking status update: ${cleanMsg}`;
 
-    playLocalAudioFile(audioPath, btn, `बुकिंग स्थिति: ${cleanMsg}`, `Booking status: ${cleanMsg}`);
+    playVoiceMessage(audioPath, btn, `बुकिंग स्थिति: ${cleanMsg}`, enText);
 }
 
 // ==========================================
@@ -3100,6 +3597,7 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 
     renderMandiTicker();
+    loadVehiclesFromDatabase();
     updateBookingBadges();
     syncBookingsFromSupabase();
 });

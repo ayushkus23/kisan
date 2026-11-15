@@ -142,7 +142,9 @@
                 <h1 class="hero-lead-line" data-i18n="heroLeadLine">फसल के टाइम पर गाड़ी, बिना एक्स्ट्रा पैसे</h1>
             </div>
             <div class="hero-action-group">
-                <button type="button" class="btn btn-hero-book-primary" onclick="document.getElementById('cropFilterSection').scrollIntoView({behavior: 'smooth'})" data-i18n="btnHeroBookVehicle">
+                <button type="button" class="btn btn-hero-book-primary"
+                    onclick="document.getElementById('cropFilterSection').scrollIntoView({behavior: 'smooth'})"
+                    data-i18n="btnHeroBookVehicle">
                     🚜 गाड़ी बुक करो
                 </button>
                 <div class="hero-sub-actions">
@@ -234,7 +236,8 @@
                 <div class="callout-icon">📞</div>
                 <div>
                     <h3 data-i18n="calloutTitle">फोन या व्हाट्सएप पर सीधे सहायता पाएं</h3>
-                    <p data-i18n="calloutDesc">अगर फॉर्म भरने में परेशानी हो, तो हमें कॉल या व्हाट्सएप करें — हमारी टीम तुरंत आपके खेत पर ट्रैक्टर भेजने में मदद करेगी।</p>
+                    <p data-i18n="calloutDesc">अगर फॉर्म भरने में परेशानी हो, तो हमें कॉल या व्हाट्सएप करें — हमारी टीम
+                        तुरंत आपके खेत पर ट्रैक्टर भेजने में मदद करेगी।</p>
                 </div>
             </div>
             <div class="callout-actions">
@@ -297,7 +300,8 @@
                                 <span data-i18n="advisoryTag">आज की कृषि सलाह (Daily Farm Advisory)</span>
                             </div>
                             <p class="advisory-text" data-i18n="advisoryText">
-                                मौसम पूरी तरह साफ और शुष्क है। गेहूं व सरसों की बोवाई, खेत की गहरी जुताई और कंबाइन से धान कटाई के
+                                मौसम पूरी तरह साफ और शुष्क है। गेहूं व सरसों की बोवाई, खेत की गहरी जुताई और कंबाइन से
+                                धान कटाई के
                                 लिए आज का दिन सर्वोत्तम है।
                             </p>
                             <div class="advisory-footer">
@@ -367,15 +371,18 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="bookingDate" data-i18n="labelBookingDate">तारीख चुनें (किस दिन चाहिए?) *</label>
-                        <input type="date" id="bookingDate" required class="form-input-date" onchange="validateBookingDate()">
-                        <span class="input-helper-text" data-i18n="helperDateRange">आज से अगले 30 दिन तक बुक कर सकते हैं</span>
+                        <input type="date" id="bookingDate" required class="form-input-date"
+                            onchange="validateBookingDate()">
+                        <span class="input-helper-text" data-i18n="helperDateRange">आज से अगले 30 दिन तक बुक कर सकते
+                            हैं</span>
                     </div>
                     <div class="form-group">
                         <label for="bookingSlot" data-i18n="labelBookingSlot">समय स्लॉट चुनें *</label>
                         <select id="bookingSlot" required class="form-select">
                             <option value="morning" data-i18n="slotMorning">🌅 सुबह (06:00 AM - 10:00 AM)</option>
                             <option value="day" selected data-i18n="slotDay">☀️ दोपहर (10:00 AM - 02:00 PM)</option>
-                            <option value="afternoon" data-i18n="slotAfternoon">🌤️ दोपहर बाद (02:00 PM - 06:00 PM)</option>
+                            <option value="afternoon" data-i18n="slotAfternoon">🌤️ दोपहर बाद (02:00 PM - 06:00 PM)
+                            </option>
                             <option value="custom" data-i18n="slotCustom">⏰ सटीक / सुविधानुसार समय</option>
                         </select>
                     </div>
@@ -411,10 +418,12 @@
                         <input type="hidden" id="farmerGpsLink" value="">
                     </div>
                     <div class="form-group">
-                        <label for="workDuration" data-i18n="labelWorkDurationHours">कितने घंटे चाहिए? (काम का समय) *</label>
+                        <label for="workDuration" data-i18n="labelWorkDurationHours">कितने घंटे चाहिए? (काम का समय)
+                            *</label>
                         <input type="number" id="workDuration" min="1" max="50" value="2" required
                             oninput="calculateEstimate()">
-                        <span class="input-helper-text" data-i18n="helperDurationHours">सटीक हिसाब के लिए सिर्फ घंटों में दर्ज करें</span>
+                        <span class="input-helper-text" data-i18n="helperDurationHours">सटीक हिसाब के लिए सिर्फ घंटों
+                            में दर्ज करें</span>
                     </div>
                 </div>
 
@@ -471,10 +480,10 @@
         <div class="modal-card receipt-card">
             <button type="button" class="modal-close-btn" onclick="closeReceiptModal()">&times;</button>
             <div class="receipt-success-icon">✅</div>
-            <h2 data-i18n="receiptTitle">बुकिंग पक्की हो गई!</h2>
-            <p class="receipt-sub" data-i18n="receiptSub">हमारी टीम आपके गांव के नजदीकी ड्राइवर से संपर्क करके जल्द
-                पहुंचेगी।</p>
-            <button type="button" class="btn-voice-speak btn-receipt-voice" onclick="speakReceipt()" title="रसीद बोल कर सुनें">
+            <h2 data-i18n="receiptTitle">आपका अनुरोध मिल गया, टीम जल्द कॉल करेगी</h2>
+            <p class="receipt-sub" data-i18n="receiptSub">ट्रैक्टर मालिक द्वारा स्वीकार करने के बाद बुकिंग पक्की होगी। हमारी टीम जल्द आपसे संपर्क करेगी।</p>
+            <button type="button" class="btn-voice-speak btn-receipt-voice" onclick="speakReceipt()"
+                title="रसीद बोल कर सुनें">
                 🔊 <span data-i18n="btnSpeakReceipt">रसीद बोल कर सुनें</span>
             </button>
 
@@ -486,7 +495,8 @@
                 <button type="button" class="btn btn-primary" id="receiptTrackBtn" onclick="trackFromReceipt()">
                     📍 <span data-i18n="receiptTrackStatusBtn">बुकिंग स्टेटस देखें</span>
                 </button>
-                <button type="button" class="btn btn-secondary" onclick="closeReceiptModal()" data-i18n="receiptCloseBtn">
+                <button type="button" class="btn btn-secondary" onclick="closeReceiptModal()"
+                    data-i18n="receiptCloseBtn">
                     ठीक है (Close)
                 </button>
             </div>
@@ -741,6 +751,18 @@
                 </div>
             </div>
 
+            <!-- Booking Lookup Form (Code + Mobile Verification) -->
+            <div class="tracking-lookup-box">
+                <div class="lookup-inputs-row">
+                    <input type="text" id="trackInputCode" placeholder="बुकिंग कोड (उदा. TRAC-0001)" class="form-input-track" autocomplete="off">
+                    <input type="tel" id="trackInputMobile" placeholder="10 अंकों का मोबाइल नंबर" maxlength="10" class="form-input-track" autocomplete="off">
+                    <button type="button" class="btn btn-primary btn-track-search" id="btnLookupBooking" onclick="handleManualStatusLookup()">
+                        🔍 <span data-i18n="btnTrackStatusSearch">स्टेटस देखें</span>
+                    </button>
+                </div>
+                <div id="trackLookupFeedback" class="track-lookup-msg" style="display: none;"></div>
+            </div>
+
             <!-- Real Booking Status Stepper (5 Steps: Requested, Accepted, Driver assigned, Reached, Work done) -->
             <div class="booking-status-stepper-box">
                 <div class="real-status-stepper" id="statusStepperContainer">
@@ -773,7 +795,8 @@
 
             <!-- Real Status Message Banner -->
             <div class="status-live-banner" id="statusLiveBanner">
-                <p id="statusLiveMessage">📢 स्थिति: अनुरोध भेज दिया गया है। टीम व ट्रैक्टर मालिक जल्द आपको कॉल करेंगे।</p>
+                <p id="statusLiveMessage">📢 स्थिति: अनुरोध भेज दिया गया है। टीम व ट्रैक्टर मालिक जल्द आपको कॉल करेंगे।
+                </p>
                 <button type="button" class="btn-voice-mini" onclick="speakBookingStatus()" title="स्टेटस बोल कर सुनें">
                     🔊 <span data-i18n="btnSpeakStatus">सुनें</span>
                 </button>
@@ -785,34 +808,35 @@
                 <div class="status-detail-grid">
                     <div class="status-detail-item">
                         <span class="detail-label">बुकिंग ID:</span>
-                        <strong class="detail-val" id="statusOrderId">TRAC-123456</strong>
+                        <strong class="detail-val" id="statusOrderId">—</strong>
                     </div>
                     <div class="status-detail-item">
                         <span class="detail-label">गाड़ी / मशीन:</span>
-                        <strong class="detail-val" id="statusMachineTitle">Mahindra 575 DI</strong>
+                        <strong class="detail-val" id="statusMachineTitle">—</strong>
                     </div>
                     <div class="status-detail-item">
                         <span class="detail-label">तारीख:</span>
-                        <strong class="detail-val" id="statusBookingDate">आज</strong>
+                        <strong class="detail-val" id="statusBookingDate">—</strong>
                     </div>
                     <div class="status-detail-item">
                         <span class="detail-label">समय स्लॉट:</span>
-                        <strong class="detail-val" id="statusBookingSlot">दोपहर (10:00 AM - 02:00 PM)</strong>
+                        <strong class="detail-val" id="statusBookingSlot">—</strong>
                     </div>
                     <div class="status-detail-item">
                         <span class="detail-label">स्थान / गांव:</span>
-                        <strong class="detail-val" id="statusFarmerVillage">रामपुर</strong>
+                        <strong class="detail-val" id="statusFarmerVillage">—</strong>
                     </div>
                     <div class="status-detail-item highlight-total">
                         <span class="detail-label">कुल अंतिम राशि:</span>
-                        <strong class="detail-val text-green" id="statusTotalAmount">₹1,200</strong>
+                        <strong class="detail-val text-green" id="statusTotalAmount">—</strong>
                     </div>
                 </div>
             </div>
 
             <!-- Action Buttons: Cancel Booking & Call Support -->
             <div class="status-actions-row">
-                <button type="button" class="btn btn-danger-outline" id="btnCancelFromStatus" onclick="handleCancelFromStatusModal()">
+                <button type="button" class="btn btn-danger-outline" id="btnCancelFromStatus"
+                    onclick="handleCancelFromStatusModal()">
                     <span data-i18n="btnCancelBookingAction">❌ बुकिंग रद्द करें</span>
                 </button>
                 <button type="button" class="btn btn-call-support" onclick="handleCallSupport()">

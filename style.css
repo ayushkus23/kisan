@@ -4536,3 +4536,86 @@ body {
         text-align: center;
     }
 }
+
+/* =========================================
+   Tracking Lookup Input Bar (Phase 1 Real Lookup)
+   ========================================= */
+.tracking-lookup-box {
+    background: #f4fbf2;
+    border: 1.5px solid #cce5c8;
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 16px;
+}
+
+.lookup-inputs-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.form-input-track {
+    flex: 1;
+    min-width: 130px;
+    padding: 10px 12px;
+    border: 1.5px solid #c8d8c2;
+    border-radius: 8px;
+    font-size: 14px;
+    background: #ffffff;
+    color: #1f3a24;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.form-input-track:focus {
+    border-color: #1f5130;
+    box-shadow: 0 0 0 2px rgba(31, 81, 48, 0.15);
+}
+
+.btn-track-search {
+    padding: 10px 16px;
+    font-size: 14px;
+    font-weight: 700;
+    white-space: nowrap;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.track-lookup-msg {
+    margin-top: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 10px;
+    border-radius: 6px;
+    line-height: 1.4;
+}
+
+.track-lookup-msg.msg-error {
+    background: #fde8e8;
+    color: #c5221f;
+    border: 1px solid #f8b4b4;
+}
+
+.track-lookup-msg.msg-success {
+    background: #def7ec;
+    color: #03543f;
+    border: 1px solid #bcf0da;
+}
+
+.track-lookup-msg.msg-loading {
+    background: #e8f0fe;
+    color: #1a73e8;
+    border: 1px solid #c2e7ff;
+}
+
+.demo-catalog-badge {
+    display: inline-block;
+    background: #fff3cd;
+    color: #856404;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-left: 6px;
+}
+
