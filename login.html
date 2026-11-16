@@ -5,9 +5,19 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Project Tractor</title>
-    <!-- Already logged-in redirect to main dashboard -->
+    <!-- Already logged-in redirect -->
     <script>
         (function() {
+            var owner = localStorage.getItem('tractorOwnerSession');
+            if (owner && owner !== 'null' && owner !== 'undefined') {
+                try {
+                    var parsed = JSON.parse(owner);
+                    if (parsed && parsed.id) {
+                        window.location.replace('owner.html');
+                        return;
+                    }
+                } catch (e) {}
+            }
             var user = localStorage.getItem('tractorUser');
             if (user && user !== 'null' && user !== 'undefined' && user.trim() !== '') {
                 window.location.replace('index.html');

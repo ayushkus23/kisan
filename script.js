@@ -888,7 +888,7 @@ function handleTractorRegistration(event) {
     const ownerPhone = document.getElementById('ownerPhone').value.trim();
     const ownerVillage = document.getElementById('ownerVillage').value.trim();
     const tractorBrand = document.getElementById('tractorBrand').value;
-    const tractorDrive = document.getElementById('tractorDrive').value;
+    const tractorDrive = document.getElementById('tractorDrive').value || '2WD';
     const tractorRC = document.getElementById('tractorRC').value.trim();
     const tractorRate = parseInt(document.getElementById('tractorRate').value) || 550;
 
@@ -897,10 +897,16 @@ function handleTractorRegistration(event) {
         return;
     }
 
+    const cleanMobile = ownerPhone.replace(/[^0-9]/g, '').slice(-10);
+    if (cleanMobile.length !== 10) {
+        alert(t.errPhoneInvalid || 'कृपया 10 अंकों का सही मोबाइल नंबर दर्ज करें');
+        return;
+    }
+
     // Pick a real photo based on chosen brand
     const photoUrl = brandRealPhotos[tractorBrand] || "images/dhan-tractor.jpg";
 
-    // Add newly registered tractor to active fleet
+    // Add newly registered tractor to fleet with verified = false (pending approval)
     const newId = 'custom-' + Date.now();
     fleetData.unshift({
         id: newId,
@@ -909,35 +915,66 @@ function handleTractorRegistration(event) {
         rate: tractorRate,
         fuelDiscount: 180,
         rateUnit: { hi: "घंटा", en: "Hour" },
-        badge: { hi: `⭐ ${ownerVillage} स्पेशल`, en: `⭐ ${ownerVillage} Local` },
+        verified: false, // Pending verification by admin!
+        badge: { hi: `⏳ ${ownerVillage} (सत्यापन लंबित)`, en: `⏳ ${ownerVillage} (Pending)` },
         name: { hi: `${tractorBrand} (${ownerName})`, en: `${tractorBrand} (${ownerName})` },
         subtitle: { hi: `मालिक: ${ownerName} | संपर्क: ${ownerPhone}`, en: `Owner: ${ownerName} | Contact: ${ownerPhone}` },
         suitableCrops: { hi: "स्थानीय फसलें व जुताई", en: "Local Crops & Tillage" },
         suitableWork: { hi: "कस्टम किराए पर उपलब्ध", en: "Available for Custom Rent" },
         tool: { hi: "रोटावेटर / कल्टीवेटर अटैच्ड", en: "Rotavator / Cultivator Attached" },
         power: tractorBrand.includes('HP') ? tractorBrand.split('(')[1].replace(')', '') : "50 HP",
-        rating: 5.0,
-        reviewsCount: 1
+        rating: null,
+        reviewsCount: 0
     });
 
-    // Sync tractor to Supabase
+    // Sync to Supabase via Phase 2 owner RPCs
     if (sbClient) {
-        sbClient.from('custom_tractors').insert([{
-            id: newId,
-            owner_name: ownerName,
-            owner_phone: ownerPhone,
-            village: ownerVillage,
-            tractor_brand: tractorBrand,
-            daily_rent: tractorRate,
-            status: 'verified',
-            created_at: new Date().toISOString()
-        }]).then();
+        (async () => {
+            try {
+                // Register owner with default PIN 1234 if not exists
+                const regRes = await sbClient.rpc('owner_register', {
+                    p_name: ownerName,
+                    p_mobile: cleanMobile,
+                    p_pin: '1234',
+                    p_village: ownerVillage,
+                    p_dl: tractorRC
+                });
+                let ownerId = regRes && regRes.data ? regRes.data.id : null;
+
+                // If owner already exists, log in to get owner ID
+                if (!ownerId) {
+                    const loginRes = await sbClient.rpc('owner_login', {
+                        p_mobile: cleanMobile,
+                        p_pin: '1234'
+                    });
+                    if (loginRes && loginRes.data) ownerId = loginRes.data.id;
+                }
+
+                if (ownerId) {
+                    await sbClient.rpc('owner_add_vehicle', {
+                        p_owner_id: ownerId,
+                        p_pin: '1234',
+                        p_brand: tractorBrand,
+                        p_drive: tractorDrive,
+                        p_rc: tractorRC,
+                        p_rate: tractorRate,
+                        p_village: ownerVillage,
+                        p_implements: ['रोटावेटर', 'कल्टीवेटर']
+                    });
+                }
+            } catch (e) {
+                console.warn('Supabase tractor registration sync error:', e);
+            }
+        })();
     }
 
     closeTractorRegModal();
     renderFleetCards(currentFilter);
 
-    alert(t.regSuccessAlert.replace('{owner}', ownerName).replace('{tractor}', tractorBrand));
+    const alertMsg = currentLang === 'hi'
+        ? `धन्यवाद ${ownerName} जी! आपका ट्रैक्टर '${tractorBrand}' पोर्टल पर दर्ज हो गया है। एडमिन द्वारा सत्यापन (Verification) के बाद यह 'सत्यापित' बैज के साथ दिखेगा।`
+        : `Thank you ${ownerName}! Your tractor '${tractorBrand}' has been listed. It will be verified by the admin shortly.`;
+    alert(alertMsg);
 }
 
 // ==========================================
@@ -3143,7 +3180,8 @@ async function handleRegister(event) {
         return;
     }
 
-    if (!/^[0-9]{10}$/.test(phone)) {
+    const cleanMobile = phone.replace(/[^0-9]/g, '').slice(-10);
+    if (cleanMobile.length !== 10) {
         showRegisterMessage(t.errPhoneInvalid, 'error');
         return;
     }
@@ -3160,13 +3198,64 @@ async function handleRegister(event) {
 
     showRegisterMessage('⏳ खाता बनाया जा रहा है...', 'info');
 
+    // ========================================================
+    // TRACTOR OWNER REGISTRATION (Phase 2 RPC to public.owners)
+    // ========================================================
+    if (role === 'owner') {
+        if (sbClient) {
+            try {
+                const { data: regRes, error: regErr } = await sbClient.rpc('owner_register', {
+                    p_name: fullName,
+                    p_mobile: cleanMobile,
+                    p_pin: password,
+                    p_village: village
+                });
+
+                if (regErr || !regRes || !regRes.success) {
+                    const errMsg = (regRes && regRes.message) || (regErr && regErr.message) || 'मालिक खाता बनाने में त्रुटि।';
+                    showRegisterMessage(errMsg, 'error');
+                    return;
+                }
+
+                // Save Owner Session
+                const ownerSession = {
+                    id: regRes.id,
+                    name: regRes.name,
+                    mobile: regRes.mobile,
+                    village: regRes.village,
+                    approved: regRes.approved || false,
+                    pin: password
+                };
+                localStorage.setItem('tractorOwnerSession', JSON.stringify(ownerSession));
+                localStorage.setItem('tractorUser', regRes.name);
+                localStorage.setItem('tractorUserProfile', JSON.stringify({
+                    fullName: regRes.name,
+                    phone: regRes.mobile,
+                    role: 'owner',
+                    village: regRes.village
+                }));
+
+                showRegisterMessage(regRes.message, 'success');
+                setTimeout(() => {
+                    window.location.replace('owner.html');
+                }, 1200);
+                return;
+            } catch (e) {
+                console.warn('Supabase owner register error:', e);
+            }
+        }
+    }
+
+    // ========================================================
+    // FARMER REGISTRATION
+    // ========================================================
     // 1. Check Supabase for existing user
     if (sbClient) {
         try {
             const { data: existingUser } = await sbClient
                 .from('users_profile')
                 .select('phone')
-                .eq('phone', phone)
+                .eq('phone', cleanMobile)
                 .maybeSingle();
 
             if (existingUser) {
@@ -3180,7 +3269,7 @@ async function handleRegister(event) {
 
     // Local check fallback
     const users = getRegisteredUsers();
-    const existing = users.find(u => u.phone === phone);
+    const existing = users.find(u => u.phone === cleanMobile);
     if (existing) {
         showRegisterMessage(t.errPhoneExists, 'error');
         return;
@@ -3189,7 +3278,7 @@ async function handleRegister(event) {
     const newUser = {
         id: 'user-' + Date.now(),
         full_name: fullName,
-        phone: phone,
+        phone: cleanMobile,
         role: role,
         village: village,
         password: password,
@@ -3208,22 +3297,20 @@ async function handleRegister(event) {
                 console.log('✅ User registered in Supabase users_profile table!');
             }
 
-            // Also register in Supabase Auth so user appears in Supabase Authentication Dashboard
             if (sbClient.auth) {
-                const syntheticEmail = `${phone}@kisan.app`;
+                const syntheticEmail = `${cleanMobile}@kisan.app`;
                 await sbClient.auth.signUp({
                     email: syntheticEmail,
                     password: password,
                     options: {
                         data: {
                             full_name: fullName,
-                            phone: phone,
+                            phone: cleanMobile,
                             village: village,
                             role: role
                         }
                     }
                 });
-                console.log('✅ User registered in Supabase Authentication Users dashboard!');
             }
         } catch (e) {
             console.warn('Supabase insert exception:', e);
@@ -3246,7 +3333,7 @@ async function handleRegister(event) {
     localStorage.setItem('tractorUser', fullName);
     localStorage.setItem('tractorUserProfile', JSON.stringify({
         fullName,
-        phone,
+        phone: cleanMobile,
         role,
         village
     }));
@@ -3274,7 +3361,7 @@ async function handleLogin(event) {
     event.preventDefault();
     const t = translations[currentLang] || translations.hi;
 
-    // PASSWORD LOGIN MODE (secure — requires registered password)
+    // PASSWORD LOGIN MODE (secure — requires registered password / PIN)
     const usernameInput = document.getElementById('username');
     const passwordInput = document.getElementById('password');
     const username = usernameInput ? usernameInput.value.trim() : '';
@@ -3292,6 +3379,54 @@ async function handleLogin(event) {
 
     showMessage('⏳ लॉगिन की पुष्टि हो रही है...', 'info');
 
+    const cleanMobile = username.replace(/[^0-9]/g, '').slice(-10);
+
+    // ========================================================
+    // 1. OWNER LOGIN CHECK (Phase 2 RPC to public.owners)
+    // ========================================================
+    if (cleanMobile.length === 10 && sbClient) {
+        try {
+            const { data: ownerRes, error: ownerErr } = await sbClient.rpc('owner_login', {
+                p_mobile: cleanMobile,
+                p_pin: password
+            });
+
+            if (!ownerErr && ownerRes && ownerRes.success) {
+                const ownerSession = {
+                    id: ownerRes.id,
+                    name: ownerRes.name,
+                    mobile: ownerRes.mobile,
+                    village: ownerRes.village,
+                    approved: ownerRes.approved,
+                    pin: password
+                };
+                localStorage.setItem('tractorOwnerSession', JSON.stringify(ownerSession));
+                localStorage.setItem('tractorUser', ownerRes.name);
+                localStorage.setItem('tractorUserProfile', JSON.stringify({
+                    fullName: ownerRes.name,
+                    phone: ownerRes.mobile,
+                    role: 'owner',
+                    village: ownerRes.village
+                }));
+
+                showMessage('✅ मालिक लॉगिन सफल! डैशबोर्ड पर ले जाया जा रहा है...', 'success');
+                setTimeout(() => {
+                    window.location.replace('owner.html');
+                }, 800);
+                return;
+            } else if (ownerRes && ownerRes.success === false && ownerRes.message && ownerRes.message.includes('गलत 4-अंकों का पिन')) {
+                // Owner exists but PIN was wrong
+                showMessage(ownerRes.message, 'error');
+                return;
+            }
+        } catch (e) {
+            console.warn('Owner login check error:', e);
+        }
+    }
+
+    // ========================================================
+    // 2. FARMER / REGULAR USER LOGIN CHECK
+    // ========================================================
     let foundUser = null;
 
     // Check Supabase cloud database first
@@ -3300,7 +3435,7 @@ async function handleLogin(event) {
             const { data, error } = await sbClient
                 .from('users_profile')
                 .select('*')
-                .or(`phone.eq.${username},full_name.ilike.${username}`)
+                .or(`phone.eq.${username},phone.eq.${cleanMobile},full_name.ilike.${username}`)
                 .maybeSingle();
 
             if (!error && data) {
@@ -3321,7 +3456,7 @@ async function handleLogin(event) {
     // Check local storage fallback (offline)
     if (!foundUser) {
         const users = getRegisteredUsers();
-        foundUser = users.find(u => u.phone === username || (u.fullName && u.fullName.toLowerCase() === username.toLowerCase()));
+        foundUser = users.find(u => u.phone === username || u.phone === cleanMobile || (u.fullName && u.fullName.toLowerCase() === username.toLowerCase()));
     }
 
     if (!foundUser) {

@@ -5,11 +5,12 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ट्रैक्टर मालिक डैशबोर्ड - Project Tractor</title>
-    <!-- Auth Guard: Redirect to login if user not logged in -->
+    <!-- Auth Guard: Redirect to login if owner not logged in -->
     <script>
         (function () {
+            var ownerSession = localStorage.getItem('tractorOwnerSession');
             var user = localStorage.getItem('tractorUser');
-            if (!user || user === 'null' || user === 'undefined' || user.trim() === '') {
+            if (!ownerSession && (!user || user === 'null' || user === 'undefined' || user.trim() === '')) {
                 window.location.replace('login.html');
             }
         })();
@@ -60,6 +61,20 @@
 
     <!-- Main Dashboard Container -->
     <main class="owner-dashboard-wrap">
+
+        <!-- Unapproved Owner Warning Banner (displayed when approved = false) -->
+        <div id="unapprovedBanner" class="owner-pending-alert-banner" style="display: none;">
+            <div class="pending-alert-icon">⚠️</div>
+            <div class="pending-alert-content">
+                <strong data-i18n="pendingAlertTitle">खाता वेरिफिकेशन में है (Verification Pending)</strong>
+                <p data-i18n="pendingAlertDesc">
+                    आपका ट्रैक्टर मालिक खाता अभी एडमिन रिव्यू में है। एडमिन स्वीकृति (Admin Approval) के बाद ही किसानों के बुकिंग ऑर्डर्स यहाँ दिखेंगे और आप स्वीकार कर सकेंगे।
+                </p>
+            </div>
+            <div class="pending-alert-badge">
+                ⏳ स्टेटस: अप्रूवल लंबित
+            </div>
+        </div>
 
         <!-- Hero Greeting Banner -->
         <section class="owner-hero-banner">
@@ -278,8 +293,22 @@
 
                 <div class="form-row-2">
                     <div class="form-group">
-                        <label for="newTractorRent">प्रति दिन किराया (₹) *</label>
-                        <input type="number" id="newTractorRent" placeholder="जैसे: 3500" min="500" required>
+                        <label for="newTractorDrive">ड्राइव प्रकार *</label>
+                        <select id="newTractorDrive">
+                            <option value="2WD">2WD (सामान्य काम)</option>
+                            <option value="4WD">4WD (भारी काम / कीचड़)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="newTractorRC">आरसी नंबर (RC Number) *</label>
+                        <input type="text" id="newTractorRC" placeholder="जैसे: UP-15-AB-1234" required>
+                    </div>
+                </div>
+
+                <div class="form-row-2">
+                    <div class="form-group">
+                        <label for="newTractorRent">प्रति दिन / घंटा किराया (₹) *</label>
+                        <input type="number" id="newTractorRent" placeholder="जैसे: 3500" min="200" required>
                     </div>
                     <div class="form-group">
                         <label for="newTractorVillage">ट्रैक्टर रखने का स्थान / गांव *</label>

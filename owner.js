@@ -124,31 +124,49 @@ document.addEventListener('DOMContentLoaded', () => {
     loadOwnerCallbacks();
 });
 
+function getOwnerSession() {
+    const raw = localStorage.getItem('tractorOwnerSession');
+    if (!raw) return null;
+    try {
+        return JSON.parse(raw);
+    } catch (e) {
+        return null;
+    }
+}
+
 function loadOwnerProfile() {
+    const session = getOwnerSession();
     const rawUser = localStorage.getItem('tractorUser') || 'मालिक';
     const rawProfile = localStorage.getItem('tractorUserProfile');
     let profile = { fullName: rawUser, village: 'भारत' };
 
     if (rawProfile) {
-        try {
-            profile = JSON.parse(rawProfile);
-        } catch (e) {}
+        try { profile = JSON.parse(rawProfile); } catch (e) {}
     }
 
-    const name = profile.fullName || rawUser;
-    const village = profile.village || 'गांव / जिला';
+    const name = (session && session.name) || profile.fullName || rawUser;
+    const village = (session && session.village) || profile.village || 'गांव / जिला';
+    const isApproved = session ? session.approved === true : true;
 
     // Update Header Chip
     const nameEl = document.getElementById('ownerChipName');
     const locEl = document.getElementById('ownerChipLoc');
     const greetingTitle = document.getElementById('ownerGreetingTitle');
+    const bannerEl = document.getElementById('unapprovedBanner');
 
-    if (nameEl) nameEl.textContent = name;
+    if (nameEl) {
+        nameEl.innerHTML = `${name} ${isApproved ? '<span style="color:#10b981;font-size:11px;font-weight:700;">✓ अधिकृत</span>' : '<span style="color:#f59e0b;font-size:11px;font-weight:700;">⏳ अप्रूवल लंबित</span>'}`;
+    }
     if (locEl) locEl.textContent = `📍 ${village}`;
     if (greetingTitle) {
         greetingTitle.textContent = currentOwnerLang === 'hi' 
             ? `राम-राम, ${name} जी! 🙏` 
             : `Welcome, ${name}! 🙏`;
+    }
+
+    // Toggle unapproved banner
+    if (bannerEl) {
+        bannerEl.style.display = isApproved ? 'none' : 'flex';
     }
 }
 
@@ -180,64 +198,84 @@ function toggleOwnerLanguage() {
 }
 
 function ownerLogout() {
+    localStorage.removeItem('tractorOwnerSession');
     localStorage.removeItem('tractorUser');
     localStorage.removeItem('tractorUserProfile');
     window.location.replace('login.html');
 }
 
 // ==========================================
-// 4. Bookings Fetching & State
+// 4. Bookings Fetching & State via Phase 2 RPC
 // ==========================================
 async function loadOwnerBookings() {
+    const session = getOwnerSession();
+
+    // 1. If owner is not approved, strictly show zero bookings and pending banner
+    if (session && session.approved !== true) {
+        ownerBookings = [];
+        updateKpiMetrics();
+        renderOwnerBookings();
+        return;
+    }
+
     let cloudData = null;
 
-    if (sbClient) {
+    // 2. Fetch via secure RPC owner_get_bookings
+    if (sbClient && session && session.id && session.pin) {
         try {
-            const { data, error } = await sbClient
-                .from('bookings')
-                .select('*')
-                .order('created_at', { ascending: false });
+            const { data, error } = await sbClient.rpc('owner_get_bookings', {
+                p_owner_id: session.id,
+                p_pin: session.pin
+            });
 
             if (!error && Array.isArray(data)) {
                 cloudData = data;
+            } else if (error) {
+                console.warn('owner_get_bookings RPC error:', error);
             }
         } catch (e) {
-            console.warn('Supabase fetch bookings error:', e);
+            console.warn('RPC invocation failed:', e);
         }
     }
 
     if (cloudData && cloudData.length > 0) {
         ownerBookings = cloudData.map(b => ({
-            orderId: b.id,
-            machineId: b.machine_id,
-            machineTitle: b.machine_name,
-            machinePhoto: tractorPhotosMap[b.machine_name] || 'images/dhan-tractor.jpg',
-            farmerName: b.farmer_name,
-            farmerPhone: b.farmer_phone,
-            farmerVillage: b.village,
+            orderId: b.booking_code || b.id,
+            bookingCode: b.booking_code,
+            machineId: b.vehicle_id,
+            machineTitle: b.vehicle_brand || 'ट्रैक्टर सेवा',
+            machinePhoto: b.vehicle_image || tractorPhotosMap[b.vehicle_brand] || 'images/dhan-tractor.jpg',
+            farmerName: b.farmer_name || 'किसान भाई',
+            farmerPhone: b.farmer_mobile || '',
+            farmerVillage: b.village_location || 'खेत का स्थान',
             gpsLink: b.gps_link,
-            duration: `${b.work_duration || 1} ${b.rate_unit || 'घंटे'}`,
+            crop: b.crop || '',
+            duration: `${b.hours || 1} घंटे`,
             fuelOption: b.fuel_option,
             fuelText: b.fuel_option === 'with-fuel' ? 'डीजल सहित' : 'डीजल किसान का',
-            total: Number(b.estimated_cost || 0).toLocaleString('en-IN'),
-            rawCost: Number(b.estimated_cost || 0),
+            total: Number(b.total_amount || b.base_amount || 0).toLocaleString('en-IN'),
+            rawCost: Number(b.total_amount || b.base_amount || 0),
             date: b.booking_date || new Date(b.created_at).toLocaleDateString('hi-IN'),
-            status: b.status || 'pending',
+            timeSlot: b.time_slot || '',
+            status: b.status || 'requested',
             createdAt: b.created_at
         }));
     } else {
-        // Fallback to localStorage
+        // Fallback to local storage only if offline/demo
         const local = localStorage.getItem('tractorBookings');
-        if (local) {
+        if (local && (!session || session.approved === true)) {
             try {
                 ownerBookings = JSON.parse(local).map(b => ({
                     ...b,
+                    bookingCode: b.bookingCode || b.orderId,
                     rawCost: parseFloat(String(b.total).replace(/,/g, '')) || 0,
-                    status: b.status || 'pending'
+                    status: b.status || 'requested'
                 }));
             } catch (e) {
                 ownerBookings = [];
             }
+        } else {
+            ownerBookings = [];
         }
     }
 
@@ -247,6 +285,7 @@ async function loadOwnerBookings() {
 
 function refreshOwnerBookings() {
     showOwnerToast('⏳ ताजा डेटा लाया जा रहा है...', '🔄');
+    loadOwnerProfile();
     loadOwnerBookings();
     loadOwnerFleet();
     loadOwnerCallbacks();
@@ -257,13 +296,13 @@ function refreshOwnerBookings() {
 // ==========================================
 function updateKpiMetrics() {
     const total = ownerBookings.length;
-    const pending = ownerBookings.filter(b => b.status === 'pending').length;
-    const accepted = ownerBookings.filter(b => b.status === 'accepted' || b.status === 'confirmed').length;
-    const rejected = ownerBookings.filter(b => b.status === 'rejected').length;
+    const pending = ownerBookings.filter(b => b.status === 'requested' || b.status === 'pending').length;
+    const accepted = ownerBookings.filter(b => ['accepted', 'assigned', 'reached', 'done', 'confirmed'].includes(b.status)).length;
+    const rejected = ownerBookings.filter(b => b.status === 'cancelled' || b.status === 'rejected').length;
 
-    // Sum of accepted earnings
+    // Sum of confirmed/done earnings
     const earnings = ownerBookings
-        .filter(b => b.status === 'accepted' || b.status === 'confirmed')
+        .filter(b => ['accepted', 'assigned', 'reached', 'done', 'confirmed'].includes(b.status))
         .reduce((sum, b) => sum + (b.rawCost || 0), 0);
 
     // Update KPI UI
@@ -303,15 +342,33 @@ function renderOwnerBookings() {
     const container = document.getElementById('ownerBookingsList');
     if (!container) return;
 
+    const session = getOwnerSession();
     const t = ownerTranslations[currentOwnerLang] || ownerTranslations.hi;
+
+    // If unapproved owner, show clear awaiting message
+    if (session && session.approved !== true) {
+        container.innerHTML = `
+            <div class="owner-empty-box" style="border: 2px dashed #f59e0b; background: #fffdf5; padding: 36px 20px;">
+                <div class="empty-icon" style="font-size: 48px;">⏳</div>
+                <h3 style="color: #92400e;">खाता सत्यापन में है (Under Admin Review)</h3>
+                <p style="max-width: 520px; margin: 10px auto; color: #78350f;">
+                    आपका खाता सुरक्षा कारणों से एडमिन द्वारा सत्यापित किया जा रहा है। सत्यापन पूरा होते ही आपके गाँव व आस-पास के किसान भाइयों के सभी बुकिंग अनुरोध यहाँ तुरंत लाइव दिखाई देंगे।
+                </p>
+                <button type="button" class="btn btn-refresh-quick" onclick="refreshOwnerBookings()" style="margin-top: 14px;">
+                    🔄 स्टेटस पुनः जांचें
+                </button>
+            </div>
+        `;
+        return;
+    }
 
     let filtered = ownerBookings;
     if (currentOwnerFilter === 'pending') {
-        filtered = ownerBookings.filter(b => b.status === 'pending');
+        filtered = ownerBookings.filter(b => b.status === 'requested' || b.status === 'pending');
     } else if (currentOwnerFilter === 'accepted') {
-        filtered = ownerBookings.filter(b => b.status === 'accepted' || b.status === 'confirmed');
+        filtered = ownerBookings.filter(b => ['accepted', 'assigned', 'reached', 'done', 'confirmed'].includes(b.status));
     } else if (currentOwnerFilter === 'rejected') {
-        filtered = ownerBookings.filter(b => b.status === 'rejected');
+        filtered = ownerBookings.filter(b => b.status === 'cancelled' || b.status === 'rejected');
     }
 
     if (filtered.length === 0) {
@@ -326,35 +383,36 @@ function renderOwnerBookings() {
     }
 
     container.innerHTML = filtered.map(b => {
-        const isPending = b.status === 'pending';
+        const isRequested = b.status === 'requested' || b.status === 'pending';
         const isAccepted = b.status === 'accepted';
         const isAssigned = b.status === 'assigned';
-        const isCompleted = b.status === 'completed' || b.status === 'done';
-        const isRejected = b.status === 'rejected';
-        const isCancelled = b.status === 'cancelled';
+        const isReached = b.status === 'reached';
+        const isDone = b.status === 'done' || b.status === 'completed';
+        const isCancelled = b.status === 'cancelled' || b.status === 'rejected';
 
         let statusClass = 'status-pending';
-        let statusText = t.statusPending;
+        let statusText = '⏳ नया अनुरोध (Pending)';
 
         if (isAccepted) {
             statusClass = 'status-accepted';
-            statusText = '🤝 स्वीकृत (Accepted)';
+            statusText = '🤝 स्वीकृत (Order Accepted)';
         } else if (isAssigned) {
             statusClass = 'status-assigned';
             statusText = '🚜 ड्राइवर रवाना (On Way)';
-        } else if (isCompleted) {
+        } else if (isReached) {
+            statusClass = 'status-reached';
+            statusText = '📍 खेत पहुंचे (Work in Progress)';
+        } else if (isDone) {
             statusClass = 'status-completed';
-            statusText = '✅ काम पूरा हुआ (Done)';
-        } else if (isRejected) {
-            statusClass = 'status-rejected';
-            statusText = t.statusRejected;
+            statusText = '✅ काम पूरा (Done)';
         } else if (isCancelled) {
             statusClass = 'status-cancelled';
-            statusText = t.statusCancelled;
+            statusText = '❌ रद्द / अस्वीकृत (Cancelled)';
         }
 
         const phoneClean = (b.farmerPhone || '').replace(/[^0-9]/g, '');
         const photo = b.machinePhoto || 'images/dhan-tractor.jpg';
+        const displayCode = b.bookingCode || b.orderId;
 
         return `
             <div class="owner-order-card ${statusClass}">
@@ -363,7 +421,7 @@ function renderOwnerBookings() {
                         <img src="${photo}" alt="${b.machineTitle}" class="order-machine-thumb">
                         <div>
                             <h3 class="order-machine-title">${b.machineTitle}</h3>
-                            <span class="order-id-tag">#${b.orderId} • 📅 ${b.date}</span>
+                            <span class="order-id-tag">कोड: <strong>${displayCode}</strong> • 📅 ${b.date}</span>
                         </div>
                     </div>
                     <span class="order-status-pill ${statusClass}">${statusText}</span>
@@ -376,15 +434,15 @@ function renderOwnerBookings() {
                     </div>
                     <div class="detail-item">
                         <span class="detail-label">📞 मोबाइल नंबर:</span>
-                        <strong class="detail-value">${b.farmerPhone || 'उपलब्ध नहीं'}</strong>
+                        <strong class="detail-value">${b.farmerPhone ? '+91 ' + b.farmerPhone : 'उपलब्ध नहीं'}</strong>
                     </div>
                     <div class="detail-item">
                         <span class="detail-label">📍 खेत का गांव / पता:</span>
                         <span class="detail-value">${b.farmerVillage || 'गांव का नाम'}</span>
                     </div>
                     <div class="detail-item">
-                        <span class="detail-label">⏱️ काम का समय:</span>
-                        <span class="detail-value">${b.duration} (${b.fuelText})</span>
+                        <span class="detail-label">⏱️ काम का समय / स्लॉट:</span>
+                        <span class="detail-value">${b.duration} (${b.fuelText}) ${b.timeSlot ? '• ' + b.timeSlot : ''}</span>
                     </div>
                 </div>
 
@@ -396,49 +454,63 @@ function renderOwnerBookings() {
 
                     <div class="order-action-buttons">
                         <!-- Direct Call -->
-                        <a href="tel:${phoneClean}" class="btn-action-icon btn-call" title="कॉल करें">
-                            📞
-                        </a>
-                        <!-- WhatsApp Chat -->
-                        <a href="https://wa.me/91${phoneClean}?text=Namaste%20${encodeURIComponent(b.farmerName)}%20ji,%20main%20Project%20Tractor%20se%20aapki%20tractor%20booking%20ke%20liye%20sampark%20kar%20raha%20hoon." target="_blank" rel="noopener noreferrer" class="btn-action-icon btn-whatsapp" title="WhatsApp पर पूछें">
-                            💬
-                        </a>
+                        ${phoneClean ? `
+                            <a href="tel:${phoneClean}" class="btn-action-icon btn-call" title="कॉल करें">
+                                📞
+                            </a>
+                            <a href="https://wa.me/91${phoneClean}?text=Namaste%20${encodeURIComponent(b.farmerName)}%20ji,%20main%20Project%20Tractor%20se%20aapki%20booking%20${encodeURIComponent(displayCode)}%20ke%20silsile%20mein%20sampark%20kar%20raha%20hoon." target="_blank" rel="noopener noreferrer" class="btn-action-icon btn-whatsapp" title="WhatsApp पर पूछें">
+                                💬
+                            </a>
+                        ` : ''}
+
                         <!-- View GPS Route -->
-                        <button type="button" class="btn-action-route" onclick="openRouteModal('${b.orderId}')">
+                        <button type="button" class="btn-action-route" onclick="openRouteModal('${displayCode}')">
                             ${t.btnViewRoute}
                         </button>
 
-                        <!-- Accept / Reject Actions -->
-                        ${isPending ? `
-                            <button type="button" class="btn-action-accept" onclick="acceptBooking('${b.orderId}')">
-                                ${t.btnAccept}
+                        <!-- Step 1: When Requested -> Accept or Reject -->
+                        ${isRequested ? `
+                            <button type="button" class="btn-action-accept" onclick="updateOwnerBookingStatus('${displayCode}', 'accepted')">
+                                ✅ स्वीकारें (Accept)
                             </button>
-                            <button type="button" class="btn-action-reject" onclick="rejectBooking('${b.orderId}')">
-                                ${t.btnReject}
+                            <button type="button" class="btn-action-reject" onclick="updateOwnerBookingStatus('${displayCode}', 'cancelled')">
+                                ❌ अस्वीकारें (Reject)
                             </button>
                         ` : ''}
 
+                        <!-- Step 2: When Accepted -> Dispatch Driver -->
                         ${isAccepted ? `
-                            <button type="button" class="btn-action-dispatch" onclick="dispatchDriver('${b.orderId}')" title="ड्राइवर को खेत की ओर रवाना करें">
-                                🚜 ड्राइवर रवाना करें
-                            </button>
-                            <button type="button" class="btn-action-complete" onclick="completeBooking('${b.orderId}')" title="काम पूरा दर्ज करें">
-                                ✅ काम पूरा
+                            <button type="button" class="btn-action-dispatch" onclick="updateOwnerBookingStatus('${displayCode}', 'assigned')" title="ड्राइवर रवाना करें">
+                                🚜 ड्राइवर रवाना (On Way)
                             </button>
                         ` : ''}
 
+                        <!-- Step 3: When Assigned -> Mark Reached Farm -->
                         ${isAssigned ? `
-                            <button type="button" class="btn-action-complete" onclick="completeBooking('${b.orderId}')" title="काम पूरा दर्ज करें">
-                                ✅ काम पूरा हुआ
+                            <button type="button" class="btn-action-reached" onclick="updateOwnerBookingStatus('${displayCode}', 'reached')" title="खेत पहुंचे मार्क करें">
+                                📍 खेत पहुंचे (Mark Reached)
                             </button>
                         ` : ''}
 
-                        ${isCompleted ? `
-                            <span class="badge-action-done" style="background:#e8f5e9;color:#2e7d32;">🏁 काम पूरा व पेमेंट प्राप्त</span>
+                        <!-- Step 4: When Reached -> Mark Done / Completed -->
+                        ${isReached ? `
+                            <button type="button" class="btn-action-complete" onclick="updateOwnerBookingStatus('${displayCode}', 'done')" title="काम पूरा दर्ज करें">
+                                🏁 काम पूरा हुआ (Mark Done)
+                            </button>
                         ` : ''}
 
-                        ${isRejected ? `
-                            <span class="badge-action-done rejected">❌ अस्वीकृत</span>
+                        <!-- Completed Badge -->
+                        ${isDone ? `
+                            <span class="badge-action-done" style="background:#e8f5e9;color:#2e7d32;padding:6px 12px;border-radius:6px;font-weight:700;">
+                                🏁 काम पूरा व पेमेंट प्राप्त
+                            </span>
+                        ` : ''}
+
+                        <!-- Cancelled Badge -->
+                        ${isCancelled ? `
+                            <span class="badge-action-done rejected" style="background:#fef2f2;color:#dc2626;padding:6px 12px;border-radius:6px;font-weight:700;">
+                                ❌ रद्द / अस्वीकृत
+                            </span>
                         ` : ''}
                     </div>
                 </div>
@@ -448,131 +520,70 @@ function renderOwnerBookings() {
 }
 
 // ==========================================
-// 7. Accept / Reject Decision Handlers
+// 7. Live Status Transitions via Phase 2 RPC
 // ==========================================
-async function acceptBooking(orderId) {
-    const t = ownerTranslations[currentOwnerLang] || ownerTranslations.hi;
-    const target = ownerBookings.find(b => b.orderId === orderId);
-    if (!target) return;
+async function updateOwnerBookingStatus(bookingCode, newStatus) {
+    const session = getOwnerSession();
+    if (!session || !session.id || !session.pin) {
+        alert('मालिक सत्र समाप्त हो गया है। कृपया पुनः लॉगिन करें।');
+        window.location.replace('login.html');
+        return;
+    }
 
-    target.status = 'accepted';
-    updateKpiMetrics();
-    renderOwnerBookings();
-    showOwnerToast(t.toastAccepted, '✅');
+    if (newStatus === 'cancelled' && !confirm('क्या आप सच में इस बुकिंग को अस्वीकार (Reject) करना चाहते हैं?')) {
+        return;
+    }
 
-    // Sync to Supabase
+    if (newStatus === 'done' && !confirm('क्या खेत का काम पूरा हो चुका है और किसान से किराया प्राप्त हो गया है?')) {
+        return;
+    }
+
+    showOwnerToast('⏳ स्थिति अपडेट की जा रही है...', '🔄');
+
+    // 1. Call Secure Supabase RPC
     if (sbClient) {
         try {
-            await sbClient
-                .from('bookings')
-                .update({ status: 'accepted' })
-                .eq('id', orderId);
+            const { data, error } = await sbClient.rpc('owner_update_booking_status', {
+                p_owner_id: session.id,
+                p_pin: session.pin,
+                p_booking_code: bookingCode,
+                p_new_status: newStatus
+            });
+
+            if (error || !data || !data.success) {
+                const msg = (data && data.message) || (error && error.message) || 'त्रुटि हुई';
+                showOwnerToast(`⚠️ ${msg}`, '⚠️');
+                return;
+            }
         } catch (e) {
-            console.warn('Supabase accept error:', e);
+            console.warn('owner_update_booking_status error:', e);
         }
     }
 
-    // Sync to localStorage
-    const local = localStorage.getItem('tractorBookings');
-    if (local) {
-        try {
-            const arr = JSON.parse(local);
-            const found = arr.find(b => b.orderId === orderId);
-            if (found) {
-                found.status = 'accepted';
-                localStorage.setItem('tractorBookings', JSON.stringify(arr));
-            }
-        } catch (e) {}
+    // 2. Update local state & UI
+    const target = ownerBookings.find(b => b.bookingCode === bookingCode || b.orderId === bookingCode);
+    if (target) {
+        target.status = newStatus;
     }
-}
 
-async function rejectBooking(orderId) {
-    const t = ownerTranslations[currentOwnerLang] || ownerTranslations.hi;
-    if (!confirm('क्या आप सच में इस बुकिंग अनुरोध को अस्वीकार (Reject) करना चाहते हैं?')) return;
-
-    const target = ownerBookings.find(b => b.orderId === orderId);
-    if (!target) return;
-
-    target.status = 'rejected';
     updateKpiMetrics();
     renderOwnerBookings();
-    showOwnerToast(t.toastRejected, '⚠️');
 
-    // Sync to Supabase
-    if (sbClient) {
-        try {
-            await sbClient
-                .from('bookings')
-                .update({ status: 'rejected' })
-                .eq('id', orderId);
-        } catch (e) {
-            console.warn('Supabase reject error:', e);
-        }
-    }
-
-    // Sync to localStorage
-    const local = localStorage.getItem('tractorBookings');
-    if (local) {
-        try {
-            const arr = JSON.parse(local);
-            const found = arr.find(b => b.orderId === orderId);
-            if (found) {
-                found.status = 'rejected';
-                localStorage.setItem('tractorBookings', JSON.stringify(arr));
-            }
-        } catch (e) {}
-    }
-}
-
-async function updateOwnerBookingStatus(orderId, newStatus, toastMsg, toastIcon) {
-    const target = ownerBookings.find(b => b.orderId === orderId);
-    if (!target) return;
-
-    target.status = newStatus;
-    updateKpiMetrics();
-    renderOwnerBookings();
-    if (toastMsg) showOwnerToast(toastMsg, toastIcon || '✅');
-
-    // Sync to Supabase
-    if (sbClient) {
-        try {
-            await sbClient
-                .from('bookings')
-                .update({ status: newStatus })
-                .eq('id', orderId);
-        } catch (e) {
-            console.warn('Supabase status error:', e);
-        }
-    }
-
-    // Sync to localStorage
-    const local = localStorage.getItem('tractorBookings');
-    if (local) {
-        try {
-            const arr = JSON.parse(local);
-            const found = arr.find(b => b.orderId === orderId);
-            if (found) {
-                found.status = newStatus;
-                localStorage.setItem('tractorBookings', JSON.stringify(arr));
-            }
-        } catch (e) {}
-    }
-}
-
-async function dispatchDriver(orderId) {
-    await updateOwnerBookingStatus(orderId, 'assigned', '🚜 ड्राइवर खेत के लिए रवाना हो गया!', '🚜');
-}
-
-async function completeBooking(orderId) {
-    if (!confirm('क्या खेत का काम पूरा हो चुका है और किसान से किराया प्राप्त हो गया है?')) return;
-    await updateOwnerBookingStatus(orderId, 'completed', '✅ काम पूरा हुआ व पेमेंट प्राप्त!', '🏁');
+    const statusLabels = {
+        accepted: 'बुकिंग सफलतापूर्वक स्वीकार कर ली गई!',
+        assigned: 'ड्राइवर खेत की ओर रवाना हो गया!',
+        reached: 'ट्रैक्टर खेत पर पहुंच गया!',
+        done: 'काम सफलतापूर्वक पूरा दर्ज हुआ व पेमेंट प्राप्त!',
+        cancelled: 'बुकिंग अस्वीकार/रद्द कर दी गई।'
+    };
+    showOwnerToast(`✅ ${statusLabels[newStatus] || 'अपडेट सफल!'}`, '✅');
 }
 
 // ==========================================
 // 8. Farm GPS Route Modal
 // ==========================================
 function openRouteModal(orderId) {
-    const b = ownerBookings.find(item => item.orderId === orderId);
+    const b = ownerBookings.find(item => item.orderId === orderId || item.bookingCode === orderId);
     if (!b) return;
 
     const modal = document.getElementById('ownerRouteModal');
@@ -583,7 +594,7 @@ function openRouteModal(orderId) {
     const gmapsBtn = document.getElementById('btnOpenGoogleMaps');
 
     if (farmerNameEl) farmerNameEl.textContent = b.farmerName || 'किसान भाई';
-    if (farmerPhoneEl) farmerPhoneEl.textContent = b.farmerPhone || 'उपलब्ध नहीं';
+    if (farmerPhoneEl) farmerPhoneEl.textContent = b.farmerPhone ? '+91 ' + b.farmerPhone : 'उपलब्ध नहीं';
     if (farmerVillageEl) farmerVillageEl.textContent = b.farmerVillage || 'खेत का गांव';
 
     const cleanPhone = (b.farmerPhone || '').replace(/[^0-9]/g, '');
@@ -606,74 +617,58 @@ function closeRouteModal() {
 }
 
 // ==========================================
-// 9. My Fleet (Registered Tractors)
+// 9. My Fleet via public.vehicles table
 // ==========================================
 async function loadOwnerFleet() {
+    const session = getOwnerSession();
     let cloudTractors = null;
-    const rawUser = localStorage.getItem('tractorUser');
 
-    if (sbClient) {
+    if (sbClient && session && session.id) {
         try {
             const { data, error } = await sbClient
-                .from('custom_tractors')
+                .from('vehicles')
                 .select('*')
+                .eq('owner_id', session.id)
                 .order('created_at', { ascending: false });
 
             if (!error && Array.isArray(data)) {
                 cloudTractors = data;
             }
         } catch (e) {
-            console.warn('Supabase fetch fleet error:', e);
+            console.warn('Supabase fetch vehicles error:', e);
         }
     }
 
     if (cloudTractors && cloudTractors.length > 0) {
         ownerFleet = cloudTractors.map(t => ({
             id: t.id,
-            brand: t.tractor_brand,
-            rent: t.daily_rent,
-            village: t.village,
-            ownerName: t.owner_name,
-            ownerPhone: t.owner_phone,
-            photo: tractorPhotosMap[t.tractor_brand] || 'images/dhan-tractor.jpg',
-            status: t.status || 'active'
+            brand: t.brand_model,
+            rent: t.rate_per_hour || t.rate_with_diesel,
+            village: t.village || 'गृह क्षेत्र',
+            photo: t.image_url || tractorPhotosMap[t.brand_model] || 'images/dhan-tractor.jpg',
+            verified: t.verified === true,
+            active: t.active === true
         }));
     } else {
-        // Fallback to localStorage
-        const local = localStorage.getItem('customTractors');
-        if (local) {
-            try {
-                ownerFleet = JSON.parse(local).map(t => ({
-                    ...t,
-                    brand: t.brand || t.tractor_brand,
-                    rent: t.rent || t.daily_rent,
-                    photo: tractorPhotosMap[t.brand || t.tractor_brand] || 'images/dhan-tractor.jpg',
-                    status: 'active'
-                }));
-            } catch (e) {
-                ownerFleet = [];
-            }
-        }
-    }
-
-    // Default sample tractors if empty so owner sees a populated fleet
-    if (ownerFleet.length === 0) {
+        // Fallback demo fleet for verified partner
         ownerFleet = [
             {
                 id: 'fleet-1',
-                brand: 'Mahindra 575 DI (45 HP)',
-                rent: 3200,
-                village: 'गृह क्षेत्र (Base Garage)',
+                brand: 'धान 4WD मड-मास्टर ट्रैक्टर (Mahindra 575 DI)',
+                rent: 600,
+                village: 'मेरठ (पश्चिमी यूपी)',
                 photo: 'images/dhan-tractor.jpg',
-                status: 'active'
+                verified: true,
+                active: true
             },
             {
                 id: 'fleet-2',
-                brand: 'Swaraj 855 FE (52 HP)',
-                rent: 3800,
-                village: 'गृह क्षेत्र (Base Garage)',
+                brand: 'सुपर-सीडर व रोटावेटर ट्रैक्टर (Swaraj 855 FE)',
+                rent: 550,
+                village: 'मेरठ (पश्चिमी यूपी)',
                 photo: 'images/gehu-tractor.jpg',
-                status: 'active'
+                verified: true,
+                active: true
             }
         ];
     }
@@ -701,11 +696,13 @@ function renderOwnerFleet() {
         <div class="fleet-card">
             <img src="${item.photo || 'images/dhan-tractor.jpg'}" alt="${item.brand}" class="fleet-card-img">
             <div class="fleet-card-body">
-                <div class="fleet-status-chip">🟢 काम के लिए उपलब्ध (Active)</div>
+                <div class="fleet-status-chip ${item.verified ? 'verified-chip' : 'pending-chip'}" style="margin-bottom:8px; font-weight:700;">
+                    ${item.verified ? '🟢 सत्यापित ट्रैक्टर (Verified)' : '⏳ सत्यापन लंबित (Pending Admin Approval)'}
+                </div>
                 <h4 class="fleet-brand-title">${item.brand}</h4>
                 <div class="fleet-meta-row">
                     <span>📍 स्थान: ${item.village || 'गांव'}</span>
-                    <strong class="fleet-rent-tag">₹${Number(item.rent).toLocaleString('en-IN')}/दिन</strong>
+                    <strong class="fleet-rent-tag">₹${Number(item.rent).toLocaleString('en-IN')}/घंटा</strong>
                 </div>
             </div>
         </div>
@@ -713,7 +710,7 @@ function renderOwnerFleet() {
 }
 
 // ==========================================
-// 10. Add Tractor Modal Handler
+// 10. Add Tractor Modal via owner_add_vehicle RPC
 // ==========================================
 function openOwnerTractorModal() {
     const modal = document.getElementById('ownerAddTractorModal');
@@ -727,49 +724,58 @@ function closeOwnerTractorModal() {
 
 async function handleOwnerAddTractor(event) {
     event.preventDefault();
-    const t = ownerTranslations[currentOwnerLang] || ownerTranslations.hi;
+    const session = getOwnerSession();
+    if (!session || !session.id || !session.pin) {
+        alert('कृपया पहले लॉगिन करें।');
+        return;
+    }
 
     const brand = document.getElementById('newTractorBrand')?.value;
-    const rent = parseFloat(document.getElementById('newTractorRent')?.value) || 3000;
-    const village = document.getElementById('newTractorVillage')?.value || '';
-    const rawUser = localStorage.getItem('tractorUser') || 'मालिक';
-    const profile = JSON.parse(localStorage.getItem('tractorUserProfile') || '{}');
+    const drive = document.getElementById('newTractorDrive')?.value || '2WD';
+    const rc = document.getElementById('newTractorRC')?.value || 'RC-APPLIED';
+    const rent = parseFloat(document.getElementById('newTractorRent')?.value) || 550;
+    const village = document.getElementById('newTractorVillage')?.value || session.village || '';
 
     if (!brand || !rent || !village) return;
 
-    const newTractor = {
-        id: 'tractor-' + Date.now(),
-        owner_name: profile.fullName || rawUser,
-        owner_phone: profile.phone || '9876543210',
-        village: village,
-        tractor_brand: brand,
-        daily_rent: rent,
-        status: 'active',
-        created_at: new Date().toISOString()
-    };
+    showOwnerToast('⏳ ट्रैक्टर जोड़ा जा रहा है...', '🚜');
 
-    // Save to Supabase
     if (sbClient) {
         try {
-            await sbClient.from('custom_tractors').insert([newTractor]);
+            const { data, error } = await sbClient.rpc('owner_add_vehicle', {
+                p_owner_id: session.id,
+                p_pin: session.pin,
+                p_brand: brand,
+                p_drive: drive,
+                p_rc: rc,
+                p_rate: rent,
+                p_village: village,
+                p_implements: ['रोटावेटर', 'कल्टीवेटर']
+            });
+
+            if (error || !data || !data.success) {
+                showOwnerToast((data && data.message) || 'जोड़ने में त्रुटि', '⚠️');
+                return;
+            }
         } catch (e) {
-            console.warn('Supabase add tractor error:', e);
+            console.warn('owner_add_vehicle error:', e);
         }
     }
 
-    // Save to local fleet list
+    // Add to local fleet
     ownerFleet.unshift({
-        id: newTractor.id,
+        id: 'fleet-' + Date.now(),
         brand: brand,
         rent: rent,
         village: village,
         photo: tractorPhotosMap[brand] || 'images/dhan-tractor.jpg',
-        status: 'active'
+        verified: false,
+        active: true
     });
 
     renderOwnerFleet();
     closeOwnerTractorModal();
-    showOwnerToast(t.toastTractorAdded, '🚜');
+    showOwnerToast('🎉 नया ट्रैक्टर सफलतापूर्वक लिस्ट हो गया (सत्यापन लंबित)!', '🚜');
 }
 
 // ==========================================

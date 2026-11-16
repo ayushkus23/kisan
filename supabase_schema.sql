@@ -352,3 +352,334 @@ ON CONFLICT (id) DO UPDATE SET
     rate_without_diesel = EXCLUDED.rate_without_diesel,
     active = EXCLUDED.active;
 
+-- ====================================================================
+-- PHASE 2: OWNER AUTHENTICATION, OWNER ACTIONS & ADMIN FUNCTIONS
+-- ====================================================================
+
+-- 1. Set default PIN '1234' for verified demo partner
+UPDATE public.owners 
+SET pin_hash = '1234' 
+WHERE mobile = '9876543210';
+
+-- 2. Owner Registration (Mobile + 4-Digit PIN)
+CREATE OR REPLACE FUNCTION public.owner_register(
+    p_name TEXT,
+    p_mobile TEXT,
+    p_pin TEXT,
+    p_village TEXT,
+    p_dl TEXT DEFAULT NULL
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+    v_clean_mobile TEXT;
+    v_existing_id UUID;
+    v_new_id UUID;
+BEGIN
+    v_clean_mobile := RIGHT(REGEXP_REPLACE(p_mobile, '[^0-9]', '', 'g'), 10);
+    IF LENGTH(v_clean_mobile) <> 10 THEN
+        RETURN jsonb_build_object('success', false, 'message', 'कृपया 10 अंकों का सही मोबाइल नंबर दर्ज करें');
+    END IF;
+
+    IF LENGTH(p_pin) < 4 THEN
+        RETURN jsonb_build_object('success', false, 'message', 'पिन कम से कम 4 अंकों का होना चाहिए');
+    END IF;
+
+    SELECT id INTO v_existing_id FROM public.owners WHERE mobile = v_clean_mobile;
+    IF v_existing_id IS NOT NULL THEN
+        RETURN jsonb_build_object('success', false, 'message', 'यह मोबाइल नंबर पहले से पंजीकृत है। कृपया लॉगिन करें।');
+    END IF;
+
+    INSERT INTO public.owners (name, mobile, pin_hash, village_district, dl_number, approved)
+    VALUES (p_name, v_clean_mobile, p_pin, p_village, p_dl, false)
+    RETURNING id INTO v_new_id;
+
+    RETURN jsonb_build_object(
+        'success', true,
+        'id', v_new_id,
+        'name', p_name,
+        'mobile', v_clean_mobile,
+        'village', p_village,
+        'approved', false,
+        'message', 'खाता सफलतापूर्वक बन गया है! एडमिन द्वारा अप्रूव होने के बाद आपको बुकिंग्स दिखेंगी।'
+    );
+END;
+$$;
+
+-- 3. Owner Login (Mobile + 4-Digit PIN)
+CREATE OR REPLACE FUNCTION public.owner_login(
+    p_mobile TEXT,
+    p_pin TEXT
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+    v_clean_mobile TEXT;
+    v_owner RECORD;
+BEGIN
+    v_clean_mobile := RIGHT(REGEXP_REPLACE(p_mobile, '[^0-9]', '', 'g'), 10);
+
+    SELECT id, name, mobile, pin_hash, village_district, approved
+    INTO v_owner
+    FROM public.owners
+    WHERE mobile = v_clean_mobile;
+
+    IF v_owner.id IS NULL THEN
+        RETURN jsonb_build_object('success', false, 'message', 'यह मोबाइल नंबर पंजीकृत नहीं है। कृपया पहले नया खाता बनाएं।');
+    END IF;
+
+    IF v_owner.pin_hash <> p_pin THEN
+        RETURN jsonb_build_object('success', false, 'message', 'गलत 4-अंकों का पिन। कृपया सही पिन डालें।');
+    END IF;
+
+    RETURN jsonb_build_object(
+        'success', true,
+        'id', v_owner.id,
+        'name', v_owner.name,
+        'mobile', v_owner.mobile,
+        'village', v_owner.village_district,
+        'approved', v_owner.approved
+    );
+END;
+$$;
+
+-- 4. Owner Get Bookings (Only for Approved Owners & Their Vehicles)
+CREATE OR REPLACE FUNCTION public.owner_get_bookings(
+    p_owner_id UUID,
+    p_pin TEXT
+)
+RETURNS SETOF jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+    v_approved BOOLEAN;
+    v_valid_pin BOOLEAN;
+BEGIN
+    SELECT (pin_hash = p_pin), approved
+    INTO v_valid_pin, v_approved
+    FROM public.owners
+    WHERE id = p_owner_id;
+
+    IF v_valid_pin IS NOT TRUE THEN
+        RAISE EXCEPTION 'Unauthorized: Invalid PIN';
+    END IF;
+
+    IF v_approved IS NOT TRUE THEN
+        RETURN;
+    END IF;
+
+    RETURN QUERY
+    SELECT jsonb_build_object(
+        'id', b.id,
+        'booking_code', b.booking_code,
+        'vehicle_id', b.vehicle_id,
+        'vehicle_brand', COALESCE(v.brand_model, 'ट्रैक्टर सेवा'),
+        'vehicle_image', COALESCE(v.image_url, 'images/dhan-tractor.jpg'),
+        'farmer_name', b.farmer_name,
+        'farmer_mobile', b.farmer_mobile,
+        'village_location', b.village_location,
+        'crop', b.crop,
+        'booking_date', b.booking_date,
+        'time_slot', b.time_slot,
+        'hours', b.hours,
+        'fuel_option', b.fuel_option,
+        'base_amount', b.base_amount,
+        'total_amount', b.total_amount,
+        'status', b.status,
+        'gps_link', b.gps_link,
+        'created_at', b.created_at
+    )
+    FROM public.bookings b
+    LEFT JOIN public.vehicles v ON b.vehicle_id = v.id
+    WHERE v.owner_id = p_owner_id
+       OR b.vehicle_id IS NULL
+    ORDER BY b.created_at DESC;
+END;
+$$;
+
+-- 5. Owner Update Booking Status (Accept / Reject / Reached / Done)
+CREATE OR REPLACE FUNCTION public.owner_update_booking_status(
+    p_owner_id UUID,
+    p_pin TEXT,
+    p_booking_code TEXT,
+    p_new_status TEXT
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+    v_approved BOOLEAN;
+    v_valid_pin BOOLEAN;
+    v_booking_id UUID;
+BEGIN
+    SELECT (pin_hash = p_pin), approved
+    INTO v_valid_pin, v_approved
+    FROM public.owners
+    WHERE id = p_owner_id;
+
+    IF v_valid_pin IS NOT TRUE OR v_approved IS NOT TRUE THEN
+        RETURN jsonb_build_object('success', false, 'message', 'अनधिकृत: आपका खाता स्वीकृत नहीं है या पिन गलत है');
+    END IF;
+
+    IF p_new_status NOT IN ('accepted', 'assigned', 'reached', 'done', 'cancelled') THEN
+        RETURN jsonb_build_object('success', false, 'message', 'अमान्य स्थिति (Invalid status)');
+    END IF;
+
+    UPDATE public.bookings
+    SET status = p_new_status
+    WHERE UPPER(TRIM(booking_code)) = UPPER(TRIM(p_booking_code))
+    RETURNING id INTO v_booking_id;
+
+    IF v_booking_id IS NULL THEN
+        RETURN jsonb_build_object('success', false, 'message', 'बुकिंग नहीं मिली');
+    END IF;
+
+    RETURN jsonb_build_object('success', true, 'status', p_new_status, 'message', 'स्थिति सफलतापूर्वक अपडेट हो गई');
+END;
+$$;
+
+-- 6. Owner Add Vehicle
+CREATE OR REPLACE FUNCTION public.owner_add_vehicle(
+    p_owner_id UUID,
+    p_pin TEXT,
+    p_brand TEXT,
+    p_drive TEXT,
+    p_rc TEXT,
+    p_rate NUMERIC,
+    p_village TEXT,
+    p_implements TEXT[] DEFAULT '{}'
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+    v_valid_pin BOOLEAN;
+    v_new_id UUID;
+BEGIN
+    SELECT (pin_hash = p_pin) INTO v_valid_pin
+    FROM public.owners
+    WHERE id = p_owner_id;
+
+    IF v_valid_pin IS NOT TRUE THEN
+        RETURN jsonb_build_object('success', false, 'message', 'अनधिकृत: अमान्य पिन');
+    END IF;
+
+    INSERT INTO public.vehicles (
+        owner_id, brand_model, drive_type, rc_number, rate_per_hour,
+        rate_with_diesel, rate_without_diesel, implements, village, verified, active
+    ) VALUES (
+        p_owner_id, p_brand, p_drive, p_rc, p_rate,
+        p_rate, GREATEST(p_rate - 200, 200), p_implements, p_village, false, true
+    )
+    RETURNING id INTO v_new_id;
+
+    RETURN jsonb_build_object(
+        'success', true,
+        'id', v_new_id,
+        'message', 'ट्रैक्टर सफलतापूर्वक लिस्ट हो गया (सत्यापन लंबित)'
+    );
+END;
+$$;
+
+-- 7. Admin: Get Overview (All Owners, Bookings, Vehicles)
+CREATE OR REPLACE FUNCTION public.admin_get_overview()
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+    v_owners JSONB;
+    v_bookings JSONB;
+    v_vehicles JSONB;
+BEGIN
+    SELECT COALESCE(jsonb_agg(to_jsonb(o)), '[]'::jsonb)
+    INTO v_owners
+    FROM (SELECT id, name, mobile, village_district, dl_number, approved, created_at FROM public.owners ORDER BY created_at DESC) o;
+
+    SELECT COALESCE(jsonb_agg(to_jsonb(b)), '[]'::jsonb)
+    INTO v_bookings
+    FROM (
+        SELECT b.*, v.brand_model as vehicle_brand, o.name as owner_name, o.mobile as owner_mobile
+        FROM public.bookings b
+        LEFT JOIN public.vehicles v ON b.vehicle_id = v.id
+        LEFT JOIN public.owners o ON v.owner_id = o.id
+        ORDER BY b.created_at DESC
+    ) b;
+
+    SELECT COALESCE(jsonb_agg(to_jsonb(v)), '[]'::jsonb)
+    INTO v_vehicles
+    FROM (
+        SELECT v.*, o.name as owner_name, o.mobile as owner_mobile
+        FROM public.vehicles v
+        LEFT JOIN public.owners o ON v.owner_id = o.id
+        ORDER BY v.created_at DESC
+    ) v;
+
+    RETURN jsonb_build_object(
+        'owners', v_owners,
+        'bookings', v_bookings,
+        'vehicles', v_vehicles
+    );
+END;
+$$;
+
+-- 8. Admin: Toggle Owner Approval
+CREATE OR REPLACE FUNCTION public.admin_toggle_owner_approval(p_owner_id UUID, p_approved BOOLEAN)
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+    UPDATE public.owners
+    SET approved = p_approved
+    WHERE id = p_owner_id;
+    RETURN FOUND;
+END;
+$$;
+
+-- 9. Admin: Toggle Vehicle Verification
+CREATE OR REPLACE FUNCTION public.admin_toggle_vehicle_verification(p_vehicle_id UUID, p_verified BOOLEAN)
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+    UPDATE public.vehicles
+    SET verified = p_verified
+    WHERE id = p_vehicle_id;
+    RETURN FOUND;
+END;
+$$;
+
+-- 10. Admin: Assign Vehicle to Booking
+CREATE OR REPLACE FUNCTION public.admin_assign_vehicle(p_booking_code TEXT, p_vehicle_id UUID)
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+    UPDATE public.bookings
+    SET vehicle_id = p_vehicle_id,
+        status = CASE WHEN status = 'requested' THEN 'accepted' ELSE status END
+    WHERE UPPER(TRIM(booking_code)) = UPPER(TRIM(p_booking_code));
+    RETURN FOUND;
+END;
+$$;
+
+
