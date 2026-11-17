@@ -73,7 +73,7 @@ async function handleAdminLogin(event) {
     if (allowedUsernames.includes(email)) {
         email = 'ayushkushwaha2312@gmail.com'; // map to verified admin email
     } else {
-        showAdminMsg('⚠️ अनधिकृत ईमेल! केवल अधिकृत एडमिन (ayushkushwaha2312@gmail.com) ही लॉगिन कर सकते हैं।', 'error');
+        showAdminMsg('⚠️ अनधिकृत यूजरनेम! केवल अधिकृत एडमिन ही लॉगिन कर सकते हैं।', 'error');
         return;
     }
 
