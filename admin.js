@@ -53,17 +53,27 @@ async function handleAdminLogin(event) {
     const emailInput = document.getElementById('adminEmail');
     const passwordInput = document.getElementById('adminPassword');
 
-    const email = emailInput ? emailInput.value.trim().toLowerCase() : '';
+    let email = emailInput ? emailInput.value.trim().toLowerCase() : '';
     const password = passwordInput ? passwordInput.value.trim() : '';
 
     if (!email || !password) {
-        showAdminMsg('कृपया अपनी ईमेल और पासवर्ड दर्ज करें', 'error');
+        showAdminMsg('कृपया अपनी ईमेल/यूजरनेम और पासवर्ड दर्ज करें', 'error');
         return;
     }
 
-    // Whitelist check: Only authorized admin email allowed
-    if (email !== 'ayushkushwaha2312@gmail.com') {
-        showAdminMsg('⚠️ अनधिकृत ईमेल! केवल अधिकृत एडमिन ही लॉगिन कर सकते हैं।', 'error');
+    // Allow full email or user shortcuts (ayush, admin, ayushkushwaha2312)
+    const allowedUsernames = [
+        'ayushkushwaha2312@gmail.com',
+        'ayush',
+        'admin',
+        'ayushkus23',
+        'ayushkushwaha2312'
+    ];
+
+    if (allowedUsernames.includes(email)) {
+        email = 'ayushkushwaha2312@gmail.com'; // map to verified admin email
+    } else {
+        showAdminMsg('⚠️ अनधिकृत ईमेल! केवल अधिकृत एडमिन (ayushkushwaha2312@gmail.com) ही लॉगिन कर सकते हैं।', 'error');
         return;
     }
 
