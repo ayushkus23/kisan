@@ -47,19 +47,19 @@
 
             <form id="adminLoginForm" onsubmit="handleAdminLogin(event)">
                 <div class="form-group" style="text-align: left; margin-bottom: 14px;">
-                    <label for="adminEmail" style="font-size: 13px; font-weight: 700; color: #263238;">एडमिन ईमेल या यूजरनेम *</label>
-                    <input type="text" id="adminEmail" placeholder="admin@kisan.app या admin" required style="width: 100%; box-sizing: border-box; padding: 10px 12px; border: 1.5px solid #c8d8c2; border-radius: 8px;">
+                    <label for="adminEmail" style="font-size: 13px; font-weight: 700; color: #263238;">अधिकृत एडमिन ईमेल (Admin Email) *</label>
+                    <input type="email" id="adminEmail" placeholder="जैसे: ayushkushwaha2312@gmail.com" required style="width: 100%; box-sizing: border-box; padding: 10px 12px; border: 1.5px solid #c8d8c2; border-radius: 8px;">
                 </div>
 
                 <div class="form-group" style="text-align: left; margin-bottom: 18px;">
-                    <label for="adminPassword" style="font-size: 13px; font-weight: 700; color: #263238;">पासवर्ड या सिक्योर पिन *</label>
-                    <input type="password" id="adminPassword" placeholder="एडमिन पासवर्ड दर्ज करें" required style="width: 100%; box-sizing: border-box; padding: 10px 12px; border: 1.5px solid #c8d8c2; border-radius: 8px;">
+                    <label for="adminPassword" style="font-size: 13px; font-weight: 700; color: #263238;">एडमिन पासवर्ड (Password) *</label>
+                    <input type="password" id="adminPassword" placeholder="अपना पासवर्ड दर्ज करें" required style="width: 100%; box-sizing: border-box; padding: 10px 12px; border: 1.5px solid #c8d8c2; border-radius: 8px;">
                 </div>
 
                 <div id="adminLoginMsg" class="message-box" style="display: none; margin-bottom: 14px;"></div>
 
                 <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px; font-size: 15px; font-weight: 800;">
-                    🔐 एडमिन रूम में प्रवेश करें
+                    🔐 सुरक्षित एडमिन लॉगिन
                 </button>
             </form>
         </div>

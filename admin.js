@@ -52,54 +52,74 @@ async function handleAdminLogin(event) {
     event.preventDefault();
     const emailInput = document.getElementById('adminEmail');
     const passwordInput = document.getElementById('adminPassword');
-    const msgBox = document.getElementById('adminLoginMsg');
 
-    const email = emailInput ? emailInput.value.trim() : '';
+    const email = emailInput ? emailInput.value.trim().toLowerCase() : '';
     const password = passwordInput ? passwordInput.value.trim() : '';
 
     if (!email || !password) {
-        showAdminMsg('कृपया सभी फ़ील्ड भरें', 'error');
+        showAdminMsg('कृपया अपनी ईमेल और पासवर्ड दर्ज करें', 'error');
+        return;
+    }
+
+    // Whitelist check: Only authorized admin email allowed
+    if (email !== 'ayushkushwaha2312@gmail.com') {
+        showAdminMsg('⚠️ अनधिकृत ईमेल! केवल अधिकृत एडमिन ही लॉगिन कर सकते हैं।', 'error');
         return;
     }
 
     showAdminMsg('⏳ एडमिन प्रमाणीकरण हो रहा है...', 'info');
 
-    // 1. Check Supabase Auth first (if user is registered in Supabase auth)
     let authSuccess = false;
+    let adminEmail = email;
+
+    // 1. Supabase Auth (Encrypted check)
     if (sbClient && sbClient.auth) {
         try {
             const { data, error } = await sbClient.auth.signInWithPassword({
-                email: email.includes('@') ? email : `${email}@kisan.app`,
+                email: email,
                 password: password
             });
+
             if (!error && data && data.user) {
                 authSuccess = true;
+                adminEmail = data.user.email;
             }
         } catch (e) {
-            console.warn('Supabase auth signin check:', e);
+            console.warn('Supabase auth sign in check:', e);
         }
     }
 
-    // 2. Allow master admin credentials for project administrator
-    if (!authSuccess) {
-        const isAdminUser = (email.toLowerCase() === 'admin' || email.toLowerCase() === 'admin@kisan.app' || email.toLowerCase() === 'ayush');
-        const isMasterPin = (password === 'admin123' || password === '1234' || password === 'kisanadmin');
-        if (isAdminUser && isMasterPin) {
-            authSuccess = true;
+    // 2. Fallback to secure PostgreSQL RPC (admin_login)
+    if (!authSuccess && sbClient) {
+        try {
+            const { data: rpcRes, error: rpcErr } = await sbClient.rpc('admin_login', {
+                p_email: email,
+                p_password: password
+            });
+
+            if (!rpcErr && rpcRes && rpcRes.success) {
+                authSuccess = true;
+                adminEmail = rpcRes.email;
+            } else if (rpcRes && rpcRes.message) {
+                showAdminMsg(rpcRes.message, 'error');
+                return;
+            }
+        } catch (e) {
+            console.warn('RPC admin_login check:', e);
         }
     }
 
     if (!authSuccess) {
-        showAdminMsg('गलत एडमिन यूजरनेम या पासवर्ड। कृपया पुनः प्रयास करें।', 'error');
+        showAdminMsg('गलत एडमिन पासवर्ड। कृपया सही पासवर्ड दर्ज करें।', 'error');
         return;
     }
 
     sessionStorage.setItem('tractorAdminSession', JSON.stringify({
-        email: email,
+        email: adminEmail,
         timestamp: Date.now()
     }));
 
-    showAdminMsg('✅ प्रमाणीकरण सफल! एडमिन रूम खोला जा रहा है...', 'success');
+    showAdminMsg('✅ प्रमाणीकरण सफल! एडमिन कंट्रोल रूम खोला जा रहा है...', 'success');
     setTimeout(() => {
         checkAdminAuth();
     }, 600);

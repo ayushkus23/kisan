@@ -682,4 +682,58 @@ BEGIN
 END;
 $$;
 
+-- 11. Admin Authentication & Verification Setup
+UPDATE auth.users 
+SET email_confirmed_at = now() 
+WHERE email = 'ayushkushwaha2312@gmail.com';
+
+INSERT INTO public.admins (id, email, role)
+SELECT id, email, 'admin'
+FROM auth.users
+WHERE email = 'ayushkushwaha2312@gmail.com'
+ON CONFLICT (id) DO NOTHING;
+
+CREATE OR REPLACE FUNCTION public.admin_login(p_email TEXT, p_password TEXT)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, auth, extensions
+AS $$
+DECLARE
+    v_user RECORD;
+    v_is_admin BOOLEAN;
+BEGIN
+    SELECT u.id, u.email, u.encrypted_password
+    INTO v_user
+    FROM auth.users u
+    WHERE LOWER(TRIM(u.email)) = LOWER(TRIM(p_email));
+
+    IF v_user.id IS NULL THEN
+        RETURN jsonb_build_object('success', false, 'message', 'यह ईमेल एडमिन के रूप में पंजीकृत नहीं है');
+    END IF;
+
+    -- Verify password with crypt
+    IF v_user.encrypted_password <> extensions.crypt(p_password, v_user.encrypted_password) THEN
+        RETURN jsonb_build_object('success', false, 'message', 'गलत एडमिन पासवर्ड');
+    END IF;
+
+    -- Verify admin whitelist
+    SELECT EXISTS (
+        SELECT 1 FROM public.admins WHERE id = v_user.id OR LOWER(email) = LOWER(v_user.email)
+    ) INTO v_is_admin;
+
+    IF NOT v_is_admin AND LOWER(v_user.email) <> 'ayushkushwaha2312@gmail.com' THEN
+        RETURN jsonb_build_object('success', false, 'message', 'यह खाता एडमिन के रूप में अधिकृत नहीं है');
+    END IF;
+
+    RETURN jsonb_build_object(
+        'success', true,
+        'id', v_user.id,
+        'email', v_user.email,
+        'role', 'admin',
+        'message', 'एडमिन लॉगिन सफल'
+    );
+END;
+$$;
+
 
