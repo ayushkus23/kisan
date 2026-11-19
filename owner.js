@@ -116,12 +116,76 @@ const tractorPhotosMap = {
 // ==========================================
 // 3. Page Initialization & User Loading
 // ==========================================
+let ownerLivePollTimer = null;
+let lastKnownOwnerBookingCodes = new Set();
+
+function playOwnerChime() {
+    try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(523.25, ctx.currentTime);
+        osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.12);
+        gain.gain.setValueAtTime(0.2, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.35);
+    } catch (e) {}
+}
+
+function startOwnerAutoSync() {
+    if (ownerLivePollTimer) clearInterval(ownerLivePollTimer);
+    ownerLivePollTimer = setInterval(async () => {
+        const session = getOwnerSession();
+        if (!session || session.approved !== true) return;
+        if (!sbClient || !session.id || !session.pin) return;
+
+        try {
+            const { data, error } = await sbClient.rpc('owner_get_bookings', {
+                p_owner_id: session.id,
+                p_pin: session.pin
+            });
+
+            if (!error && Array.isArray(data)) {
+                const incomingCodes = new Set(data.map(b => b.booking_code));
+                if (lastKnownOwnerBookingCodes.size > 0) {
+                    let hasNew = false;
+                    for (const code of incomingCodes) {
+                        if (!lastKnownOwnerBookingCodes.has(code)) {
+                            hasNew = true;
+                            break;
+                        }
+                    }
+                    if (hasNew) {
+                        playOwnerChime();
+                        showOwnerToast('🔔 नया किसान बुकिंग अनुरोध आया है!', '🚜');
+                        loadOwnerBookings();
+                    }
+                }
+                lastKnownOwnerBookingCodes = incomingCodes;
+            }
+        } catch (e) {}
+    }, 6000);
+}
+
+window.addEventListener('storage', (e) => {
+    if (e.key === 'kisan_live_sync_trigger' || e.key === 'tractorBookings') {
+        loadOwnerBookings();
+    }
+});
+
 document.addEventListener('DOMContentLoaded', () => {
     loadOwnerProfile();
     applyOwnerLanguage(currentOwnerLang);
     loadOwnerBookings();
     loadOwnerFleet();
     loadOwnerCallbacks();
+    startOwnerAutoSync();
 });
 
 function getOwnerSession() {
@@ -568,6 +632,23 @@ async function updateOwnerBookingStatus(bookingCode, newStatus) {
 
     updateKpiMetrics();
     renderOwnerBookings();
+
+    // 3. Instant cross-tab sync with Farmer Portal
+    try {
+        localStorage.setItem('kisan_live_sync_trigger', JSON.stringify({
+            action: 'status_update',
+            code: bookingCode,
+            status: newStatus,
+            timestamp: Date.now()
+        }));
+
+        const myHist = JSON.parse(localStorage.getItem('myBookingHistory') || '[]');
+        const hMatch = myHist.find(h => h.code && h.code.toUpperCase() === bookingCode.toUpperCase());
+        if (hMatch) {
+            hMatch.status = newStatus;
+            localStorage.setItem('myBookingHistory', JSON.stringify(myHist));
+        }
+    } catch (e) {}
 
     const statusLabels = {
         accepted: 'बुकिंग सफलतापूर्वक स्वीकार कर ली गई!',

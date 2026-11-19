@@ -1342,6 +1342,221 @@ function getUniversalLocation(onStart, onSuccess, onError) {
     );
 }
 
+// ==========================================
+// 6.2 Live Farm Weather Engine (Open-Meteo Free API)
+// ==========================================
+let currentWeatherData = null;
+
+function interpretWmoWeather(code, isHi = true) {
+    if (code === 0) {
+        return {
+            icon: '☀️',
+            cond: isHi ? 'धूप खिली है' : 'Sunny & Clear',
+            advisory: isHi 
+                ? 'मौसम पूरी तरह साफ और शुष्क है। गेहूं व सरसों की बोवाई, खेत की गहरी जुताई और कंबाइन से धान कटाई के लिए आज का दिन सर्वोत्तम है।' 
+                : 'Weather is completely clear and dry. Optimal condition for wheat/mustard sowing, deep ploughing, and combine harvesting.',
+            badge: isHi ? '✅ जुताई व कटाई के लिए सर्वोत्तम' : '✅ Best for Farming'
+        };
+    } else if (code === 1 || code === 2) {
+        return {
+            icon: '🌤️',
+            cond: isHi ? 'हल्की धूप-छांव' : 'Partly Cloudy',
+            advisory: isHi 
+                ? 'मौसम सामान्य और कृषि कार्यों के अनुकूल है। ट्रैक्टर से जुताई व बुवाई का काम सामान्य रूप से जारी रख सकते हैं।' 
+                : 'Fair weather conditions. Suitable for tractor operations and sowing.',
+            badge: isHi ? '✅ जुताई के लिए अनुकूल' : '✅ Good for Farming'
+        };
+    } else if (code === 3) {
+        return {
+            icon: '☁️',
+            cond: isHi ? 'घने बादल' : 'Overcast',
+            advisory: isHi 
+                ? 'आसमान में घने बादल हैं। जुताई कर सकते हैं, परंतु कीटनाशक छिड़काव करने से पहले बारिश की स्थिति अवश्य देखें।' 
+                : 'Overcast skies. Ploughing can proceed, but check before spraying pesticides.',
+            badge: isHi ? '⚠️ सामान्य सतर्कता' : '⚠️ Moderate Caution'
+        };
+    } else if (code === 45 || code === 48) {
+        return {
+            icon: '🌫️',
+            cond: isHi ? 'कोहरा / धुंध' : 'Foggy',
+            advisory: isHi 
+                ? 'खेतों में कोहरा छाया है। सुबह के समय ट्रैक्टर और कंबाइन चलाते समय हेडलाइट जलाएं और गति धीमी रखें।' 
+                : 'Dense fog observed. Exercise extra caution and use headlights while driving farm equipment.',
+            badge: isHi ? '⚠️ कोहरा अलर्ट' : '⚠️ Fog Alert'
+        };
+    } else if (code >= 51 && code <= 57) {
+        return {
+            icon: '🌦️',
+            cond: isHi ? 'हल्की बूंदाबांदी' : 'Light Drizzle',
+            advisory: isHi 
+                ? 'हल्की बूंदाबांदी हो रही है। खुले में रखा अनाज सुरक्षित स्थान पर ढकें और किसी भी प्रकार का स्प्रे अभी न करें।' 
+                : 'Light drizzle expected. Cover open grains and postpone any pesticide spraying.',
+            badge: isHi ? '⚠️ स्प्रे टालें' : '⚠️ Postpone Spray'
+        };
+    } else if ((code >= 61 && code <= 67) || (code >= 80 && code <= 82)) {
+        return {
+            icon: '🌧️',
+            cond: isHi ? 'बारिश का अलर्ट' : 'Rain Alert',
+            advisory: isHi 
+                ? 'खेत में बारिश की संभावना है। भारी ट्रैक्टर से गहरी जुताई व मिट्टी पलटने का काम कुछ समय के लिए टालें।' 
+                : 'Rainfall expected. Delay deep ploughing and harvesting to prevent soil damage.',
+            badge: isHi ? '🚨 बारिश अलर्ट — जुताई टालें' : '🚨 Rain Alert — Delay Ploughing'
+        };
+    } else if (code >= 95 && code <= 99) {
+        return {
+            icon: '⛈️',
+            cond: isHi ? 'आंधी-तूफ़ान चेतावनी' : 'Thunderstorm Alert',
+            advisory: isHi 
+                ? 'बिजली व तेज़ आंधी-तूफ़ान की चेतावनी। खुले खेत में ट्रैक्टर न चलाएं और तुरंत सुरक्षित पक्के स्थान पर जाएं।' 
+                : 'Thunderstorm and high winds alert. Halt field operations immediately and seek shelter.',
+            badge: isHi ? '🚨 तूफ़ान अलर्ट — काम रोकें' : '🚨 Thunderstorm Alert'
+        };
+    }
+    return {
+        icon: '⛅',
+        cond: isHi ? 'सामान्य मौसम' : 'Normal Weather',
+        advisory: isHi 
+            ? 'मौसम सामान्य है। खेती के काम सुचारू रूप से किए जा सकते हैं।' 
+            : 'Normal weather. Farm operations can proceed as scheduled.',
+        badge: isHi ? '✅ काम के लिए अनुकूल' : '✅ Good for Farming'
+    };
+}
+
+async function fetchLiveFarmWeather(lat, lng, locationName, bypassCache = false) {
+    if (!lat || !lng) {
+        lat = 28.98;
+        lng = 77.70;
+        locationName = locationName || 'मेरठ, उत्तर प्रदेश (पश्चिमी क्षेत्र)';
+    }
+
+    const cacheKey = 'kisan_weather_cache';
+    if (!bypassCache) {
+        try {
+            const cached = sessionStorage.getItem(cacheKey);
+            if (cached) {
+                const parsed = JSON.parse(cached);
+                if (Date.now() - parsed.timestamp < 15 * 60 * 1000 && Math.abs(parsed.lat - lat) < 0.1 && Math.abs(parsed.lng - lng) < 0.1) {
+                    currentWeatherData = parsed.data;
+                    renderFarmWeather(currentWeatherData);
+                    return currentWeatherData;
+                }
+            }
+        } catch (e) {}
+    }
+
+    try {
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto`;
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('Weather API HTTP ' + res.status);
+        const data = await res.json();
+
+        const current = data.current || {};
+        const daily = data.daily || {};
+
+        const weatherPayload = {
+            temp: Math.round(current.temperature_2m !== undefined ? current.temperature_2m : 26),
+            humidity: Math.round(current.relative_humidity_2m !== undefined ? current.relative_humidity_2m : 50),
+            wind: Math.round(current.wind_speed_10m !== undefined ? current.wind_speed_10m : 7),
+            code: current.weather_code !== undefined ? current.weather_code : 0,
+            rainProb: (daily.precipitation_probability_max && daily.precipitation_probability_max[0] !== undefined) ? daily.precipitation_probability_max[0] : 0,
+            locationName: locationName || 'आपका क्षेत्र',
+            lat: lat,
+            lng: lng,
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        };
+
+        currentWeatherData = weatherPayload;
+        try {
+            sessionStorage.setItem(cacheKey, JSON.stringify({
+                timestamp: Date.now(),
+                lat,
+                lng,
+                data: weatherPayload
+            }));
+        } catch (e) {}
+
+        renderFarmWeather(weatherPayload);
+        return weatherPayload;
+    } catch (err) {
+        console.warn('Open-Meteo live weather fetch fallback:', err);
+        const fallback = {
+            temp: 24,
+            humidity: 48,
+            wind: 8,
+            code: 0,
+            rainProb: 0,
+            locationName: locationName || 'मेरठ, उत्तर प्रदेश (पश्चिमी क्षेत्र)',
+            lat: lat,
+            lng: lng,
+            time: 'आज'
+        };
+        currentWeatherData = fallback;
+        renderFarmWeather(fallback);
+        return fallback;
+    }
+}
+
+function renderFarmWeather(data) {
+    if (!data) return;
+    const isHi = (currentLang || 'hi') === 'hi';
+    const info = interpretWmoWeather(data.code, isHi);
+
+    const iconEl = document.getElementById('liveWeatherIcon');
+    const tempEl = document.getElementById('liveWeatherTemp');
+    const condEl = document.getElementById('liveWeatherCondition');
+    const humEl = document.getElementById('liveWeatherHumidity');
+    const windEl = document.getElementById('liveWeatherWind');
+    const rainEl = document.getElementById('liveWeatherRain');
+    const cityEl = document.getElementById('liveWeatherCity');
+    const advTextEl = document.getElementById('liveWeatherAdvisoryText');
+    const badgeEl = document.getElementById('liveWeatherBadge');
+    const timeEl = document.getElementById('liveWeatherTime');
+
+    if (iconEl) iconEl.textContent = info.icon;
+    if (tempEl) tempEl.textContent = `${data.temp}°C`;
+    if (condEl) condEl.textContent = `${info.cond} ${info.icon}`;
+    if (humEl) humEl.textContent = isHi ? `💧 नमी: ${data.humidity}%` : `💧 Humidity: ${data.humidity}%`;
+    if (windEl) windEl.textContent = isHi ? `💨 हवा: ${data.wind} km/h` : `💨 Wind: ${data.wind} km/h`;
+    if (rainEl) rainEl.textContent = isHi ? `🌧️ बारिश: ${data.rainProb}%` : `🌧️ Rain: ${data.rainProb}%`;
+    if (cityEl) cityEl.textContent = data.locationName;
+    if (advTextEl) advTextEl.textContent = info.advisory;
+    if (badgeEl) badgeEl.textContent = info.badge;
+    if (timeEl) timeEl.textContent = isHi ? `ताजा अपडेट (${data.time})` : `Updated (${data.time})`;
+
+    // Update in Booking modal if open
+    const bookingAlert = document.getElementById('farmerWeatherAlert');
+    if (bookingAlert) {
+        bookingAlert.style.display = 'flex';
+        bookingAlert.innerHTML = `<span>${info.icon} <strong>${data.temp}°C</strong> • ${isHi ? 'बारिश' : 'Rain'}: ${data.rainProb}%</span> <span class="badge-optimum" style="margin-left: 8px;">${info.badge}</span>`;
+    }
+}
+
+function refreshFarmWeather(force = false) {
+    const lat = currentWeatherData ? currentWeatherData.lat : 28.98;
+    const lng = currentWeatherData ? currentWeatherData.lng : 77.70;
+    const name = currentWeatherData ? currentWeatherData.locationName : 'मेरठ, उत्तर प्रदेश (पश्चिमी क्षेत्र)';
+    fetchLiveFarmWeather(lat, lng, name, force);
+}
+
+function detectWeatherByGPS() {
+    const cityEl = document.getElementById('liveWeatherCity');
+    if (cityEl) cityEl.textContent = '⏳ GPS से मौसम खोज रहे हैं...';
+
+    getUniversalLocation(
+        null,
+        (loc) => {
+            fetchLiveFarmWeather(loc.lat, loc.lng, loc.name, true);
+        },
+        () => {
+            fetchLiveFarmWeather(28.98, 77.70, 'मेरठ, उत्तर प्रदेश (पश्चिमी क्षेत्र)', false);
+        }
+    );
+}
+
+function initLiveFarmWeather() {
+    fetchLiveFarmWeather(28.98, 77.70, 'मेरठ, उत्तर प्रदेश (पश्चिमी क्षेत्र)', false);
+}
+
 function detectFarmerLocation() {
     const statusPill = document.getElementById('farmerGpsStatus');
     const villageInput = document.getElementById('farmerVillage');
@@ -1364,6 +1579,11 @@ function detectFarmerLocation() {
             if (statusPill) {
                 statusPill.className = 'gps-status-pill success';
                 statusPill.innerHTML = `✅ ${t.locSuccess.replace('{loc}', loc.name)} <a href="${mapsUrl}" target="_blank" class="gps-preview-link">🗺️ मैप देखें</a>`;
+            }
+
+            // Also fetch and update live farm weather for farmer's field
+            if (loc.lat && loc.lng) {
+                fetchLiveFarmWeather(loc.lat, loc.lng, loc.name, true);
             }
         },
         () => {
@@ -1505,6 +1725,17 @@ function openBookingModal(machineId) {
         gpsStatus.innerHTML = '';
     }
     if (gpsInput) gpsInput.value = '';
+
+    // Initialize Weather Alert in Booking modal if current weather available
+    const bookingWeatherAlert = document.getElementById('farmerWeatherAlert');
+    if (bookingWeatherAlert && currentWeatherData) {
+        const isHi = (currentLang || 'hi') === 'hi';
+        const info = interpretWmoWeather(currentWeatherData.code, isHi);
+        bookingWeatherAlert.style.display = 'flex';
+        bookingWeatherAlert.innerHTML = `<span>${info.icon} <strong>${currentWeatherData.temp}°C</strong> • ${isHi ? 'बारिश' : 'Rain'}: ${currentWeatherData.rainProb}%</span> <span class="badge-optimum" style="margin-left: 8px;">${info.badge}</span>`;
+    } else if (bookingWeatherAlert) {
+        bookingWeatherAlert.style.display = 'none';
+    }
 
     // Pre-fill user name and profile if logged in
     const savedUser = localStorage.getItem('tractorUser');
@@ -1771,6 +2002,15 @@ async function handleTractorBookingSubmit(event) {
         status: 'requested'
     });
     localStorage.setItem('tractorBookings', JSON.stringify(legacyBookings));
+
+    // Trigger instant cross-tab live synchronization
+    try {
+        localStorage.setItem('kisan_live_sync_trigger', JSON.stringify({
+            action: 'new_booking',
+            code: realBookingCode,
+            timestamp: Date.now()
+        }));
+    } catch (e) {}
 
     updateBookingBadges();
     closeBookingModal();
@@ -2150,9 +2390,88 @@ function viewPastReceipt(orderId) {
 let currentTrackingCode = null;
 let currentTrackingMobile = null;
 let liveTrackingPollInterval = null;
+let lastKnownStatus = null;
+let liveRealtimeChannel = null;
+
+function playStatusChime(type = 'success') {
+    try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        if (type === 'success') {
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
+            osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.15); // A5
+            gain.gain.setValueAtTime(0.18, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+            osc.start();
+            osc.stop(ctx.currentTime + 0.35);
+        } else if (type === 'alert') {
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(523.25, ctx.currentTime);
+            osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.12);
+            gain.gain.setValueAtTime(0.2, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+            osc.start();
+            osc.stop(ctx.currentTime + 0.35);
+        }
+    } catch (e) {}
+}
+
+function handleStatusTransition(oldStatus, newStatus, booking) {
+    if (!oldStatus || oldStatus === newStatus) return;
+
+    playStatusChime('success');
+
+    const statusTitles = {
+        'accepted': 'स्वीकृत (Booking Accepted)',
+        'assigned': 'ड्राइवर रवाना (Driver Assigned)',
+        'reached': 'खेत पर आगमन (Reached Field)',
+        'done': 'काम पूरा हुआ (Work Completed)',
+        'completed': 'काम पूरा हुआ (Work Completed)',
+        'cancelled': 'रद्द (Cancelled)'
+    };
+    const friendlyTitle = statusTitles[newStatus] || newStatus;
+
+    const toast = document.getElementById('statusChangeToast');
+    if (toast) {
+        toast.innerHTML = `🔔 <strong>ताजा अपडेट!</strong> आपकी बुकिंग स्थिति अब <u>${friendlyTitle}</u> हो गई है!`;
+        toast.style.display = 'block';
+        setTimeout(() => {
+            if (toast) toast.style.display = 'none';
+        }, 5000);
+    }
+
+    // Sync to local history
+    try {
+        const myHistory = JSON.parse(localStorage.getItem('myBookingHistory') || '[]');
+        const idx = myHistory.findIndex(h => h.code && h.code.toUpperCase() === booking.booking_code.toUpperCase());
+        if (idx !== -1) {
+            myHistory[idx].status = newStatus;
+            localStorage.setItem('myBookingHistory', JSON.stringify(myHistory));
+        }
+    } catch (e) {}
+
+    // Announce update via Speech
+    try {
+        const synth = window.speechSynthesis;
+        if (synth && !synth.speaking) {
+            const utterance = new SpeechSynthesisUtterance(`ताजा अपडेट! आपकी बुकिंग स्थिति अब ${friendlyTitle} हो गई है`);
+            utterance.lang = 'hi-IN';
+            synth.speak(utterance);
+        }
+    } catch (e) {}
+}
 
 function startLiveStatusPolling(code, mobile) {
     stopLiveStatusPolling();
+
+    // 1. Setup polling every 3 seconds for fast reliable sync
     liveTrackingPollInterval = setInterval(async () => {
         if (!currentTrackingCode || !currentTrackingMobile) return;
         if (sbClient) {
@@ -2168,7 +2487,33 @@ function startLiveStatusPolling(code, mobile) {
                 }
             } catch (e) {}
         }
-    }, 4000);
+    }, 3000);
+
+    // 2. Setup Supabase Realtime channel subscription if supported
+    if (sbClient && typeof sbClient.channel === 'function') {
+        try {
+            liveRealtimeChannel = sbClient.channel('booking-live-' + code.toUpperCase())
+                .on('postgres_changes', {
+                    event: 'UPDATE',
+                    schema: 'public',
+                    table: 'bookings',
+                    filter: 'booking_code=eq.' + code.toUpperCase()
+                }, async (payload) => {
+                    if (currentTrackingCode && currentTrackingMobile) {
+                        try {
+                            const { data } = await sbClient.rpc('lookup_farmer_booking', {
+                                p_code: currentTrackingCode.toUpperCase(),
+                                p_mobile: currentTrackingMobile
+                            });
+                            if (data && data[0]) renderStatusDetails(data[0]);
+                        } catch (e) {}
+                    }
+                })
+                .subscribe();
+        } catch (e) {
+            console.warn('Realtime subscription warning:', e);
+        }
+    }
 }
 
 function stopLiveStatusPolling() {
@@ -2176,11 +2521,17 @@ function stopLiveStatusPolling() {
         clearInterval(liveTrackingPollInterval);
         liveTrackingPollInterval = null;
     }
+    if (liveRealtimeChannel && sbClient && typeof sbClient.removeChannel === 'function') {
+        try {
+            sbClient.removeChannel(liveRealtimeChannel);
+        } catch (e) {}
+        liveRealtimeChannel = null;
+    }
 }
 
 // Window storage listener for instant cross-tab sync between Farmer and Owner dashboard
 window.addEventListener('storage', (e) => {
-    if ((e.key === 'myBookingHistory' || e.key === 'tractorBookings') && currentTrackingCode && currentTrackingMobile) {
+    if ((e.key === 'myBookingHistory' || e.key === 'tractorBookings' || e.key === 'kisan_live_sync_trigger') && currentTrackingCode && currentTrackingMobile) {
         const modal = document.getElementById('liveTrackingModal');
         if (modal && modal.style.display !== 'none') {
             fetchBookingStatus(currentTrackingCode, currentTrackingMobile, true);
@@ -2189,7 +2540,10 @@ window.addEventListener('storage', (e) => {
 });
 
 function openLiveTrackingModal(orderCode, mobile, isAutoUpdate) {
-    if (!isAutoUpdate) closeMyBookingsModal();
+    if (!isAutoUpdate) {
+        closeMyBookingsModal();
+        lastKnownStatus = null;
+    }
     const modal = document.getElementById('liveTrackingModal');
     if (!modal) return;
 
@@ -2381,6 +2735,13 @@ function renderStatusDetails(booking) {
     const cancelBtn = document.getElementById('btnCancelFromStatus');
 
     const status = (booking.status || 'requested').toLowerCase();
+
+    // Trigger instant realtime chime & toast when status updates
+    if (lastKnownStatus && lastKnownStatus !== status) {
+        handleStatusTransition(lastKnownStatus, status, booking);
+    }
+    lastKnownStatus = status;
+
     const isCancelled = status === 'cancelled';
     const isRejected = status === 'rejected';
     const isAccepted = status === 'accepted' || status === 'confirmed';
@@ -2987,6 +3348,9 @@ function applyLanguage(lang) {
     renderFleetCards(currentFilter);
     renderMandiTicker();
     updateBookingBadges();
+    if (currentWeatherData) {
+        renderFarmWeather(currentWeatherData);
+    }
 
     // Update navbar session state
     updateNavSession();
@@ -3735,4 +4099,5 @@ window.addEventListener('DOMContentLoaded', () => {
     loadVehiclesFromDatabase();
     updateBookingBadges();
     syncBookingsFromSupabase();
+    initLiveFarmWeather();
 });

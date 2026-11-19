@@ -279,19 +279,25 @@
                     <div class="weather-advisory-card">
                         <div class="weather-col-left">
                             <div class="weather-main-info">
-                                <span class="weather-icon">☀️</span>
+                                <span class="weather-icon" id="liveWeatherIcon">☀️</span>
                                 <div class="weather-temp-info">
-                                    <span class="weather-temp">28°C</span>
-                                    <span class="weather-condition" data-i18n="weatherCondition">धूप खिली है ☀️</span>
+                                    <span class="weather-temp" id="liveWeatherTemp">--°C</span>
+                                    <span class="weather-condition" id="liveWeatherCondition" data-i18n="weatherCondition">मौसम लोड हो रहा है...</span>
                                 </div>
                             </div>
                             <div class="weather-meta-row">
-                                <span class="weather-meta-item" data-i18n="weatherHumidity">💧 नमी: 42%</span>
-                                <span class="weather-meta-item" data-i18n="weatherWind">💨 हवा: 8 km/h</span>
-                                <span class="weather-meta-item" data-i18n="weatherRain">🌧️ बारिश: 0%</span>
+                                <span class="weather-meta-item" id="liveWeatherHumidity" data-i18n="weatherHumidity">💧 नमी: --%</span>
+                                <span class="weather-meta-item" id="liveWeatherWind" data-i18n="weatherWind">💨 हवा: -- km/h</span>
+                                <span class="weather-meta-item" id="liveWeatherRain" data-i18n="weatherRain">🌧️ बारिश: --%</span>
                             </div>
-                            <div class="weather-location-tag">
-                                📍 <span data-i18n="weatherCity">मेरठ, उत्तर प्रदेश (पश्चिमी क्षेत्र)</span>
+                            <div class="weather-location-row" style="display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;">
+                                <div class="weather-location-tag">
+                                    📍 <span id="liveWeatherCity" data-i18n="weatherCity">मेरठ, उत्तर प्रदेश (पश्चिमी क्षेत्र)</span>
+                                </div>
+                                <div style="display: flex; gap: 6px;">
+                                    <button type="button" class="btn-weather-mini" onclick="detectWeatherByGPS()" title="GPS से अपना मौसम देखें">📍 GPS मौसम</button>
+                                    <button type="button" class="btn-weather-mini" onclick="refreshFarmWeather(true)" title="मौसम रीफ्रेश">🔄 रीफ्रेश</button>
+                                </div>
                             </div>
                         </div>
                         <div class="weather-col-right">
@@ -299,14 +305,12 @@
                                 <span class="advisory-icon">🌾</span>
                                 <span data-i18n="advisoryTag">आज की कृषि सलाह (Daily Farm Advisory)</span>
                             </div>
-                            <p class="advisory-text" data-i18n="advisoryText">
-                                मौसम पूरी तरह साफ और शुष्क है। गेहूं व सरसों की बोवाई, खेत की गहरी जुताई और कंबाइन से
-                                धान कटाई के
-                                लिए आज का दिन सर्वोत्तम है।
+                            <p class="advisory-text" id="liveWeatherAdvisoryText" data-i18n="advisoryText">
+                                मौसम लोड हो रहा है...
                             </p>
                             <div class="advisory-footer">
-                                <span class="badge-optimum">✅ जुताई व कटाई के लिए अनुकूल</span>
-                                <span class="advisory-time" data-i18n="advisoryTime">आज का अपडेट</span>
+                                <span class="badge-optimum" id="liveWeatherBadge">✅ जुताई व कटाई के लिए अनुकूल</span>
+                                <span class="advisory-time" id="liveWeatherTime" data-i18n="advisoryTime">लाइव अपडेट</span>
                             </div>
                         </div>
                     </div>
@@ -415,6 +419,7 @@
                             placeholder="जैसे: रामपुर, मेरठ (या GPS बटन दबाएं)"
                             data-i18n-placeholder="placeholderFarmerVillage">
                         <div id="farmerGpsStatus" class="gps-status-pill" style="display: none;"></div>
+                        <div id="farmerWeatherAlert" class="booking-weather-pill" style="display: none;"></div>
                         <input type="hidden" id="farmerGpsLink" value="">
                     </div>
                     <div class="form-group">
@@ -762,6 +767,13 @@
                 </div>
                 <div id="trackLookupFeedback" class="track-lookup-msg" style="display: none;"></div>
             </div>
+
+            <!-- Real-time Live Tracking Indicator & Change Toast -->
+            <div class="tracking-live-indicator" id="trackingLiveIndicator">
+                <span class="live-pulse-dot"></span>
+                <span id="trackingLiveIndicatorText">🟢 लाइव ट्रैकिंग एक्टिव (ऑटो-अपडेट ऑन)</span>
+            </div>
+            <div id="statusChangeToast" class="status-change-toast" style="display: none;"></div>
 
             <!-- Real Booking Status Stepper (5 Steps: Requested, Accepted, Driver assigned, Reached, Work done) -->
             <div class="booking-status-stepper-box">
