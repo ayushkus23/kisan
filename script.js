@@ -844,12 +844,26 @@ function closeDrawer() {
     }
 }
 
-function handleDrawerAuth() {
+function isRealLoggedInUser() {
     const user = localStorage.getItem('tractorUser');
+    if (!user || user === 'null' || user === 'undefined' || user.trim() === '') return false;
+    const uLower = user.trim().toLowerCase();
+    if (uLower === 'guest' || uLower === 'mehman' || uLower === 'मेहमान किसान' || uLower === 'guest farmer') {
+        return false;
+    }
+    const t = translations[currentLang] || translations.hi;
+    if (user === t.guestUser || user === translations.hi.guestUser || user === translations.en.guestUser) {
+        return false;
+    }
+    return true;
+}
+
+function handleDrawerAuth() {
     closeDrawer();
-    if (user) {
+    if (isRealLoggedInUser()) {
         logout();
     } else {
+        sessionStorage.removeItem('tractorUser');
         window.location.href = 'login.html';
     }
 }
@@ -1737,10 +1751,10 @@ function openBookingModal(machineId) {
         bookingWeatherAlert.style.display = 'none';
     }
 
-    // Pre-fill user name and profile if logged in
+    // Pre-fill user name and profile if logged in with real account
     const savedUser = localStorage.getItem('tractorUser');
     const farmerNameInput = document.getElementById('farmerName');
-    if (farmerNameInput && savedUser && savedUser !== t.guestUser) {
+    if (farmerNameInput && savedUser && isRealLoggedInUser()) {
         farmerNameInput.value = savedUser;
     }
 
@@ -3414,16 +3428,23 @@ window.addEventListener('click', (e) => {
 // ==========================================
 function updateNavSession() {
     const drawerUserName = document.getElementById('drawerUserName');
+    const drawerUserBadge = document.getElementById('drawerUserBadge');
     const drawerAuthText = document.getElementById('drawerAuthText');
+    const drawerAuthIcon = document.getElementById('drawerAuthIcon');
     const t = translations[currentLang] || translations.hi;
 
-    const user = localStorage.getItem('tractorUser');
-    if (user) {
+    if (isRealLoggedInUser()) {
+        const user = localStorage.getItem('tractorUser');
         if (drawerUserName) drawerUserName.textContent = t.navGreetingUser.replace('{user}', user);
-        if (drawerAuthText) drawerAuthText.textContent = t.navLogout;
+        if (drawerUserBadge) drawerUserBadge.textContent = t.drawerVerifiedBadge || 'किसान प्रोफाइल';
+        if (drawerAuthText) drawerAuthText.textContent = t.navLogout || 'लॉगआउट';
+        if (drawerAuthIcon) drawerAuthIcon.textContent = '🚪';
     } else {
-        if (drawerUserName) drawerUserName.textContent = t.navGreetingGuest;
-        if (drawerAuthText) drawerAuthText.textContent = t.navLogin;
+        // Guest account: user has NOT logged in, so show Login option!
+        if (drawerUserName) drawerUserName.textContent = t.navGreetingGuest || 'नमस्ते, किसान भाई 🙏';
+        if (drawerUserBadge) drawerUserBadge.textContent = (currentLang === 'en') ? 'Guest Mode' : 'गेस्ट मोड';
+        if (drawerAuthText) drawerAuthText.textContent = t.navLogin || 'लॉगिन करें';
+        if (drawerAuthIcon) drawerAuthIcon.textContent = '🔑';
     }
 }
 
@@ -3848,8 +3869,9 @@ async function handleLogin(event) {
 }
 
 function guestLogin() {
-    const t = translations[currentLang] || translations.hi;
-    localStorage.setItem('tractorUser', t.guestUser);
+    localStorage.removeItem('tractorUser');
+    localStorage.removeItem('tractorUserProfile');
+    sessionStorage.setItem('tractorUser', 'guest');
     window.location.replace('index.html');
 }
 
@@ -4078,6 +4100,7 @@ function showMessage(text, type) {
 function logout() {
     localStorage.removeItem('tractorUser');
     localStorage.removeItem('tractorUserProfile');
+    sessionStorage.removeItem('tractorUser');
     window.location.replace('login.html');
 }
 

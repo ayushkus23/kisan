@@ -19,7 +19,8 @@
                 } catch (e) {}
             }
             var user = localStorage.getItem('tractorUser');
-            if (user && user !== 'null' && user !== 'undefined' && user.trim() !== '') {
+            var isGuest = !user || user === 'guest' || user === 'मेहमान किसान' || user === 'Guest Farmer';
+            if (user && !isGuest && user !== 'null' && user !== 'undefined' && user.trim() !== '') {
                 window.location.replace('index.html');
             }
         })();

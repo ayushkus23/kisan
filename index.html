@@ -9,7 +9,10 @@
     <script>
         (function () {
             var user = localStorage.getItem('tractorUser');
-            if (!user || user === 'null' || user === 'undefined' || user.trim() === '') {
+            var guest = sessionStorage.getItem('tractorUser');
+            var isReal = user && user !== 'null' && user !== 'undefined' && user !== 'guest' && user !== 'मेहमान किसान' && user !== 'Guest Farmer' && user.trim() !== '';
+            var isGuest = guest === 'guest';
+            if (!isReal && !isGuest) {
                 window.location.replace('login.html');
             }
         })();
@@ -46,7 +49,7 @@
                 <img src="images/dhan-tractor.jpg" alt="Farmer Avatar" class="drawer-real-avatar">
                 <div class="drawer-user-meta">
                     <h3 id="drawerUserName">नमस्ते, किसान भाई 🙏</h3>
-                    <span class="user-badge" data-i18n="drawerVerifiedBadge">किसान प्रोफाइल</span>
+                    <span class="user-badge" id="drawerUserBadge" data-i18n="drawerVerifiedBadge">किसान प्रोफाइल</span>
                 </div>
             </div>
             <button type="button" class="drawer-close-btn" onclick="closeDrawer()">&times;</button>
@@ -91,7 +94,7 @@
                 <span data-i18n="menuHelpline">किसान सहायता केंद्र (Call & WhatsApp)</span>
             </button>
             <button type="button" class="drawer-item" id="drawerAuthBtn" onclick="handleDrawerAuth()">
-                <span class="drawer-item-icon">🚪</span>
+                <span class="drawer-item-icon" id="drawerAuthIcon">🔑</span>
                 <span id="drawerAuthText" data-i18n="navLogin">लॉगिन</span>
             </button>
         </nav>
