@@ -64,6 +64,12 @@
                 <p class="subtitle" data-i18n="brandSubtitle">किसान भाइयों का अपना ट्रैक्टर पोर्टल</p>
             </div>
 
+            <!-- Booking Redirect Notice Banner (Shown when coming from booking final step) -->
+            <div id="bookingRedirectNotice" class="booking-redirect-notice" style="display: none;">
+                🚜 <strong>ट्रैक्टर बुकिंग पक्की करने के लिए लॉगिन करें</strong>
+                <p style="margin: 4px 0 0; font-size: 12.5px; opacity: 0.95;">लॉगिन या नया खाता बनाते ही आपका चुना हुआ ट्रैक्टर तुरंत बुक हो जाएगा।</p>
+            </div>
+
             <!-- Auth Tabs: Login & Create Account -->
             <div class="auth-tabs">
                 <button type="button" class="auth-tab-btn active" id="tabLoginBtn" onclick="switchAuthTab('login')">
@@ -248,6 +254,29 @@
     <!-- Supabase Cloud Client SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var params = new URLSearchParams(window.location.search);
+            var hasDraft = sessionStorage.getItem('pendingBookingDraft');
+            if (params.get('redirect') === 'booking' || hasDraft) {
+                var notice = document.getElementById('bookingRedirectNotice');
+                if (notice) notice.style.display = 'block';
+
+                var phone = params.get('phone');
+                var name = params.get('name');
+                if (phone) {
+                    var uInput = document.getElementById('username');
+                    var regPhone = document.getElementById('regPhone');
+                    if (uInput && !uInput.value) uInput.value = phone;
+                    if (regPhone && !regPhone.value) regPhone.value = phone;
+                }
+                if (name) {
+                    var regName = document.getElementById('regFullName');
+                    if (regName && !regName.value) regName.value = decodeURIComponent(name);
+                }
+            }
+        });
+    </script>
 </body>
 
 </html>

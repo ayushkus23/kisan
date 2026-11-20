@@ -5120,4 +5120,32 @@ body {
     100% { box-shadow: 0 0 0 0 rgba(46, 125, 50, 0); }
 }
 
+/* Booking Redirect Notice on Login Page */
+.booking-redirect-notice {
+    background: linear-gradient(135deg, #e8f5e9, #dcedc8);
+    border: 1.5px solid #66bb6a;
+    color: #1b5e20;
+    padding: 11px 16px;
+    border-radius: 10px;
+    margin-bottom: 16px;
+    font-size: 13.5px;
+    text-align: center;
+    box-shadow: 0 3px 10px rgba(46, 125, 50, 0.15);
+    animation: fadeInWeather 0.3s ease-in-out;
+}
+
+.guest-booking-badge {
+    background: #fff8e1;
+    border: 1px solid #ffe082;
+    color: #b45309;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 12.5px;
+    margin: 8px 0 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+
 

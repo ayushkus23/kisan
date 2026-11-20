@@ -1773,6 +1773,12 @@ function openBookingModal(machineId) {
         } catch (e) {}
     }
 
+    // Guest booking notice badge
+    const guestBadge = document.getElementById('guestBookingBadge');
+    if (guestBadge) {
+        guestBadge.style.display = isRealLoggedInUser() ? 'none' : 'flex';
+    }
+
     // Default duration in hours
     document.getElementById('workDuration').value = 2;
     calculateEstimate();
@@ -1890,6 +1896,27 @@ async function handleTractorBookingSubmit(event) {
     // Date validation
     if (!bookingDateVal) {
         alert(t.errInvalidDate || 'कृपया तारीख चुनें।');
+        return;
+    }
+
+    // GUEST USER CHECK: If user is browsing as Guest, require Login on final step!
+    if (!isRealLoggedInUser()) {
+        const draft = {
+            machineId: selectedMachine ? selectedMachine.id : null,
+            farmerName,
+            farmerPhone: phoneClean,
+            farmerVillage,
+            duration,
+            cropName: document.getElementById('workCropName') ? document.getElementById('workCropName').value.trim() : '',
+            bookingDate: bookingDateVal,
+            bookingSlot: bookingSlotVal,
+            bookingSlotText,
+            fuelOption: selectedFuelOption,
+            gpsLink: gpsLink || ''
+        };
+        sessionStorage.setItem('pendingBookingDraft', JSON.stringify(draft));
+        alert('⚠️ बुकिंग पक्की करने के लिए कृपया पहले लॉगिन करें या 10 सेकंड में नया खाता बनाएं। (लॉगिन करते ही आपकी यह बुकिंग तुरंत कन्फर्म हो जाएगी)');
+        window.location.href = `login.html?redirect=booking&phone=${phoneClean}&name=${encodeURIComponent(farmerName)}`;
         return;
     }
 
@@ -2028,6 +2055,7 @@ async function handleTractorBookingSubmit(event) {
 
     updateBookingBadges();
     closeBookingModal();
+    sessionStorage.removeItem('pendingBookingDraft');
 
     // Show confirmation receipt modal with real booking code
     showReceiptModal({
@@ -3279,6 +3307,26 @@ function sendBookingViaWhatsApp() {
     const slotSelect = document.getElementById('bookingSlot');
     const slotText = slotSelect && slotSelect.selectedOptions[0] ? slotSelect.selectedOptions[0].textContent.trim() : 'दोपहर (Day)';
 
+    // GUEST USER CHECK: Require login on final step
+    if (!isRealLoggedInUser()) {
+        const draft = {
+            machineId: selectedMachine ? selectedMachine.id : null,
+            farmerName,
+            farmerPhone: farmerPhone.replace(/\D/g, ''),
+            farmerVillage,
+            duration,
+            cropName,
+            bookingDate: dateVal,
+            bookingSlot: slotSelect ? slotSelect.value : 'day',
+            fuelOption: selectedFuelOption,
+            gpsLink: gpsLink || ''
+        };
+        sessionStorage.setItem('pendingBookingDraft', JSON.stringify(draft));
+        alert('⚠️ व्हाट्सएप पर बुकिंग भेजने के लिए कृपया पहले लॉगिन करें या नया खाता बनाएं। (लॉगिन के बाद तुरंत बुकिंग पक्की हो जाएगी)');
+        window.location.href = `login.html?redirect=booking&phone=${farmerPhone.replace(/\D/g, '')}&name=${encodeURIComponent(farmerName)}`;
+        return;
+    }
+
     const discount = selectedMachine.fuelDiscount || 200;
     const appliedRate = selectedFuelOption === 'with-fuel'
         ? selectedMachine.rate
@@ -3729,7 +3777,8 @@ async function handleRegister(event) {
         if (role === 'owner') {
             window.location.replace('owner.html');
         } else {
-            window.location.replace('index.html');
+            const hasDraft = sessionStorage.getItem('pendingBookingDraft');
+            window.location.replace(hasDraft ? 'index.html?resume_booking=1' : 'index.html');
         }
     }, 900);
 }
@@ -3863,7 +3912,8 @@ async function handleLogin(event) {
         if (foundUser && foundUser.role === 'owner') {
             window.location.replace('owner.html');
         } else {
-            window.location.replace('index.html');
+            const hasDraft = sessionStorage.getItem('pendingBookingDraft');
+            window.location.replace(hasDraft ? 'index.html?resume_booking=1' : 'index.html');
         }
     }, 800);
 }
@@ -4104,6 +4154,73 @@ function logout() {
     window.location.replace('login.html');
 }
 
+function checkAndResumePendingBooking() {
+    const draftRaw = sessionStorage.getItem('pendingBookingDraft');
+    if (!draftRaw) return;
+
+    if (!isRealLoggedInUser()) return;
+
+    try {
+        const draft = JSON.parse(draftRaw);
+        if (!draft || !draft.machineId) return;
+
+        setTimeout(() => {
+            openBookingModal(draft.machineId);
+
+            if (draft.farmerName) {
+                const nameInput = document.getElementById('farmerName');
+                if (nameInput) nameInput.value = draft.farmerName;
+            }
+            if (draft.farmerPhone) {
+                const phoneInput = document.getElementById('farmerPhone');
+                if (phoneInput) phoneInput.value = draft.farmerPhone;
+            }
+            if (draft.farmerVillage) {
+                const villageInput = document.getElementById('farmerVillage');
+                if (villageInput) villageInput.value = draft.farmerVillage;
+            }
+            if (draft.duration) {
+                const durInput = document.getElementById('workDuration');
+                if (durInput) durInput.value = draft.duration;
+            }
+            if (draft.cropName) {
+                const cropInput = document.getElementById('workCropName');
+                if (cropInput) cropInput.value = draft.cropName;
+            }
+            if (draft.bookingDate) {
+                const dateInput = document.getElementById('bookingDate');
+                if (dateInput) dateInput.value = draft.bookingDate;
+            }
+            if (draft.bookingSlot) {
+                const slotSelect = document.getElementById('bookingSlot');
+                if (slotSelect) slotSelect.value = draft.bookingSlot;
+            }
+            if (draft.fuelOption) {
+                handleFuelOptionChange(draft.fuelOption);
+            }
+            if (draft.gpsLink) {
+                const gpsInput = document.getElementById('farmerGpsLink');
+                if (gpsInput) gpsInput.value = draft.gpsLink;
+            }
+
+            calculateEstimate();
+
+            // Show a pleasant welcome toast inside booking card
+            const form = document.getElementById('tractorBookingForm');
+            if (form && !document.getElementById('bookingResumeAlert')) {
+                const resumeAlert = document.createElement('div');
+                resumeAlert.id = 'bookingResumeAlert';
+                resumeAlert.className = 'status-change-toast';
+                resumeAlert.style.margin = '0 0 14px';
+                resumeAlert.innerHTML = '🎉 <strong>लॉगिन सफल!</strong> आपका विवरण सुरक्षित है, अब नीचे <u>"बुकिंग पक्की करें"</u> दबाएं।';
+                form.insertBefore(resumeAlert, form.firstChild);
+            }
+        }, 400);
+    } catch (e) {
+        console.warn('Resume booking draft error:', e);
+    }
+}
+
 // ==========================================
 // 14. Page Initialization
 // ==========================================
@@ -4123,4 +4240,5 @@ window.addEventListener('DOMContentLoaded', () => {
     updateBookingBadges();
     syncBookingsFromSupabase();
     initLiveFarmWeather();
+    checkAndResumePendingBooking();
 });
