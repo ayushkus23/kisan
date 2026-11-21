@@ -3420,6 +3420,7 @@ function applyLanguage(lang) {
 
 function selectLanguage(lang) {
     applyLanguage(lang);
+    localStorage.setItem('tractorLangPromptSeen', 'true');
     sessionStorage.setItem('tractorLangPromptShown', 'true');
     closeLanguageModal();
 }
@@ -3430,6 +3431,8 @@ function openLanguageModal() {
 }
 
 function closeLanguageModal() {
+    localStorage.setItem('tractorLangPromptSeen', 'true');
+    sessionStorage.setItem('tractorLangPromptShown', 'true');
     const modal = document.getElementById('languageModal');
     if (modal) modal.style.display = 'none';
 }
@@ -3445,7 +3448,7 @@ window.addEventListener('click', (e) => {
     const myBookingsModal = document.getElementById('myBookingsModal');
     const liveTrackingModal = document.getElementById('liveTrackingModal');
 
-    if (e.target === langModal && localStorage.getItem('tractorLang')) {
+    if (e.target === langModal) {
         closeLanguageModal();
     }
     if (e.target === bookModal) {
@@ -4226,13 +4229,14 @@ function checkAndResumePendingBooking() {
 // ==========================================
 window.addEventListener('DOMContentLoaded', () => {
     const savedLang = localStorage.getItem('tractorLang');
-    const sessionSeen = sessionStorage.getItem('tractorLangPromptShown');
+    const seen = localStorage.getItem('tractorLangPromptSeen');
 
-    if (!savedLang || !sessionSeen) {
+    // Do NOT show automatic popup if language is already chosen or user has seen it before
+    if (!savedLang && !seen) {
         openLanguageModal();
-        applyLanguage(savedLang || 'hi');
+        applyLanguage('hi');
     } else {
-        applyLanguage(savedLang);
+        applyLanguage(savedLang || 'hi');
     }
 
     renderMandiTicker();
