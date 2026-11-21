@@ -121,7 +121,7 @@
 
                 <div class="login-footer">
                     <p><span data-i18n="newFarmerText">नए किसान हैं?</span> <a href="#" onclick="switchAuthTab('register'); return false;" data-i18n="createAccountLink">नया अकाउंट बनाएं</a></p>
-                    <p style="margin-top: 10px;"><a href="admin.html" style="font-size: 12px; color: #78909c; text-decoration: none;">🛡️ एडमिन कंट्रोल रूम लॉगिन</a></p>
+                    <p style="margin-top: 10px;"><a href="admin.html" style="font-size: 14px; color: #37474f; text-decoration: none; font-weight: 600;">🛡️ एडमिन कंट्रोल रूम लॉगिन</a></p>
                 </div>
             </div>
 
@@ -185,65 +185,111 @@
 
             <!-- 4. Create Account (Register) Form -->
             <form id="registerForm" onsubmit="handleRegister(event)" style="display: none;">
-                <div class="form-group">
-                    <label for="regFullName" data-i18n="labelFullName">पूरा नाम / Farmer Name *</label>
-                    <input type="text" id="regFullName" data-i18n-placeholder="placeholderFullName" placeholder="जैसे: रामप्रसाद यादव" required autocomplete="name">
-                </div>
-
-                <div class="form-group">
-                    <label for="regPhone" data-i18n="labelPhone">मोबाइल नंबर (10 अंक) *</label>
-                    <input type="tel" id="regPhone" pattern="[0-9]{10}" maxlength="10" data-i18n-placeholder="placeholderPhone" placeholder="जैसे: 9876543210" required autocomplete="tel">
-                </div>
-
-                <div class="form-group">
-                    <label data-i18n="labelRole">आपकी भूमिका / Your Role *</label>
-                    <div class="role-selector-grid">
-                        <label class="role-card selected" id="roleCardFarmer">
-                            <input type="radio" name="regRole" value="farmer" checked onchange="handleRoleChange(this)">
-                            <span class="role-icon">🌾</span>
-                            <div class="role-meta">
-                                <span class="role-title" data-i18n="roleFarmerTitle">किसान भाई</span>
-                                <span class="role-desc" data-i18n="roleFarmerDesc">ट्रैक्टर किराये पर चाहिए</span>
-                            </div>
-                        </label>
-                        <label class="role-card" id="roleCardOwner">
-                            <input type="radio" name="regRole" value="owner" onchange="handleRoleChange(this)">
-                            <span class="role-icon">🚜</span>
-                            <div class="role-meta">
-                                <span class="role-title" data-i18n="roleOwnerTitle">ट्रैक्टर मालिक</span>
-                                <span class="role-desc" data-i18n="roleOwnerDesc">किराये पर कमाई करनी है</span>
-                            </div>
-                        </label>
+                <!-- Register Wizard Progress Indicator -->
+                <div class="wizard-header" id="regWizardProgress">
+                    <div class="wizard-progress-meta">
+                        <span class="wizard-step-badge" id="regStepBadge">कदम 1 / 3 (Step 1 of 3)</span>
+                        <span class="wizard-step-title" id="regStepTitle" data-i18n="regStepTitleName">नाम व भूमिका</span>
+                    </div>
+                    <div class="wizard-progress-track" role="progressbar" aria-valuemin="1" aria-valuemax="3" aria-valuenow="1" id="regProgressBar">
+                        <div class="wizard-progress-fill" id="regProgressFill" style="width: 33%;"></div>
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <div class="label-with-action">
-                        <label for="regVillage" data-i18n="labelVillage">गांव और जिला *</label>
-                        <button type="button" class="btn-gps-inline" id="btnRegGps" onclick="detectRegisterLocation()" title="GPS से अपना गांव पता करें">
-                            📍 <span data-i18n="btnGpsInline">GPS से खोजें</span>
+                <!-- Step 1: Role & Full Name -->
+                <div class="wizard-step-pane active" id="regStepPane1">
+                    <div class="form-group">
+                        <label data-i18n="labelRole">आपकी भूमिका / Your Role *</label>
+                        <div class="role-selector-grid">
+                            <label class="role-card selected" id="roleCardFarmer">
+                                <input type="radio" name="regRole" value="farmer" checked onchange="handleRoleChange(this)">
+                                <span class="role-icon">🌾</span>
+                                <div class="role-meta">
+                                    <span class="role-title" data-i18n="roleFarmerTitle">किसान भाई</span>
+                                    <span class="role-desc" data-i18n="roleFarmerDesc">ट्रैक्टर किराये पर चाहिए</span>
+                                </div>
+                            </label>
+                            <label class="role-card" id="roleCardOwner">
+                                <input type="radio" name="regRole" value="owner" onchange="handleRoleChange(this)">
+                                <span class="role-icon">🚜</span>
+                                <div class="role-meta">
+                                    <span class="role-title" data-i18n="roleOwnerTitle">ट्रैक्टर मालिक</span>
+                                    <span class="role-desc" data-i18n="roleOwnerDesc">किराये पर कमाई करनी है</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="regFullName" data-i18n="labelFullName">पूरा नाम / Farmer Name *</label>
+                        <input type="text" id="regFullName" data-i18n-placeholder="placeholderFullName" placeholder="जैसे: रामप्रसाद यादव" required autocomplete="name">
+                    </div>
+
+                    <div id="regStepError1" class="wizard-step-error"></div>
+
+                    <div class="wizard-nav-row">
+                        <button type="button" class="btn btn-primary btn-wizard-next" onclick="nextRegisterStep()">
+                            <span data-i18n="wizardBtnNext">आगे बढ़ें (मोबाइल व पता)</span> →
                         </button>
                     </div>
-                    <input type="text" id="regVillage" data-i18n-placeholder="placeholderVillage" placeholder="जैसे: मवाना, मेरठ (उत्तर प्रदेश)" required autocomplete="address-level2">
-                    <div id="regGpsStatus" class="gps-status-pill" style="display: none; margin-top: 6px;"></div>
                 </div>
 
-                <div class="form-row-2">
+                <!-- Step 2: Mobile & Village Location -->
+                <div class="wizard-step-pane" id="regStepPane2">
                     <div class="form-group">
-                        <label for="regPassword" data-i18n="labelNewPassword">पासवर्ड बनाएं *</label>
-                        <input type="password" id="regPassword" data-i18n-placeholder="placeholderNewPassword" placeholder="कम से कम 4 अंक" required autocomplete="new-password">
+                        <label for="regPhone" data-i18n="labelPhone">मोबाइल नंबर (10 अंक) *</label>
+                        <input type="tel" id="regPhone" pattern="[0-9]{10}" inputmode="numeric" maxlength="10" data-i18n-placeholder="placeholderPhone" placeholder="जैसे: 9876543210" required autocomplete="tel">
                     </div>
+
                     <div class="form-group">
-                        <label for="regConfirmPassword" data-i18n="labelConfirmPassword">पासवर्ड दोबारा डालें *</label>
-                        <input type="password" id="regConfirmPassword" data-i18n-placeholder="placeholderConfirmPassword" placeholder="वही पासवर्ड दोबारा डालें" required autocomplete="new-password">
+                        <div class="label-with-action">
+                            <label for="regVillage" data-i18n="labelVillage">गांव और जिला *</label>
+                            <button type="button" class="btn-gps-inline" id="btnRegGps" onclick="detectRegisterLocation()" title="GPS से अपना गांव पता करें" aria-label="GPS से अपना गांव पता करें">
+                                📍 <span data-i18n="btnGpsInline">GPS से खोजें</span>
+                            </button>
+                        </div>
+                        <input type="text" id="regVillage" data-i18n-placeholder="placeholderVillage" placeholder="जैसे: मवाना, मेरठ (उत्तर प्रदेश)" required autocomplete="address-level2">
+                        <div id="regGpsStatus" class="gps-status-pill" style="display: none; margin-top: 6px;"></div>
+                    </div>
+
+                    <div id="regStepError2" class="wizard-step-error"></div>
+
+                    <div class="wizard-nav-row">
+                        <button type="button" class="btn btn-secondary btn-wizard-back" onclick="prevRegisterStep()">
+                            ← <span data-i18n="wizardBtnBack">पीछे</span>
+                        </button>
+                        <button type="button" class="btn btn-primary btn-wizard-next" onclick="nextRegisterStep()">
+                            <span data-i18n="wizardBtnNext">आगे बढ़ें (पासवर्ड)</span> →
+                        </button>
                     </div>
                 </div>
 
-                <div id="registerMessage" class="message-box"></div>
+                <!-- Step 3: Password & Confirm -->
+                <div class="wizard-step-pane" id="regStepPane3">
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label for="regPassword" data-i18n="labelNewPassword">पासवर्ड बनाएं *</label>
+                            <input type="password" id="regPassword" data-i18n-placeholder="placeholderNewPassword" placeholder="कम से कम 4 अंक" required autocomplete="new-password">
+                        </div>
+                        <div class="form-group">
+                            <label for="regConfirmPassword" data-i18n="labelConfirmPassword">पासवर्ड दोबारा डालें *</label>
+                            <input type="password" id="regConfirmPassword" data-i18n-placeholder="placeholderConfirmPassword" placeholder="वही पासवर्ड दोबारा डालें" required autocomplete="new-password">
+                        </div>
+                    </div>
 
-                <button type="submit" class="btn btn-primary login-btn" data-i18n="regBtn">
-                    ✅ खाता बनाएं और शुरू करें
-                </button>
+                    <div id="regStepError3" class="wizard-step-error"></div>
+                    <div id="registerMessage" class="message-box"></div>
+
+                    <button type="submit" class="btn btn-primary login-btn" id="btnSubmitRegister" data-i18n="regBtn" style="margin-top: 10px;">
+                        ✅ खाता बनाएं और शुरू करें
+                    </button>
+
+                    <div class="wizard-nav-row" style="margin-top: 10px;">
+                        <button type="button" class="btn btn-secondary btn-wizard-back" onclick="prevRegisterStep()">
+                            ← <span data-i18n="wizardBtnBack">पीछे</span>
+                        </button>
+                    </div>
+                </div>
 
                 <div class="login-footer" style="margin-top: 18px;">
                     <p><span data-i18n="alreadyAccountText">पहले से खाता है?</span> <a href="#" onclick="switchAuthTab('login'); return false;" data-i18n="loginLink">लॉगिन करें</a></p>

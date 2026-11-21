@@ -337,6 +337,77 @@ const translations = {
         callbackErr: "कृपया अपना 10 अंकों का सही मोबाइल नंबर दर्ज करें।",
 
         // Booking Modal
+        
+        // Wizard Translation Strings
+        stepTitleFuel: "डीजल का चुनाव",
+        stepTitleDate: "तारीख का चुनाव",
+        stepTitleSlot: "समय स्लॉट",
+        stepTitleHours: "काम के घंटे",
+        stepTitleFarmer: "किसान संपर्क",
+        stepTitleLocation: "खेत का स्थान",
+        stepTitleReview: "समीक्षा व बुकिंग पक्की",
+        fuelStepDesc: "चुनें कि डीजल आपका रहेगा या ट्रैक्टर मालिक का खर्च होगा:",
+        slotStepDesc: "ड्राइवर आपके चुने हुए समय पर खेत पहुंचेगा:",
+        slotMorningTitle: "सुबह का समय",
+        slotDayTitle: "दोपहर का समय",
+        slotAfternoonTitle: "दोपहर बाद",
+        slotCustomTitle: "सटीक समय",
+        slotCustomDesc: "फोन पर तय करें",
+        dateToday: "आज (Today)",
+        dateTomorrow: "कल (Tomorrow)",
+        dateDayAfter: "परसों (Day After)",
+        labelSelectExactDate: "या कैलेंडर से तारीख चुनें *",
+        stepDescFarmer: "ट्रैक्टर मालिक और ड्राइवर सीधे आपसे इसी नंबर पर संपर्क करेंगे:",
+        helperPhoneNotice: "ड्राइवर कॉल कर सके इसके लिए सही 10 अंकों का नंबर दें",
+        stepDescLocation: "खेत की लोकेशन बताएं ताकि ड्राइवर बिना भटके सीधे आपके खेत पहुंच सके:",
+        stepDescReview: "कृपया सभी जानकारी ध्यान से जांचें, किसी भी जानकारी को बदलने के लिए 'बदलें' बटन दबाएं:",
+        reviewLabelMachine: "🚜 चयनित ट्रैक्टर:",
+        reviewLabelFuel: "⛽ डीजल का चुनाव:",
+        reviewLabelDate: "📅 तारीख व समय स्लॉट:",
+        reviewLabelHours: "⏱️ काम के घंटे:",
+        reviewLabelFarmer: "👨‍🌾 किसान संपर्क:",
+        reviewLabelLocation: "📍 खेत का स्थान व फसल:",
+        wizardBtnNext: "आगे बढ़ें",
+        wizardBtnBack: "पीछे",
+        wizardBtnEdit: "बदलें",
+        stickyRateLabel: "अनुमानित कुल किराया:",
+        btnSubmitting: "अनुरोध भेजा जा रहा है...",
+
+        // Tractor Reg Wizard Strings
+        regStepTitleOwner: "मालिक व ड्राइवर जानकारी",
+        regStepDescOwner: "अपने संपर्क की सही जानकारी दें ताकि किसान भाई आपसे बात कर सकें:",
+        regStepTitleTractor: "ट्रैक्टर की जानकारी",
+        regStepDescTractor: "अपने ट्रैक्टर का मॉडल, ड्राइव और किराया रेट भरें:",
+        regStepTitleTools: "उपलब्ध औजार",
+        regStepDescTools: "जो औजार आपके ट्रैक्टर के साथ उपलब्ध हैं उन पर टिक करें (कम से कम 1 चुनें):",
+        regStepTitleReview: "समीक्षा व नियम",
+        regStepDescReview: "कृपया भरी हुई जानकारी जांचें और नियम स्वीकार कर ट्रैक्टर जोड़ें:",
+        regReviewOwnerLabel: "मालिक व संपर्क:",
+        regReviewTractorLabel: "ट्रैक्टर व किराया दर:",
+        regReviewToolsLabel: "उपलब्ध औजार:",
+
+        // Register Wizard Strings
+        regStepTitleName: "नाम व भूमिका",
+        regStepTitleContact: "मोबाइल व गांव",
+        regStepTitlePassword: "सुरक्षित पासवर्ड",
+
+        // Validation Errors (with icons)
+        errSelectFuel: "⚠️ कृपया डीजल का विकल्प चुनें",
+        errSelectDate: "⚠️ कृपया आज या अगले 30 दिनों में से सही तारीख चुनें",
+        errSelectSlot: "⚠️ कृपया समय स्लॉट चुनें",
+        errSelectHours: "⚠️ कृपया काम के घंटे दर्ज करें (कम से कम 1 घंटा)",
+        errFillFarmerInfo: "⚠️ कृपया किसान का नाम और 10 अंकों का सही मोबाइल नंबर दर्ज करें",
+        errFillVillageLocation: "⚠️ कृपया गांव / खेत का स्थान दर्ज करें या GPS बटन दबाएं",
+        errFillOwnerInfo: "⚠️ कृपया मालिक का नाम, 10 अंकों का फोन और गांव दर्ज करें",
+        errFillTractorDetails: "⚠️ कृपया ट्रैक्टर मॉडल, RC नंबर और किराया सही भरें",
+        errSelectImplement: "⚠️ कम से कम 1 औजार अवश्य चुनें",
+        errAcceptTerms: "⚠️ आगे बढ़ने के लिए कृपया नियम व शर्तों पर टिक करें",
+        errFillRegName: "⚠️ कृपया अपना पूरा नाम दर्ज करें",
+        errFillRegPhone: "⚠️ कृपया 10 अंकों का सही मोबाइल नंबर दर्ज करें",
+        errFillRegVillage: "⚠️ कृपया अपना गांव व जिला दर्ज करें",
+        errFillRegPass: "⚠️ पासवर्ड कम से कम 4 अक्षरों/अंकों का होना चाहिए",
+        errPassMismatch: "⚠️ दोनों पासवर्ड समान होने चाहिए",
+
         modalRateLabel: "किराया दर:",
         modalEstimatedLabel: "कुल अनुमानित खर्च:",
         labelBookingDate: "तारीख चुनें (किस दिन चाहिए?) *",
@@ -651,6 +722,74 @@ const translations = {
         callbackErr: "Please enter a valid 10-digit mobile number.",
 
         // Booking Modal
+        
+        // Wizard Translation Strings
+        stepTitleFuel: "Fuel Option",
+        stepTitleDate: "Select Date",
+        stepTitleSlot: "Time Slot",
+        stepTitleHours: "Work Hours",
+        stepTitleFarmer: "Farmer Details",
+        stepTitleLocation: "Farm Location",
+        stepTitleReview: "Review & Confirm",
+        fuelStepDesc: "Choose whether fuel is included or provided by the farmer:",
+        slotStepDesc: "The driver will arrive at your field during this chosen slot:",
+        slotMorningTitle: "Morning Slot",
+        slotDayTitle: "Afternoon Slot",
+        slotAfternoonTitle: "Late Afternoon",
+        slotCustomTitle: "Custom Time",
+        slotCustomDesc: "Decide via call",
+        dateToday: "Today",
+        dateTomorrow: "Tomorrow",
+        dateDayAfter: "Day After",
+        labelSelectExactDate: "Or choose date from calendar *",
+        stepDescFarmer: "The owner and driver will contact you directly on this number:",
+        helperPhoneNotice: "Provide valid 10-digit number so driver can call you",
+        stepDescLocation: "Specify farm location so the driver reaches directly without delays:",
+        stepDescReview: "Please review all details carefully. Click 'Edit' next to any field to change:",
+        reviewLabelMachine: "🚜 Selected Tractor:",
+        reviewLabelFuel: "⛽ Fuel Option:",
+        reviewLabelDate: "📅 Date & Slot:",
+        reviewLabelHours: "⏱️ Hours Needed:",
+        reviewLabelFarmer: "👨‍🌾 Farmer Contact:",
+        reviewLabelLocation: "📍 Location & Crop:",
+        wizardBtnNext: "Next",
+        wizardBtnBack: "Back",
+        wizardBtnEdit: "Edit",
+        stickyRateLabel: "Estimated Total:",
+        btnSubmitting: "Sending request...",
+
+        regStepTitleOwner: "Owner & Driver Info",
+        regStepDescOwner: "Provide accurate contact info so farmers can reach you:",
+        regStepTitleTractor: "Tractor Details",
+        regStepDescTractor: "Enter your tractor model, drive type and hourly rate:",
+        regStepTitleTools: "Available Implements",
+        regStepDescTools: "Select the implements available with your tractor (at least 1):",
+        regStepTitleReview: "Review & Terms",
+        regStepDescReview: "Review your tractor info and accept terms to attach:",
+        regReviewOwnerLabel: "Owner & Contact:",
+        regReviewTractorLabel: "Tractor & Rate:",
+        regReviewToolsLabel: "Available Implements:",
+
+        regStepTitleName: "Name & Role",
+        regStepTitleContact: "Mobile & Village",
+        regStepTitlePassword: "Secure Password",
+
+        errSelectFuel: "⚠️ Please select a fuel option",
+        errSelectDate: "⚠️ Please select a valid date (today or next 30 days)",
+        errSelectSlot: "⚠️ Please select a time slot",
+        errSelectHours: "⚠️ Please enter hours needed (minimum 1 hour)",
+        errFillFarmerInfo: "⚠️ Please enter farmer name and valid 10-digit mobile number",
+        errFillVillageLocation: "⚠️ Please enter village / field location or tap GPS",
+        errFillOwnerInfo: "⚠️ Please enter owner name, 10-digit mobile and village",
+        errFillTractorDetails: "⚠️ Please enter tractor model, RC plate and hourly rate",
+        errSelectImplement: "⚠️ Please select at least one implement",
+        errAcceptTerms: "⚠️ Please agree to terms & policy before submitting",
+        errFillRegName: "⚠️ Please enter your full name",
+        errFillRegPhone: "⚠️ Please enter a valid 10-digit mobile number",
+        errFillRegVillage: "⚠️ Please enter your village and district",
+        errFillRegPass: "⚠️ Password must be at least 4 characters",
+        errPassMismatch: "⚠️ Passwords do not match",
+
         modalRateLabel: "Rental Rate:",
         modalEstimatedLabel: "Estimated Total Cost:",
         labelBookingDate: "Select Date (When needed?) *",
@@ -874,7 +1013,10 @@ function handleDrawerAuth() {
 function openTractorRegModal() {
     closeDrawer();
     const modal = document.getElementById('tractorRegModal');
-    if (modal) modal.style.display = 'flex';
+    if (modal) 
+    goToBookingStep(1);
+
+    modal.style.display = 'flex';
 }
 
 function closeTractorRegModal() {
@@ -907,8 +1049,7 @@ function handleTractorRegistration(event) {
     const tractorRate = parseInt(document.getElementById('tractorRate').value) || 550;
 
     if (!ownerName || !ownerPhone || !ownerVillage || !tractorRC) {
-        alert(t.errFillFields);
-        return;
+        alert(t.errFillFields); if (typeof resetSubmitBtn === "function") resetSubmitBtn(); return;
     }
 
     const cleanMobile = ownerPhone.replace(/[^0-9]/g, '').slice(-10);
@@ -983,6 +1124,17 @@ function handleTractorRegistration(event) {
     }
 
     closeTractorRegModal();
+    
+    if (typeof updateBookingWizardUI === 'function' && document.getElementById('bookingModal') && document.getElementById('bookingModal').style.display === 'flex') {
+        updateBookingWizardUI();
+    }
+    if (typeof updateTractorRegWizardUI === 'function' && document.getElementById('tractorRegModal') && document.getElementById('tractorRegModal').style.display === 'flex') {
+        updateTractorRegWizardUI();
+    }
+    if (typeof updateRegisterWizardUI === 'function' && document.getElementById('registerForm') && document.getElementById('registerForm').style.display !== 'none') {
+        updateRegisterWizardUI();
+    }
+
     renderFleetCards(currentFilter);
 
     const alertMsg = currentLang === 'hi'
@@ -1789,6 +1941,9 @@ function openBookingModal(machineId) {
 function closeBookingModal() {
     const modal = document.getElementById('bookingModal');
     if (modal) modal.style.display = 'none';
+    if (!lastBookedOrderId) {
+        goToBookingStep(1);
+    }
 }
 
 function handleFuelOptionChange(option) {
@@ -1850,6 +2005,17 @@ function calculateEstimate() {
         }
     }
 
+    
+    const stickyTotalEl = document.getElementById('stickyTotalEstimate');
+    if (stickyTotalEl) {
+        stickyTotalEl.textContent = `₹${total.toLocaleString('en-IN')}`;
+    }
+    const stickySubEl = document.getElementById('stickyRateSub');
+    if (stickySubEl) {
+        const hrText = currentLang === 'hi' ? 'घंटे' : 'Hours';
+        stickySubEl.textContent = `₹${appliedRate} • ${duration} ${hrText}`;
+    }
+
     const totalEl = document.getElementById('modalTotalEstimate');
     if (totalEl) {
         totalEl.textContent = `₹${total.toLocaleString('en-IN')}`;
@@ -1864,6 +2030,17 @@ let lastBookedMobile = null;
 // ==========================================
 async function handleTractorBookingSubmit(event) {
     event.preventDefault();
+    const submitBtn = document.getElementById('btnConfirmBooking');
+    const resetSubmitBtn = () => {
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '🚜 <span data-i18n="btnConfirmBooking">' + (currentLang === 'hi' ? 'अनुरोध भेजें (बुकिंग पक्की करें)' : 'Send Request (Confirm Booking)') + '</span>';
+        }
+    };
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '⏳ <span>' + (currentLang === 'hi' ? 'अनुरोध भेजा जा रहा है...' : 'Sending request...') + '</span>';
+    }
     const t = translations[currentLang] || translations.hi;
 
     const farmerName = document.getElementById('farmerName').value.trim();
@@ -1889,14 +2066,12 @@ async function handleTractorBookingSubmit(event) {
     // Phone validation (10 digits)
     const phoneClean = farmerPhone.replace(/\D/g, '');
     if (phoneClean.length !== 10) {
-        alert(t.errInvalidPhone || 'कृपया 10 अंकों का सही मोबाइल नंबर दर्ज करें।');
-        return;
+        alert(t.errInvalidPhone || "कृपया 10 अंकों का सही मोबाइल नंबर दर्ज करें।"); if (typeof resetSubmitBtn === "function") resetSubmitBtn(); return;
     }
 
     // Date validation
     if (!bookingDateVal) {
-        alert(t.errInvalidDate || 'कृपया तारीख चुनें।');
-        return;
+        alert(t.errInvalidDate || "कृपया तारीख चुनें।"); if (typeof resetSubmitBtn === "function") resetSubmitBtn(); return;
     }
 
     // GUEST USER CHECK: If user is browsing as Guest, require Login on final step!
@@ -1931,11 +2106,11 @@ async function handleTractorBookingSubmit(event) {
     const fuelText = selectedFuelOption === 'with-fuel' ? t.fuelWithShort : t.fuelWithoutShort;
 
     // Show loading state on submit button
-    const submitBtn = document.querySelector('.btn-confirm-booking');
-    const originalBtnHtml = submitBtn ? submitBtn.innerHTML : '';
-    if (submitBtn) {
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = `⏳ ${t.bookingSubmitting || 'अनुरोध भेजा जा रहा है...'}`;
+    const btnConfirm = submitBtn || document.querySelector('.btn-confirm-booking');
+    const originalBtnHtml = btnConfirm ? btnConfirm.innerHTML : '';
+    if (btnConfirm) {
+        btnConfirm.disabled = true;
+        btnConfirm.innerHTML = `⏳ ${t.bookingSubmitting || 'अनुरोध भेजा जा रहा है...'}`;
     }
 
     // Generate clean readable booking code (e.g. TRAC-5421)
@@ -3407,6 +3582,15 @@ function applyLanguage(lang) {
     }
 
     // Re-render fleet and ticker in chosen language
+    if (typeof updateBookingWizardUI === 'function' && document.getElementById('bookingModal')) {
+        updateBookingWizardUI();
+    }
+    if (typeof updateTractorRegWizardUI === 'function' && document.getElementById('tractorRegModal')) {
+        updateTractorRegWizardUI();
+    }
+    if (typeof updateRegisterWizardUI === 'function' && document.getElementById('registerForm')) {
+        updateRegisterWizardUI();
+    }
     renderFleetCards(currentFilter);
     renderMandiTicker();
     updateBookingBadges();
@@ -4245,4 +4429,665 @@ window.addEventListener('DOMContentLoaded', () => {
     syncBookingsFromSupabase();
     initLiveFarmWeather();
     checkAndResumePendingBooking();
+});
+
+
+// ==========================================================================
+// STEP-BY-STEP WIZARD CONTROLLERS (Booking, Tractor Reg, Registration)
+// ==========================================================================
+
+// 1. BOOKING MODAL WIZARD CONTROLLER (7 Steps)
+var currentBookingStep = 1;
+const totalBookingSteps = 7;
+
+function getStepTitleKey(step) {
+    const titles = {
+        1: 'stepTitleFuel',
+        2: 'stepTitleDate',
+        3: 'stepTitleSlot',
+        4: 'stepTitleHours',
+        5: 'stepTitleFarmer',
+        6: 'stepTitleLocation',
+        7: 'stepTitleReview'
+    };
+    return titles[step] || 'stepTitleFuel';
+}
+
+function updateBookingWizardUI() {
+    const t = translations[currentLang] || translations.hi;
+    const badge = document.getElementById('bookingStepBadge');
+    const titleEl = document.getElementById('bookingStepTitle');
+    const fill = document.getElementById('bookingProgressFill');
+    const bar = document.getElementById('bookingProgressBar');
+    const stickyBar = document.getElementById('bookingStickyRateBar');
+
+    if (badge) {
+        badge.textContent = currentLang === 'hi'
+            ? `कदम ${currentBookingStep} / ${totalBookingSteps}`
+            : `Step ${currentBookingStep} of ${totalBookingSteps}`;
+    }
+    if (titleEl) {
+        titleEl.textContent = t[getStepTitleKey(currentBookingStep)] || '';
+    }
+    const percent = Math.round((currentBookingStep / totalBookingSteps) * 100);
+    if (fill) fill.style.width = percent + '%';
+    if (bar) bar.setAttribute('aria-valuenow', currentBookingStep);
+
+    // Show sticky rate bar on steps 1-6, hide on step 7 (since breakdown card is there)
+    if (stickyBar) {
+        stickyBar.style.display = (currentBookingStep >= 1 && currentBookingStep <= 6) ? 'flex' : 'none';
+    }
+
+    // Toggle active step panes
+    for (let i = 1; i <= totalBookingSteps; i++) {
+        const pane = document.getElementById('bookingStepPane' + i);
+        if (pane) {
+            pane.classList.toggle('active', i === currentBookingStep);
+        }
+    }
+
+    if (currentBookingStep === 7) {
+        updateBookingReviewSummary();
+    }
+
+    // Keep page/modal scrolled to top of step
+    const card = document.querySelector('#bookingModal .modal-card');
+    if (card) card.scrollTop = 0;
+}
+
+function showBookingStepError(step, msg) {
+    const errBox = document.getElementById('bookingStepError' + step);
+    if (errBox) {
+        errBox.textContent = msg;
+        errBox.classList.add('show');
+    }
+}
+
+function clearBookingStepErrors() {
+    for (let i = 1; i <= totalBookingSteps; i++) {
+        const errBox = document.getElementById('bookingStepError' + i);
+        if (errBox) {
+            errBox.textContent = '';
+            errBox.classList.remove('show');
+        }
+    }
+}
+
+function validateCurrentBookingStep(step) {
+    const t = translations[currentLang] || translations.hi;
+    clearBookingStepErrors();
+
+    if (step === 1) {
+        if (!selectedFuelOption) {
+            showBookingStepError(1, t.errSelectFuel);
+            return false;
+        }
+        return true;
+    }
+
+    if (step === 2) {
+        const dateInput = document.getElementById('bookingDate');
+        if (!dateInput || !dateInput.value) {
+            showBookingStepError(2, t.errSelectDate);
+            if (dateInput) dateInput.focus();
+            return false;
+        }
+        return true;
+    }
+
+    if (step === 3) {
+        const slotSelect = document.getElementById('bookingSlot');
+        if (!slotSelect || !slotSelect.value) {
+            showBookingStepError(3, t.errSelectSlot);
+            return false;
+        }
+        return true;
+    }
+
+    if (step === 4) {
+        const durationInput = document.getElementById('workDuration');
+        const dur = parseFloat(durationInput ? durationInput.value : 0);
+        if (isNaN(dur) || dur < 1) {
+            showBookingStepError(4, t.errSelectHours);
+            if (durationInput) durationInput.focus();
+            return false;
+        }
+        return true;
+    }
+
+    if (step === 5) {
+        const nameInput = document.getElementById('farmerName');
+        const phoneInput = document.getElementById('farmerPhone');
+        const name = nameInput ? nameInput.value.trim() : '';
+        const phone = phoneInput ? phoneInput.value.replace(/\D/g, '') : '';
+
+        if (!name || name.length < 2) {
+            showBookingStepError(5, t.errFillFarmerInfo);
+            if (nameInput) nameInput.focus();
+            return false;
+        }
+        if (!phone || phone.length !== 10) {
+            showBookingStepError(5, t.errInvalidPhone || t.errFillFarmerInfo);
+            if (phoneInput) phoneInput.focus();
+            return false;
+        }
+        return true;
+    }
+
+    if (step === 6) {
+        const villageInput = document.getElementById('farmerVillage');
+        const village = villageInput ? villageInput.value.trim() : '';
+        if (!village || village.length < 2) {
+            showBookingStepError(6, t.errFillVillageLocation);
+            if (villageInput) villageInput.focus();
+            return false;
+        }
+        return true;
+    }
+
+    return true;
+}
+
+function nextBookingStep() {
+    if (validateCurrentBookingStep(currentBookingStep)) {
+        if (currentBookingStep < totalBookingSteps) {
+            currentBookingStep++;
+            updateBookingWizardUI();
+        }
+    }
+}
+
+function prevBookingStep() {
+    clearBookingStepErrors();
+    if (currentBookingStep > 1) {
+        currentBookingStep--;
+        updateBookingWizardUI();
+    }
+}
+
+function goToBookingStep(step) {
+    if (step >= 1 && step <= totalBookingSteps) {
+        clearBookingStepErrors();
+        currentBookingStep = step;
+        updateBookingWizardUI();
+    }
+}
+
+function selectTimeSlotCard(slotVal) {
+    const slotSelect = document.getElementById('bookingSlot');
+    if (slotSelect) {
+        slotSelect.value = slotVal;
+    }
+    const cards = ['Morning', 'Day', 'Afternoon', 'Custom'];
+    cards.forEach(c => {
+        const card = document.getElementById('slotCard' + c);
+        if (card) {
+            card.classList.toggle('active', c.toLowerCase() === slotVal.toLowerCase());
+        }
+    });
+    clearBookingStepErrors();
+}
+
+function selectQuickDate(daysOffset) {
+    const dateInput = document.getElementById('bookingDate');
+    const target = new Date();
+    target.setDate(target.getDate() + daysOffset);
+    const dateStr = getFormattedDateString(target);
+    if (dateInput) {
+        dateInput.value = dateStr;
+    }
+    const chips = [
+        { id: 'chipDateToday', offset: 0 },
+        { id: 'chipDateTomorrow', offset: 1 },
+        { id: 'chipDateDayAfter', offset: 2 }
+    ];
+    chips.forEach(c => {
+        const el = document.getElementById(c.id);
+        if (el) el.classList.toggle('active', c.offset === daysOffset);
+    });
+    clearBookingStepErrors();
+}
+
+function adjustWorkDuration(delta) {
+    const input = document.getElementById('workDuration');
+    if (!input) return;
+    let val = parseInt(input.value, 10) || 1;
+    val = Math.max(1, Math.min(50, val + delta));
+    input.value = val;
+    calculateEstimate();
+    updateDurationChips(val);
+    clearBookingStepErrors();
+}
+
+function setWorkDurationQuick(hours) {
+    const input = document.getElementById('workDuration');
+    if (input) {
+        input.value = hours;
+        calculateEstimate();
+        updateDurationChips(hours);
+        clearBookingStepErrors();
+    }
+}
+
+function updateDurationChips(currentHours) {
+    const hourChips = [1, 2, 4, 6, 8];
+    hourChips.forEach(h => {
+        const btn = document.getElementById('chipHour' + h);
+        if (btn) btn.classList.toggle('active', h === currentHours);
+    });
+}
+
+function selectQuickCrop(cropName) {
+    const input = document.getElementById('workCropName');
+    if (input) input.value = cropName;
+}
+
+function updateBookingReviewSummary() {
+    const isHi = (currentLang || 'hi') === 'hi';
+
+    // 1. Machine
+    const machineEl = document.getElementById('reviewSummaryMachine');
+    if (machineEl && selectedMachine) {
+        const name = selectedMachine.name[currentLang] || selectedMachine.name.hi;
+        const badge = selectedMachine.badge[currentLang] || selectedMachine.badge.hi;
+        machineEl.textContent = `${name} (${badge})`;
+    }
+
+    // 2. Fuel
+    const fuelEl = document.getElementById('reviewSummaryFuel');
+    if (fuelEl) {
+        fuelEl.textContent = selectedFuelOption === 'with-fuel'
+            ? (isHi ? 'डीजल व ड्राइवर सहित' : 'With Fuel & Driver')
+            : (isHi ? 'डीजल किसान का (छूट लागू)' : 'Without Fuel (Farmer provides diesel)');
+    }
+
+    // 3. Date & Time
+    const dtEl = document.getElementById('reviewSummaryDateTime');
+    const dateInput = document.getElementById('bookingDate');
+    const slotSelect = document.getElementById('bookingSlot');
+    if (dtEl) {
+        const dVal = dateInput ? dateInput.value : '';
+        let slotText = 'दोपहर (10:00 AM - 02:00 PM)';
+        if (slotSelect && slotSelect.selectedOptions && slotSelect.selectedOptions[0]) {
+            slotText = slotSelect.selectedOptions[0].textContent.trim();
+        }
+        dtEl.textContent = `${dVal || 'आज'} • ${slotText}`;
+    }
+
+    // 4. Hours
+    const hoursEl = document.getElementById('reviewSummaryHours');
+    const durationInput = document.getElementById('workDuration');
+    if (hoursEl) {
+        const dur = durationInput ? durationInput.value : '2';
+        hoursEl.textContent = `${dur} ${isHi ? 'घंटे' : 'Hours'}`;
+    }
+
+    // 5. Farmer Contact
+    const contactEl = document.getElementById('reviewSummaryContact');
+    const nameInput = document.getElementById('farmerName');
+    const phoneInput = document.getElementById('farmerPhone');
+    if (contactEl) {
+        const n = nameInput ? nameInput.value.trim() : '';
+        const p = phoneInput ? phoneInput.value.trim() : '';
+        contactEl.textContent = `${n} • ${p}`;
+    }
+
+    // 6. Location & Crop
+    const locEl = document.getElementById('reviewSummaryLocation');
+    const villageInput = document.getElementById('farmerVillage');
+    const cropInput = document.getElementById('workCropName');
+    if (locEl) {
+        const v = villageInput ? villageInput.value.trim() : '';
+        const c = cropInput ? cropInput.value.trim() : '';
+        locEl.textContent = c ? `${v} (${c})` : v;
+    }
+}
+
+// 2. TRACTOR REGISTRATION WIZARD CONTROLLER (4 Steps)
+var currentTractorRegStep = 1;
+const totalTractorRegSteps = 4;
+
+function updateTractorRegWizardUI() {
+    const t = translations[currentLang] || translations.hi;
+    const badge = document.getElementById('tractorRegStepBadge');
+    const titleEl = document.getElementById('tractorRegStepTitle');
+    const fill = document.getElementById('tractorRegProgressFill');
+    const bar = document.getElementById('tractorRegProgressBar');
+
+    const regTitles = {
+        1: t.regStepTitleOwner || 'मालिक व ड्राइवर जानकारी',
+        2: t.regStepTitleTractor || 'ट्रैक्टर की जानकारी',
+        3: t.regStepTitleTools || 'उपलब्ध औजार',
+        4: t.regStepTitleReview || 'समीक्षा व नियम'
+    };
+
+    if (badge) {
+        badge.textContent = currentLang === 'hi'
+            ? `कदम ${currentTractorRegStep} / ${totalTractorRegSteps}`
+            : `Step ${currentTractorRegStep} of ${totalTractorRegSteps}`;
+    }
+    if (titleEl) titleEl.textContent = regTitles[currentTractorRegStep] || '';
+    const pct = Math.round((currentTractorRegStep / totalTractorRegSteps) * 100);
+    if (fill) fill.style.width = pct + '%';
+    if (bar) bar.setAttribute('aria-valuenow', currentTractorRegStep);
+
+    for (let i = 1; i <= totalTractorRegSteps; i++) {
+        const pane = document.getElementById('tractorRegStepPane' + i);
+        if (pane) {
+            pane.classList.toggle('active', i === currentTractorRegStep);
+        }
+    }
+
+    if (currentTractorRegStep === 4) {
+        updateTractorRegReviewSummary();
+    }
+
+    const card = document.querySelector('#tractorRegModal .reg-modal-card');
+    if (card) card.scrollTop = 0;
+}
+
+function showTractorRegStepError(step, msg) {
+    const el = document.getElementById('tractorRegStepError' + step);
+    if (el) {
+        el.textContent = msg;
+        el.classList.add('show');
+    }
+}
+
+function clearTractorRegStepErrors() {
+    for (let i = 1; i <= totalTractorRegSteps; i++) {
+        const el = document.getElementById('tractorRegStepError' + i);
+        if (el) {
+            el.textContent = '';
+            el.classList.remove('show');
+        }
+    }
+}
+
+function validateCurrentTractorRegStep(step) {
+    const t = translations[currentLang] || translations.hi;
+    clearTractorRegStepErrors();
+
+    if (step === 1) {
+        const name = document.getElementById('ownerName') ? document.getElementById('ownerName').value.trim() : '';
+        const phone = document.getElementById('ownerPhone') ? document.getElementById('ownerPhone').value.replace(/\D/g, '') : '';
+        const village = document.getElementById('ownerVillage') ? document.getElementById('ownerVillage').value.trim() : '';
+
+        if (!name || name.length < 2 || !phone || phone.length !== 10 || !village || village.length < 2) {
+            showTractorRegStepError(1, t.errFillOwnerInfo);
+            return false;
+        }
+        return true;
+    }
+
+    if (step === 2) {
+        const brand = document.getElementById('tractorBrand') ? document.getElementById('tractorBrand').value : '';
+        const rc = document.getElementById('tractorRC') ? document.getElementById('tractorRC').value.trim() : '';
+        const rate = document.getElementById('tractorRate') ? parseFloat(document.getElementById('tractorRate').value) : 0;
+
+        if (!brand || !rc || rc.length < 4 || isNaN(rate) || rate < 200) {
+            showTractorRegStepError(2, t.errFillTractorDetails);
+            return false;
+        }
+        return true;
+    }
+
+    if (step === 3) {
+        const toolIds = ['toolRotavator', 'toolCultivator', 'toolTrolley', 'toolCageWheel', 'toolSeeder', 'toolPlough'];
+        const hasTool = toolIds.some(id => {
+            const chk = document.getElementById(id);
+            return chk && chk.checked;
+        });
+        if (!hasTool) {
+            showTractorRegStepError(3, t.errSelectImplement);
+            return false;
+        }
+        return true;
+    }
+
+    if (step === 4) {
+        const agree = document.getElementById('agreeTerms');
+        if (!agree || !agree.checked) {
+            showTractorRegStepError(4, t.errAcceptTerms);
+            return false;
+        }
+        return true;
+    }
+
+    return true;
+}
+
+function nextTractorRegStep() {
+    if (validateCurrentTractorRegStep(currentTractorRegStep)) {
+        if (currentTractorRegStep < totalTractorRegSteps) {
+            currentTractorRegStep++;
+            updateTractorRegWizardUI();
+        }
+    }
+}
+
+function prevTractorRegStep() {
+    clearTractorRegStepErrors();
+    if (currentTractorRegStep > 1) {
+        currentTractorRegStep--;
+        updateTractorRegWizardUI();
+    }
+}
+
+function goToTractorRegStep(step) {
+    if (step >= 1 && step <= totalTractorRegSteps) {
+        clearTractorRegStepErrors();
+        currentTractorRegStep = step;
+        updateTractorRegWizardUI();
+    }
+}
+
+function toggleImplementCard(chk) {
+    if (chk && chk.parentElement) {
+        chk.parentElement.classList.toggle('checked', chk.checked);
+    }
+    clearTractorRegStepErrors();
+}
+
+function updateTractorRegReviewSummary() {
+    const oName = document.getElementById('ownerName') ? document.getElementById('ownerName').value.trim() : '';
+    const oPhone = document.getElementById('ownerPhone') ? document.getElementById('ownerPhone').value.trim() : '';
+    const oVillage = document.getElementById('ownerVillage') ? document.getElementById('ownerVillage').value.trim() : '';
+    const tBrand = document.getElementById('tractorBrand') ? document.getElementById('tractorBrand').value : '';
+    const tDrive = document.getElementById('tractorDrive') ? document.getElementById('tractorDrive').value : '';
+    const tRC = document.getElementById('tractorRC') ? document.getElementById('tractorRC').value.trim() : '';
+    const tRate = document.getElementById('tractorRate') ? document.getElementById('tractorRate').value : '550';
+
+    const ownerVal = document.getElementById('regReviewOwnerVal');
+    if (ownerVal) ownerVal.textContent = `${oName} • ${oPhone} (${oVillage})`;
+
+    const tractorVal = document.getElementById('regReviewTractorVal');
+    if (tractorVal) tractorVal.textContent = `${tBrand} [${tDrive}] • RC: ${tRC} • ₹${tRate}/घंटा`;
+
+    const toolMap = {
+        toolRotavator: 'रोटावेटर',
+        toolCultivator: 'कल्टीवेटर',
+        toolTrolley: 'ट्रॉली',
+        toolCageWheel: 'केज व्हील',
+        toolSeeder: 'सुपर सीडर',
+        toolPlough: 'एमबी हल'
+    };
+    const tools = [];
+    Object.keys(toolMap).forEach(id => {
+        const el = document.getElementById(id);
+        if (el && el.checked) tools.push(toolMap[id]);
+    });
+    const toolsVal = document.getElementById('regReviewToolsVal');
+    if (toolsVal) toolsVal.textContent = tools.length ? tools.join(', ') : 'कोई नहीं चुना';
+}
+
+// 3. CREATE ACCOUNT (REGISTER) WIZARD CONTROLLER (3 Steps)
+var currentRegStep = 1;
+const totalRegSteps = 3;
+
+function updateRegisterWizardUI() {
+    const t = translations[currentLang] || translations.hi;
+    const badge = document.getElementById('regStepBadge');
+    const titleEl = document.getElementById('regStepTitle');
+    const fill = document.getElementById('regProgressFill');
+    const bar = document.getElementById('regProgressBar');
+
+    const regTitles = {
+        1: t.regStepTitleName || 'नाम व भूमिका',
+        2: t.regStepTitleContact || 'मोबाइल व गांव',
+        3: t.regStepTitlePassword || 'सुरक्षित पासवर्ड'
+    };
+
+    if (badge) {
+        badge.textContent = currentLang === 'hi'
+            ? `कदम ${currentRegStep} / ${totalRegSteps}`
+            : `Step ${currentRegStep} of ${totalRegSteps}`;
+    }
+    if (titleEl) titleEl.textContent = regTitles[currentRegStep] || '';
+    const pct = Math.round((currentRegStep / totalRegSteps) * 100);
+    if (fill) fill.style.width = pct + '%';
+    if (bar) bar.setAttribute('aria-valuenow', currentRegStep);
+
+    for (let i = 1; i <= totalRegSteps; i++) {
+        const pane = document.getElementById('regStepPane' + i);
+        if (pane) {
+            pane.classList.toggle('active', i === currentRegStep);
+        }
+    }
+}
+
+function showRegisterStepError(step, msg) {
+    const el = document.getElementById('regStepError' + step);
+    if (el) {
+        el.textContent = msg;
+        el.classList.add('show');
+    }
+}
+
+function clearRegisterStepErrors() {
+    for (let i = 1; i <= totalRegSteps; i++) {
+        const el = document.getElementById('regStepError' + i);
+        if (el) {
+            el.textContent = '';
+            el.classList.remove('show');
+        }
+    }
+}
+
+function validateCurrentRegisterStep(step) {
+    const t = translations[currentLang] || translations.hi;
+    clearRegisterStepErrors();
+
+    if (step === 1) {
+        const nameInput = document.getElementById('regFullName');
+        const name = nameInput ? nameInput.value.trim() : '';
+        if (!name || name.length < 2) {
+            showRegisterStepError(1, t.errFillRegName);
+            if (nameInput) nameInput.focus();
+            return false;
+        }
+        return true;
+    }
+
+    if (step === 2) {
+        const phoneInput = document.getElementById('regPhone');
+        const villageInput = document.getElementById('regVillage');
+        const phone = phoneInput ? phoneInput.value.replace(/\D/g, '') : '';
+        const village = villageInput ? villageInput.value.trim() : '';
+
+        if (!phone || phone.length !== 10) {
+            showRegisterStepError(2, t.errFillRegPhone);
+            if (phoneInput) phoneInput.focus();
+            return false;
+        }
+        if (!village || village.length < 2) {
+            showRegisterStepError(2, t.errFillRegVillage);
+            if (villageInput) villageInput.focus();
+            return false;
+        }
+        return true;
+    }
+
+    if (step === 3) {
+        const p1Input = document.getElementById('regPassword');
+        const p2Input = document.getElementById('regConfirmPassword');
+        const p1 = p1Input ? p1Input.value : '';
+        const p2 = p2Input ? p2Input.value : '';
+
+        if (!p1 || p1.length < 4) {
+            showRegisterStepError(3, t.errFillRegPass);
+            if (p1Input) p1Input.focus();
+            return false;
+        }
+        if (p1 !== p2) {
+            showRegisterStepError(3, t.errPassMismatch);
+            if (p2Input) p2Input.focus();
+            return false;
+        }
+        return true;
+    }
+
+    return true;
+}
+
+function nextRegisterStep() {
+    if (validateCurrentRegisterStep(currentRegStep)) {
+        if (currentRegStep < totalRegSteps) {
+            currentRegStep++;
+            updateRegisterWizardUI();
+        }
+    }
+}
+
+function prevRegisterStep() {
+    clearRegisterStepErrors();
+    if (currentRegStep > 1) {
+        currentRegStep--;
+        updateRegisterWizardUI();
+    }
+}
+
+function goToRegisterStep(step) {
+    if (step >= 1 && step <= totalRegSteps) {
+        clearRegisterStepErrors();
+        currentRegStep = step;
+        updateRegisterWizardUI();
+    }
+}
+
+// 4. Keyboard Navigation: Enter key triggers Next step on active wizards
+document.addEventListener('DOMContentLoaded', () => {
+    const bookingForm = document.getElementById('tractorBookingForm');
+    if (bookingForm) {
+        bookingForm.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
+                if (currentBookingStep < 7) {
+                    e.preventDefault();
+                    nextBookingStep();
+                }
+            }
+        });
+    }
+    const regForm = document.getElementById('tractorRegisterForm');
+    if (regForm) {
+        regForm.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                if (currentTractorRegStep < 4) {
+                    e.preventDefault();
+                    nextTractorRegStep();
+                }
+            }
+        });
+    }
+    const authRegForm = document.getElementById('registerForm');
+    if (authRegForm) {
+        authRegForm.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                if (currentRegStep < 3) {
+                    e.preventDefault();
+                    nextRegisterStep();
+                }
+            }
+        });
+    }
 });

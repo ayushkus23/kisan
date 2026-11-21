@@ -346,142 +346,388 @@
             </div>
 
             <form id="tractorBookingForm" onsubmit="handleTractorBookingSubmit(event)">
-                <!-- Fuel Option Toggle (With vs Without Diesel) -->
-                <div class="fuel-choice-section">
-                    <label class="fuel-choice-title" data-i18n="fuelChoiceTitle">⛽ डीजल का चुनाव करें (Fuel Option)
-                        *</label>
-                    <div class="fuel-options-grid">
+                <!-- Wizard Progress Indicator -->
+                <div class="wizard-header" id="bookingWizardProgress">
+                    <div class="wizard-progress-meta">
+                        <span class="wizard-step-badge" id="bookingStepBadge">कदम 1 / 7 (Step 1 of 7)</span>
+                        <span class="wizard-step-title" id="bookingStepTitle" data-i18n="stepTitleFuel">डीजल का चुनाव</span>
+                    </div>
+                    <div class="wizard-progress-track" role="progressbar" aria-valuemin="1" aria-valuemax="7" aria-valuenow="1" id="bookingProgressBar">
+                        <div class="wizard-progress-fill" id="bookingProgressFill" style="width: 14%;"></div>
+                    </div>
+                </div>
+
+                <!-- Step 1: Fuel Option -->
+                <div class="wizard-step-pane active" id="bookingStepPane1">
+                    <h3 class="wizard-step-question" data-i18n="fuelChoiceTitle">⛽ डीजल का चुनाव करें (Fuel Option) *</h3>
+                    <p class="wizard-step-desc" data-i18n="fuelStepDesc">चुनें कि डीजल आपका रहेगा या ट्रैक्टर मालिक का खर्च होगा:</p>
+                    
+                    <div class="fuel-options-grid" style="display: grid; gap: 12px; margin-bottom: 8px;">
                         <label class="fuel-option-card active" id="fuelOptionWithCard"
                             onclick="handleFuelOptionChange('with-fuel')">
-                            <input type="radio" name="fuelOption" id="fuelOptionWith" value="with-fuel" checked>
+                            <input type="radio" name="fuelOption" id="fuelOptionWith" value="with-fuel" checked style="width: 22px; height: 22px; accent-color: #2e7d32;">
                             <div class="fuel-opt-info">
-                                <span class="fuel-opt-title" data-i18n="fuelWithTitle">डीजल व ड्राइवर सहित</span>
-                                <span class="fuel-opt-desc" data-i18n="fuelWithDesc">डीजल और ड्राइवर का खर्च मालिक
-                                    का</span>
+                                <span class="fuel-opt-title" data-i18n="fuelWithTitle" style="font-weight: 800; font-size: 1rem; color: #1f2937;">डीजल व ड्राइवर सहित</span>
+                                <span class="fuel-opt-desc" data-i18n="fuelWithDesc" style="font-size: 0.875rem; color: #475569;">डीजल और ड्राइवर का खर्च मालिक का</span>
                             </div>
-                            <span class="fuel-opt-rate" id="fuelRateWith">₹600/घं</span>
+                            <span class="fuel-opt-rate" id="fuelRateWith" style="font-weight: 800; font-size: 1.125rem; color: #1f5130;">₹600/घं</span>
                         </label>
                         <label class="fuel-option-card" id="fuelOptionWithoutCard"
                             onclick="handleFuelOptionChange('without-fuel')">
-                            <input type="radio" name="fuelOption" id="fuelOptionWithout" value="without-fuel">
+                            <input type="radio" name="fuelOption" id="fuelOptionWithout" value="without-fuel" style="width: 22px; height: 22px; accent-color: #2e7d32;">
                             <div class="fuel-opt-info">
-                                <span class="fuel-opt-title" data-i18n="fuelWithoutTitle">डीजल किसान का (सस्ता
-                                    रेट)</span>
-                                <span class="fuel-opt-desc" data-i18n="fuelWithoutDesc">डीजल आप देंगे, सिर्फ मशीन व
-                                    ड्राइवर</span>
+                                <span class="fuel-opt-title" data-i18n="fuelWithoutTitle" style="font-weight: 800; font-size: 1rem; color: #1f2937;">डीजल किसान का (सस्ता रेट)</span>
+                                <span class="fuel-opt-desc" data-i18n="fuelWithoutDesc" style="font-size: 0.875rem; color: #475569;">डीजल आप देंगे, सिर्फ मशीन व ड्राइवर</span>
                             </div>
-                            <span class="fuel-opt-rate discount" id="fuelRateWithout">₹380/घं</span>
+                            <span class="fuel-opt-rate discount" id="fuelRateWithout" style="font-weight: 800; font-size: 1.125rem; color: #d97706;">₹380/घं</span>
                         </label>
                     </div>
+
+                    <div id="bookingStepError1" class="wizard-step-error"></div>
+
+                    <div class="wizard-nav-row">
+                        <button type="button" class="btn btn-primary btn-wizard-next" onclick="nextBookingStep()">
+                            <span data-i18n="wizardBtnNext">आगे बढ़ें (तारीख चुनें)</span> →
+                        </button>
+                    </div>
                 </div>
 
-                <!-- Date & Time Slot Row (Advance Booking) -->
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="bookingDate" data-i18n="labelBookingDate">तारीख चुनें (किस दिन चाहिए?) *</label>
+                <!-- Step 2: Date Selection -->
+                <div class="wizard-step-pane" id="bookingStepPane2">
+                    <h3 class="wizard-step-question" data-i18n="labelBookingDate">तारीख चुनें (किस दिन चाहिए?) *</h3>
+                    <p class="wizard-step-desc" data-i18n="helperDateRange">आज से अगले 30 दिन तक किसी भी तारीख के लिए एडवांस बुक कर सकते हैं:</p>
+
+                    <div class="quick-chip-group">
+                        <button type="button" class="quick-chip-btn active" id="chipDateToday" onclick="selectQuickDate(0)">
+                            📅 <span data-i18n="dateToday">आज (Today)</span>
+                        </button>
+                        <button type="button" class="quick-chip-btn" id="chipDateTomorrow" onclick="selectQuickDate(1)">
+                            🌅 <span data-i18n="dateTomorrow">कल (Tomorrow)</span>
+                        </button>
+                        <button type="button" class="quick-chip-btn" id="chipDateDayAfter" onclick="selectQuickDate(2)">
+                            📆 <span data-i18n="dateDayAfter">परसों (Day After)</span>
+                        </button>
+                    </div>
+
+                    <div class="form-group" style="margin-top: 10px;">
+                        <label for="bookingDate" data-i18n="labelSelectExactDate">या कैलेंडर से तारीख चुनें *</label>
                         <input type="date" id="bookingDate" required class="form-input-date"
-                            onchange="validateBookingDate()">
-                        <span class="input-helper-text" data-i18n="helperDateRange">आज से अगले 30 दिन तक बुक कर सकते
-                            हैं</span>
+                            onchange="validateBookingDate()" style="font-size: 1.125rem; padding: 12px;">
                     </div>
-                    <div class="form-group">
-                        <label for="bookingSlot" data-i18n="labelBookingSlot">समय स्लॉट चुनें *</label>
-                        <select id="bookingSlot" required class="form-select">
-                            <option value="morning" data-i18n="slotMorning">🌅 सुबह (06:00 AM - 10:00 AM)</option>
-                            <option value="day" selected data-i18n="slotDay">☀️ दोपहर (10:00 AM - 02:00 PM)</option>
-                            <option value="afternoon" data-i18n="slotAfternoon">🌤️ दोपहर बाद (02:00 PM - 06:00 PM)
-                            </option>
-                            <option value="custom" data-i18n="slotCustom">⏰ सटीक / सुविधानुसार समय</option>
-                        </select>
+
+                    <div id="bookingStepError2" class="wizard-step-error"></div>
+
+                    <div class="wizard-nav-row">
+                        <button type="button" class="btn btn-secondary btn-wizard-back" onclick="prevBookingStep()">
+                            ← <span data-i18n="wizardBtnBack">पीछे</span>
+                        </button>
+                        <button type="button" class="btn btn-primary btn-wizard-next" onclick="nextBookingStep()">
+                            <span data-i18n="wizardBtnNext">आगे बढ़ें (समय स्लॉट)</span> →
+                        </button>
                     </div>
                 </div>
 
-                <div class="form-row">
+                <!-- Step 3: Time Slot Selection -->
+                <div class="wizard-step-pane" id="bookingStepPane3">
+                    <h3 class="wizard-step-question" data-i18n="labelBookingSlot">समय स्लॉट चुनें *</h3>
+                    <p class="wizard-step-desc" data-i18n="slotStepDesc">ड्राइवर आपके चुने हुए समय पर खेत पहुंचेगा:</p>
+
+                    <div class="timeslot-cards-grid">
+                        <div class="timeslot-card" id="slotCardMorning" onclick="selectTimeSlotCard('morning')">
+                            <div class="timeslot-card-left">
+                                <span class="timeslot-card-icon">🌅</span>
+                                <div class="timeslot-card-info">
+                                    <span class="timeslot-card-title" data-i18n="slotMorningTitle">सुबह का समय</span>
+                                    <span class="timeslot-card-desc">06:00 AM - 10:00 AM</span>
+                                </div>
+                            </div>
+                            <div class="timeslot-card-check">✓</div>
+                        </div>
+
+                        <div class="timeslot-card active" id="slotCardDay" onclick="selectTimeSlotCard('day')">
+                            <div class="timeslot-card-left">
+                                <span class="timeslot-card-icon">☀️</span>
+                                <div class="timeslot-card-info">
+                                    <span class="timeslot-card-title" data-i18n="slotDayTitle">दोपहर का समय</span>
+                                    <span class="timeslot-card-desc">10:00 AM - 02:00 PM</span>
+                                </div>
+                            </div>
+                            <div class="timeslot-card-check">✓</div>
+                        </div>
+
+                        <div class="timeslot-card" id="slotCardAfternoon" onclick="selectTimeSlotCard('afternoon')">
+                            <div class="timeslot-card-left">
+                                <span class="timeslot-card-icon">🌤️</span>
+                                <div class="timeslot-card-info">
+                                    <span class="timeslot-card-title" data-i18n="slotAfternoonTitle">दोपहर बाद</span>
+                                    <span class="timeslot-card-desc">02:00 PM - 06:00 PM</span>
+                                </div>
+                            </div>
+                            <div class="timeslot-card-check">✓</div>
+                        </div>
+
+                        <div class="timeslot-card" id="slotCardCustom" onclick="selectTimeSlotCard('custom')">
+                            <div class="timeslot-card-left">
+                                <span class="timeslot-card-icon">⏰</span>
+                                <div class="timeslot-card-info">
+                                    <span class="timeslot-card-title" data-i18n="slotCustomTitle">सटीक समय</span>
+                                    <span class="timeslot-card-desc" data-i18n="slotCustomDesc">फोन पर तय करें</span>
+                                </div>
+                            </div>
+                            <div class="timeslot-card-check">✓</div>
+                        </div>
+                    </div>
+
+                    <!-- Preserved Select element for backend JS compatibility -->
+                    <select id="bookingSlot" required class="form-select" style="display: none;" aria-hidden="true">
+                        <option value="morning" data-i18n="slotMorning">🌅 सुबह (06:00 AM - 10:00 AM)</option>
+                        <option value="day" selected data-i18n="slotDay">☀️ दोपहर (10:00 AM - 02:00 PM)</option>
+                        <option value="afternoon" data-i18n="slotAfternoon">🌤️ दोपहर बाद (02:00 PM - 06:00 PM)</option>
+                        <option value="custom" data-i18n="slotCustom">⏰ सटीक / सुविधानुसार समय</option>
+                    </select>
+
+                    <div id="bookingStepError3" class="wizard-step-error"></div>
+
+                    <div class="wizard-nav-row">
+                        <button type="button" class="btn btn-secondary btn-wizard-back" onclick="prevBookingStep()">
+                            ← <span data-i18n="wizardBtnBack">पीछे</span>
+                        </button>
+                        <button type="button" class="btn btn-primary btn-wizard-next" onclick="nextBookingStep()">
+                            <span data-i18n="wizardBtnNext">आगे बढ़ें (घंटे चुनें)</span> →
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 4: Hours Needed -->
+                <div class="wizard-step-pane" id="bookingStepPane4">
+                    <h3 class="wizard-step-question" data-i18n="labelWorkDurationHours">कितने घंटे चाहिए? (काम का समय) *</h3>
+                    <p class="wizard-step-desc" data-i18n="helperDurationHours">कम से कम 1 घंटा। काम के हिसाब से घंटे चुनें या बदलें:</p>
+
+                    <div class="hour-stepper-wrap">
+                        <button type="button" class="stepper-btn" onclick="adjustWorkDuration(-1)" aria-label="घंटे कम करें">−</button>
+                        <input type="number" id="workDuration" min="1" max="50" value="2" required
+                            class="stepper-input" oninput="calculateEstimate()">
+                        <button type="button" class="stepper-btn" onclick="adjustWorkDuration(1)" aria-label="घंटे बढ़ाएं">+</button>
+                    </div>
+
+                    <div class="quick-chip-group" style="justify-content: center;">
+                        <button type="button" class="quick-chip-btn" onclick="setWorkDurationQuick(1)">1 घंटा</button>
+                        <button type="button" class="quick-chip-btn active" id="chipHour2" onclick="setWorkDurationQuick(2)">2 घंटे</button>
+                        <button type="button" class="quick-chip-btn" onclick="setWorkDurationQuick(4)">4 घंटे</button>
+                        <button type="button" class="quick-chip-btn" onclick="setWorkDurationQuick(6)">6 घंटे</button>
+                        <button type="button" class="quick-chip-btn" onclick="setWorkDurationQuick(8)">8 घंटे</button>
+                    </div>
+
+                    <div id="bookingStepError4" class="wizard-step-error"></div>
+
+                    <div class="wizard-nav-row">
+                        <button type="button" class="btn btn-secondary btn-wizard-back" onclick="prevBookingStep()">
+                            ← <span data-i18n="wizardBtnBack">पीछे</span>
+                        </button>
+                        <button type="button" class="btn btn-primary btn-wizard-next" onclick="nextBookingStep()">
+                            <span data-i18n="wizardBtnNext">आगे बढ़ें (नाम व नंबर)</span> →
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 5: Farmer Contact Info -->
+                <div class="wizard-step-pane" id="bookingStepPane5">
+                    <h3 class="wizard-step-question" data-i18n="stepTitleFarmer">किसान का नाम और मोबाइल नंबर *</h3>
+                    <p class="wizard-step-desc" data-i18n="stepDescFarmer">ट्रैक्टर मालिक और ड्राइवर सीधे आपसे इसी नंबर पर संपर्क करेंगे:</p>
+
                     <div class="form-group">
                         <label for="farmerName" data-i18n="labelFarmerName">किसान का नाम *</label>
                         <input type="text" id="farmerName" required placeholder="जैसे: रमेश कुमार"
-                            data-i18n-placeholder="placeholderFarmerName">
+                            data-i18n-placeholder="placeholderFarmerName" autocomplete="name">
                     </div>
+
                     <div class="form-group">
                         <label for="farmerPhone" data-i18n="labelFarmerPhone">मोबाइल नंबर *</label>
-                        <input type="tel" id="farmerPhone" required pattern="[0-9]{10}" maxlength="10"
-                            placeholder="10 अंकों का मोबाइल नंबर" data-i18n-placeholder="placeholderFarmerPhone">
+                        <input type="tel" id="farmerPhone" required pattern="[0-9]{10}" inputmode="numeric" maxlength="10"
+                            placeholder="10 अंकों का मोबाइल नंबर" data-i18n-placeholder="placeholderFarmerPhone" autocomplete="tel">
+                        <span class="input-helper-text" data-i18n="helperPhoneNotice">ड्राइवर कॉल कर सके इसके लिए सही 10 अंकों का नंबर दें</span>
+                    </div>
+
+                    <div id="bookingStepError5" class="wizard-step-error"></div>
+
+                    <div class="wizard-nav-row">
+                        <button type="button" class="btn btn-secondary btn-wizard-back" onclick="prevBookingStep()">
+                            ← <span data-i18n="wizardBtnBack">पीछे</span>
+                        </button>
+                        <button type="button" class="btn btn-primary btn-wizard-next" onclick="nextBookingStep()">
+                            <span data-i18n="wizardBtnNext">आगे बढ़ें (खेत का स्थान)</span> →
+                        </button>
                     </div>
                 </div>
 
-                <div class="form-row">
+                <!-- Step 6: Field Location & Crop -->
+                <div class="wizard-step-pane" id="bookingStepPane6">
+                    <h3 class="wizard-step-question" data-i18n="stepTitleLocation">गांव / खेत का स्थान व फसल *</h3>
+                    <p class="wizard-step-desc" data-i18n="stepDescLocation">खेत की लोकेशन बताएं ताकि ड्राइवर बिना भटके सीधे आपके खेत पहुंच सके:</p>
+
                     <div class="form-group">
                         <div class="label-with-action">
-                            <label for="farmerVillage" data-i18n="labelFarmerVillage">गांव / खेत का स्थान व जिला
-                                *</label>
+                            <label for="farmerVillage" data-i18n="labelFarmerVillage">गांव / खेत का स्थान व जिला *</label>
                             <button type="button" class="btn-detect-gps" id="btnDetectLocation"
-                                onclick="detectFarmerLocation()" title="GPS से खेत की लोकेशन लें">
+                                onclick="detectFarmerLocation()" title="GPS से खेत की लोकेशन लें" aria-label="GPS से खेत की लोकेशन लें">
                                 📍 <span data-i18n="btnDetectGPS">GPS से खेत खोजें</span>
                             </button>
                         </div>
                         <input type="text" id="farmerVillage" required
                             placeholder="जैसे: रामपुर, मेरठ (या GPS बटन दबाएं)"
-                            data-i18n-placeholder="placeholderFarmerVillage">
+                            data-i18n-placeholder="placeholderFarmerVillage" autocomplete="address-level2">
                         <div id="farmerGpsStatus" class="gps-status-pill" style="display: none;"></div>
                         <div id="farmerWeatherAlert" class="booking-weather-pill" style="display: none;"></div>
                         <input type="hidden" id="farmerGpsLink" value="">
                     </div>
+
                     <div class="form-group">
-                        <label for="workDuration" data-i18n="labelWorkDurationHours">कितने घंटे चाहिए? (काम का समय)
-                            *</label>
-                        <input type="number" id="workDuration" min="1" max="50" value="2" required
-                            oninput="calculateEstimate()">
-                        <span class="input-helper-text" data-i18n="helperDurationHours">सटीक हिसाब के लिए सिर्फ घंटों
-                            में दर्ज करें</span>
+                        <label for="workCropName" data-i18n="labelWorkCrop">किस फसल के लिए काम करवाना है?</label>
+                        <input type="text" id="workCropName" placeholder="जैसे: धान का कीचड़, गेहूं बोवाई"
+                            data-i18n-placeholder="placeholderWorkCrop">
+                        <div class="quick-chip-group">
+                            <button type="button" class="quick-chip-btn" onclick="selectQuickCrop('धान (Paddy)')">🌾 धान</button>
+                            <button type="button" class="quick-chip-btn" onclick="selectQuickCrop('गेहूं (Wheat)')">🌱 गेहूं</button>
+                            <button type="button" class="quick-chip-btn" onclick="selectQuickCrop('गन्ना (Sugarcane)')">🎋 गन्ना</button>
+                            <button type="button" class="quick-chip-btn" onclick="selectQuickCrop('जुताई (Tillage)')">🚜 जुताई</button>
+                        </div>
                     </div>
-                </div>
 
-                <div class="form-group">
-                    <label for="workCropName" data-i18n="labelWorkCrop">किस फसल के लिए काम करवाना है?</label>
-                    <input type="text" id="workCropName" placeholder="जैसे: धान का कीचड़, गेहूं बोवाई"
-                        data-i18n-placeholder="placeholderWorkCrop">
-                </div>
+                    <div id="bookingStepError6" class="wizard-step-error"></div>
 
-                <!-- Final Rate Breakdown Box Before Booking -->
-                <div class="price-breakdown-card">
-                    <div class="breakdown-header">
-                        <strong data-i18n="breakdownTitle">📊 किराए का पूरा विवरण (Final Rate Breakdown)</strong>
-                        <button type="button" class="btn-voice-speak" onclick="speakFinalRate()" title="बोल कर सुनें">
-                            🔊 <span data-i18n="btnSpeakEstimate">बोल कर सुनें</span>
+                    <div class="wizard-nav-row">
+                        <button type="button" class="btn btn-secondary btn-wizard-back" onclick="prevBookingStep()">
+                            ← <span data-i18n="wizardBtnBack">पीछे</span>
+                        </button>
+                        <button type="button" class="btn btn-primary btn-wizard-next" onclick="nextBookingStep()">
+                            <span data-i18n="wizardBtnNext">समीक्षा देखें (Review)</span> →
                         </button>
                     </div>
-                    <div class="breakdown-row">
-                        <span data-i18n="breakdownBaseLabel">मूल किराया (Base Rate):</span>
-                        <span id="breakdownBaseRateText">₹600 x 2 घंटे = ₹1,200</span>
+                </div>
+
+                <!-- Step 7: Final Review & Confirm Screen -->
+                <div class="wizard-step-pane" id="bookingStepPane7">
+                    <h3 class="wizard-step-question" data-i18n="stepTitleReview">🔍 बुकिंग की समीक्षा (Review & Confirm)</h3>
+                    <p class="wizard-step-desc" data-i18n="stepDescReview">कृपया सभी जानकारी ध्यान से जांचें, किसी भी जानकारी को बदलने के लिए 'बदलें' बटन दबाएं:</p>
+
+                    <!-- Summary Box with [Edit] Jump Links -->
+                    <div class="wizard-review-box">
+                        <div class="wizard-review-row">
+                            <div class="wizard-review-left">
+                                <span class="wizard-review-label" data-i18n="reviewLabelMachine">🚜 चयनित ट्रैक्टर:</span>
+                                <span class="wizard-review-val" id="reviewSummaryMachine">-</span>
+                            </div>
+                        </div>
+
+                        <div class="wizard-review-row">
+                            <div class="wizard-review-left">
+                                <span class="wizard-review-label" data-i18n="reviewLabelFuel">⛽ डीजल का चुनाव:</span>
+                                <span class="wizard-review-val" id="reviewSummaryFuel">-</span>
+                            </div>
+                            <button type="button" class="wizard-review-edit-btn" onclick="goToBookingStep(1)">
+                                ✏️ <span data-i18n="wizardBtnEdit">बदलें</span>
+                            </button>
+                        </div>
+
+                        <div class="wizard-review-row">
+                            <div class="wizard-review-left">
+                                <span class="wizard-review-label" data-i18n="reviewLabelDate">📅 तारीख व समय स्लॉट:</span>
+                                <span class="wizard-review-val" id="reviewSummaryDateTime">-</span>
+                            </div>
+                            <button type="button" class="wizard-review-edit-btn" onclick="goToBookingStep(2)">
+                                ✏️ <span data-i18n="wizardBtnEdit">बदलें</span>
+                            </button>
+                        </div>
+
+                        <div class="wizard-review-row">
+                            <div class="wizard-review-left">
+                                <span class="wizard-review-label" data-i18n="reviewLabelHours">⏱️ काम के घंटे:</span>
+                                <span class="wizard-review-val" id="reviewSummaryHours">-</span>
+                            </div>
+                            <button type="button" class="wizard-review-edit-btn" onclick="goToBookingStep(4)">
+                                ✏️ <span data-i18n="wizardBtnEdit">बदलें</span>
+                            </button>
+                        </div>
+
+                        <div class="wizard-review-row">
+                            <div class="wizard-review-left">
+                                <span class="wizard-review-label" data-i18n="reviewLabelFarmer">👨‍🌾 किसान संपर्क:</span>
+                                <span class="wizard-review-val" id="reviewSummaryContact">-</span>
+                            </div>
+                            <button type="button" class="wizard-review-edit-btn" onclick="goToBookingStep(5)">
+                                ✏️ <span data-i18n="wizardBtnEdit">बदलें</span>
+                            </button>
+                        </div>
+
+                        <div class="wizard-review-row">
+                            <div class="wizard-review-left">
+                                <span class="wizard-review-label" data-i18n="reviewLabelLocation">📍 खेत का स्थान व फसल:</span>
+                                <span class="wizard-review-val" id="reviewSummaryLocation">-</span>
+                            </div>
+                            <button type="button" class="wizard-review-edit-btn" onclick="goToBookingStep(6)">
+                                ✏️ <span data-i18n="wizardBtnEdit">बदलें</span>
+                            </button>
+                        </div>
                     </div>
-                    <div class="breakdown-row">
-                        <span data-i18n="breakdownDieselLabel">डीजल विकल्प (Fuel):</span>
-                        <span id="breakdownFuelText" class="badge-text-green">डीजल व ड्राइवर सहित</span>
+
+                    <!-- Final Rate Breakdown Box Before Booking -->
+                    <div class="price-breakdown-card">
+                        <div class="breakdown-header">
+                            <strong data-i18n="breakdownTitle">📊 किराए का पूरा विवरण (Final Rate Breakdown)</strong>
+                            <button type="button" class="btn-voice-speak" onclick="speakFinalRate()" title="बोल कर सुनें" aria-label="किराया बोल कर सुनें">
+                                🔊 <span data-i18n="btnSpeakEstimate">बोल कर सुनें</span>
+                            </button>
+                        </div>
+                        <div class="breakdown-row">
+                            <span data-i18n="breakdownBaseLabel">मूल किराया (Base Rate):</span>
+                            <span id="breakdownBaseRateText">₹600 x 2 घंटे = ₹1,200</span>
+                        </div>
+                        <div class="breakdown-row">
+                            <span data-i18n="breakdownDieselLabel">डीजल विकल्प (Fuel):</span>
+                            <span id="breakdownFuelText" class="badge-text-green">डीजल व ड्राइवर सहित</span>
+                        </div>
+                        <div class="breakdown-row">
+                            <span data-i18n="breakdownTravelLabel">दूरी / ट्रैवल चार्ज (5 किमी तक):</span>
+                            <span class="badge-text-free" data-i18n="breakdownTravelFree">₹0 (बिल्कुल मुफ्त)</span>
+                        </div>
+                        <div class="breakdown-divider"></div>
+                        <div class="breakdown-total-row">
+                            <span class="total-label" data-i18n="breakdownTotalLabel">कुल अंतिम राशि (Total Amount):</span>
+                            <strong class="total-val" id="modalTotalEstimate">₹1,200</strong>
+                        </div>
+                        <div class="final-rate-guarantee-note" data-i18n="noHiddenChargesNote">
+                            ✅ यही फाइनल रेट है, बाद में कोई छुपा चार्ज नहीं
+                        </div>
+                        <div id="guestBookingBadge" class="guest-booking-badge" style="display: none;">
+                            🔒 <span>अंतिम स्टेप: बुकिंग सुरक्षित करने के लिए अगले स्टेप पर 10 सेकंड में लॉगिन/खाता बनेगा।</span>
+                        </div>
                     </div>
-                    <div class="breakdown-row">
-                        <span data-i18n="breakdownTravelLabel">दूरी / ट्रैवल चार्ज (5 किमी तक):</span>
-                        <span class="badge-text-free" data-i18n="breakdownTravelFree">₹0 (बिल्कुल मुफ्त)</span>
+
+                    <div id="bookingStepError7" class="wizard-step-error"></div>
+
+                    <div class="modal-action-buttons">
+                        <button type="submit" class="btn btn-primary btn-confirm-booking" id="btnConfirmBooking">
+                            🚜 <span data-i18n="btnConfirmBooking">अनुरोध भेजें (बुकिंग पक्की करें)</span>
+                        </button>
+                        <button type="button" class="btn btn-whatsapp" onclick="sendBookingViaWhatsApp()">
+                            💬 <span data-i18n="btnSendWhatsApp">व्हाट्सएप पर बुकिंग भेजें</span>
+                        </button>
                     </div>
-                    <div class="breakdown-divider"></div>
-                    <div class="breakdown-total-row">
-                        <span class="total-label" data-i18n="breakdownTotalLabel">कुल अंतिम राशि (Total Amount):</span>
-                        <strong class="total-val" id="modalTotalEstimate">₹1,200</strong>
-                    </div>
-                    <div class="final-rate-guarantee-note" data-i18n="noHiddenChargesNote">
-                        ✅ यही फाइनल रेट है, बाद में कोई छुपा चार्ज नहीं
-                    </div>
-                    <div id="guestBookingBadge" class="guest-booking-badge" style="display: none;">
-                        🔒 <span>अंतिम स्टेप: बुकिंग सुरक्षित करने के लिए अगले स्टेप पर 10 सेकंड में लॉगिन/खाता बनेगा।</span>
+
+                    <div class="wizard-nav-row" style="margin-top: 10px;">
+                        <button type="button" class="btn btn-secondary btn-wizard-back" onclick="prevBookingStep()">
+                            ← <span data-i18n="wizardBtnBack">पीछे</span>
+                        </button>
                     </div>
                 </div>
 
-                <div class="modal-action-buttons">
-                    <button type="submit" class="btn btn-primary btn-confirm-booking">
-                        🚜 <span data-i18n="btnConfirmBooking">बुकिंग पक्की करें</span>
-                    </button>
-                    <button type="button" class="btn btn-whatsapp" onclick="sendBookingViaWhatsApp()">
-                        💬 <span data-i18n="btnSendWhatsApp">व्हाट्सएप पर बुकिंग भेजें</span>
-                    </button>
+                <!-- Sticky Running Rate Bar at bottom of steps 1-6 -->
+                <div class="wizard-sticky-rate" id="bookingStickyRateBar">
+                    <div class="sticky-rate-info">
+                        <span class="sticky-rate-label" data-i18n="stickyRateLabel">अनुमानित कुल किराया:</span>
+                        <strong class="sticky-rate-val" id="stickyTotalEstimate">₹1,200</strong>
+                    </div>
+                    <span class="sticky-rate-sub" id="stickyRateSub">₹600/घं • 2 घंटे</span>
                 </div>
             </form>
         </div>
@@ -526,42 +772,67 @@
             </div>
 
             <form id="tractorRegisterForm" onsubmit="handleTractorRegistration(event)">
-                <h4 class="form-section-heading" data-i18n="regHeadingOwner">1. मालिक व ड्राइवर की जानकारी</h4>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="ownerName" data-i18n="regOwnerName">मालिक का नाम *</label>
-                        <input type="text" id="ownerName" required placeholder="जैसे: सुरेश सिंह"
-                            data-i18n-placeholder="regPlaceholderOwner">
+                <!-- Wizard Progress Indicator -->
+                <div class="wizard-header" id="tractorRegWizardProgress">
+                    <div class="wizard-progress-meta">
+                        <span class="wizard-step-badge" id="tractorRegStepBadge">कदम 1 / 4 (Step 1 of 4)</span>
+                        <span class="wizard-step-title" id="tractorRegStepTitle" data-i18n="regStepTitleOwner">मालिक व ड्राइवर जानकारी</span>
                     </div>
-                    <div class="form-group">
-                        <label for="ownerPhone" data-i18n="regOwnerPhone">मोबाइल नंबर (WhatsApp) *</label>
-                        <input type="tel" id="ownerPhone" required pattern="[0-9]{10}" placeholder="10 अंकों का नंबर"
-                            data-i18n-placeholder="placeholderFarmerPhone">
+                    <div class="wizard-progress-track" role="progressbar" aria-valuemin="1" aria-valuemax="4" aria-valuenow="1" id="tractorRegProgressBar">
+                        <div class="wizard-progress-fill" id="tractorRegProgressFill" style="width: 25%;"></div>
                     </div>
                 </div>
 
-                <div class="form-row">
+                <!-- Step 1: Owner Info -->
+                <div class="wizard-step-pane active" id="tractorRegStepPane1">
+                    <h3 class="wizard-step-question" data-i18n="regHeadingOwner">1. मालिक व ड्राइवर की जानकारी *</h3>
+                    <p class="wizard-step-desc" data-i18n="regStepDescOwner">अपने संपर्क की सही जानकारी दें ताकि किसान भाई आपसे बात कर सकें:</p>
+
+                    <div class="form-group">
+                        <label for="ownerName" data-i18n="regOwnerName">मालिक का नाम *</label>
+                        <input type="text" id="ownerName" required placeholder="जैसे: सुरेश सिंह"
+                            data-i18n-placeholder="regPlaceholderOwner" autocomplete="name">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="ownerPhone" data-i18n="regOwnerPhone">मोबाइल नंबर (WhatsApp) *</label>
+                        <input type="tel" id="ownerPhone" required pattern="[0-9]{10}" inputmode="numeric" maxlength="10"
+                            placeholder="10 अंकों का नंबर" data-i18n-placeholder="placeholderFarmerPhone" autocomplete="tel">
+                    </div>
+
                     <div class="form-group">
                         <div class="label-with-action">
                             <label for="ownerVillage" data-i18n="regOwnerLocation">गांव / कस्बा व जिला *</label>
-                            <button type="button" class="btn-detect-gps" onclick="detectOwnerLocation()"
-                                title="GPS से गैराज लोकेशन लें">
+                            <button type="button" class="btn-detect-gps" id="btnDetectOwnerGps" onclick="detectOwnerLocation()"
+                                title="GPS से गैराज लोकेशन लें" aria-label="GPS से गैराज लोकेशन लें">
                                 📍 <span data-i18n="btnDetectGPS">GPS लोकेशन</span>
                             </button>
                         </div>
                         <input type="text" id="ownerVillage" required placeholder="जैसे: मवाना, मेरठ (या GPS बटन दबाएं)"
-                            data-i18n-placeholder="placeholderFarmerVillage">
+                            data-i18n-placeholder="placeholderFarmerVillage" autocomplete="address-level2">
                         <div id="ownerGpsStatus" class="gps-status-pill" style="display: none;"></div>
                     </div>
+
                     <div class="form-group">
                         <label for="ownerDL" data-i18n="regOwnerDL">ड्राइविंग लाइसेंस (DL) नंबर</label>
                         <input type="text" id="ownerDL" placeholder="DL नंबर दर्ज करें"
                             data-i18n-placeholder="regPlaceholderDL">
                     </div>
+
+                    <div id="tractorRegStepError1" class="wizard-step-error"></div>
+
+                    <div class="wizard-nav-row">
+                        <button type="button" class="btn btn-primary btn-wizard-next" onclick="nextTractorRegStep()">
+                            <span data-i18n="wizardBtnNext">आगे बढ़ें (ट्रैक्टर जानकारी)</span> →
+                        </button>
+                    </div>
                 </div>
 
-                <h4 class="form-section-heading" data-i18n="regHeadingTractor">2. ट्रैक्टर की जानकारी</h4>
-                <div class="form-row">
+                <!-- Step 2: Tractor Info -->
+                <div class="wizard-step-pane" id="tractorRegStepPane2">
+                    <h3 class="wizard-step-question" data-i18n="regHeadingTractor">2. ट्रैक्टर की जानकारी *</h3>
+                    <p class="wizard-step-desc" data-i18n="regStepDescTractor">अपने ट्रैक्टर का मॉडल, ड्राइव और किराया रेट भरें:</p>
+
                     <div class="form-group">
                         <label for="tractorBrand" data-i18n="regTractorBrand">ट्रैक्टर ब्रांड व मॉडल *</label>
                         <select id="tractorBrand" required class="form-select">
@@ -574,61 +845,138 @@
                             <option value="Chhota Mini Tractor (24 HP)">Chhota Mini Tractor (24 HP)</option>
                         </select>
                     </div>
+
                     <div class="form-group">
                         <label for="tractorDrive" data-i18n="regTractorDrive">ड्राइव प्रकार *</label>
                         <select id="tractorDrive" required class="form-select">
-                            <option value="2WD">2-व्हील ड्राइव (2WD)</option>
+                            <option value="2WD">2-व्हील ड्राइव (2WD - सामान्य जुताई)</option>
                             <option value="4WD">4-व्हील ड्राइव (4WD - कीचड़ स्पेशल)</option>
                         </select>
                     </div>
-                </div>
 
-                <div class="form-row">
                     <div class="form-group">
                         <label for="tractorRC" data-i18n="regTractorRC">ट्रैक्टर नंबर (RC Plate) *</label>
                         <input type="text" id="tractorRC" required placeholder="जैसे: UP 15 AB 1234"
                             data-i18n-placeholder="regPlaceholderRC">
                     </div>
+
                     <div class="form-group">
                         <label for="tractorRate" data-i18n="regTractorRate">आपका किराया रेट (₹/घंटा) *</label>
                         <input type="number" id="tractorRate" required min="200" max="2500" value="550">
                     </div>
+
+                    <div id="tractorRegStepError2" class="wizard-step-error"></div>
+
+                    <div class="wizard-nav-row">
+                        <button type="button" class="btn btn-secondary btn-wizard-back" onclick="prevTractorRegStep()">
+                            ← <span data-i18n="wizardBtnBack">पीछे</span>
+                        </button>
+                        <button type="button" class="btn btn-primary btn-wizard-next" onclick="nextTractorRegStep()">
+                            <span data-i18n="wizardBtnNext">आगे बढ़ें (औजार चुनें)</span> →
+                        </button>
+                    </div>
                 </div>
 
-                <h4 class="form-section-heading" data-i18n="regHeadingTools">3. आपके पास कौनसे औजार उपलब्ध हैं?</h4>
-                <div class="checkbox-grid">
-                    <label class="check-box-label">
-                        <input type="checkbox" id="toolRotavator" checked> <span>रोटावेटर (Rotavator)</span>
-                    </label>
-                    <label class="check-box-label">
-                        <input type="checkbox" id="toolCultivator" checked> <span>कल्टीवेटर / हल</span>
-                    </label>
-                    <label class="check-box-label">
-                        <input type="checkbox" id="toolTrolley"> <span>हाइड्रोलिक ट्रॉली</span>
-                    </label>
-                    <label class="check-box-label">
-                        <input type="checkbox" id="toolCageWheel"> <span>केज व्हील (धान पहिया)</span>
-                    </label>
-                    <label class="check-box-label">
-                        <input type="checkbox" id="toolSeeder"> <span>सुपर सीडर / ड्रिल</span>
-                    </label>
-                    <label class="check-box-label">
-                        <input type="checkbox" id="toolPlough"> <span>एमबी हल (गहरी जुताई)</span>
-                    </label>
+                <!-- Step 3: Implements -->
+                <div class="wizard-step-pane" id="tractorRegStepPane3">
+                    <h3 class="wizard-step-question" data-i18n="regHeadingTools">3. आपके पास कौनसे औजार उपलब्ध हैं? *</h3>
+                    <p class="wizard-step-desc" data-i18n="regStepDescTools">जो औजार आपके ट्रैक्टर के साथ उपलब्ध हैं उन पर टिक करें (कम से कम 1 चुनें):</p>
+
+                    <div class="checkbox-grid" style="display: grid; gap: 10px;">
+                        <label class="implement-touch-card checked">
+                            <input type="checkbox" id="toolRotavator" checked onchange="toggleImplementCard(this)">
+                            <span>🔄 रोटावेटर (Rotavator)</span>
+                        </label>
+                        <label class="implement-touch-card checked">
+                            <input type="checkbox" id="toolCultivator" checked onchange="toggleImplementCard(this)">
+                            <span>🌾 कल्टीवेटर / हल (Cultivator)</span>
+                        </label>
+                        <label class="implement-touch-card">
+                            <input type="checkbox" id="toolTrolley" onchange="toggleImplementCard(this)">
+                            <span>🚛 हाइड्रोलिक ट्रॉली (Hydraulic Trolley)</span>
+                        </label>
+                        <label class="implement-touch-card">
+                            <input type="checkbox" id="toolCageWheel" onchange="toggleImplementCard(this)">
+                            <span>⚙️ केज व्हील (धान पहिया / Cage Wheel)</span>
+                        </label>
+                        <label class="implement-touch-card">
+                            <input type="checkbox" id="toolSeeder" onchange="toggleImplementCard(this)">
+                            <span>🌱 सुपर सीडर / ड्रिल (Super Seeder)</span>
+                        </label>
+                        <label class="implement-touch-card">
+                            <input type="checkbox" id="toolPlough" onchange="toggleImplementCard(this)">
+                            <span>⛏️ एमबी हल (गहरी जुताई / MB Plough)</span>
+                        </label>
+                    </div>
+
+                    <div id="tractorRegStepError3" class="wizard-step-error"></div>
+
+                    <div class="wizard-nav-row">
+                        <button type="button" class="btn btn-secondary btn-wizard-back" onclick="prevTractorRegStep()">
+                            ← <span data-i18n="wizardBtnBack">पीछे</span>
+                        </button>
+                        <button type="button" class="btn btn-primary btn-wizard-next" onclick="nextTractorRegStep()">
+                            <span data-i18n="wizardBtnNext">समीक्षा देखें (Review)</span> →
+                        </button>
+                    </div>
                 </div>
 
-                <div class="terms-agree-box">
-                    <label class="check-box-label">
-                        <input type="checkbox" id="agreeTerms" required>
-                        <span><span data-i18n="regAgreeText">मैं प्रोजेक्ट ट्रैक्टर के सभी</span> <a href="#"
-                                onclick="openTermsModal(event)" data-i18n="regTermsLink">नियम व नीतियों (Terms)</a>
-                            <span data-i18n="regAgreeSuffix">से सहमत हूँ।</span></span>
-                    </label>
-                </div>
+                <!-- Step 4: Review & Submit -->
+                <div class="wizard-step-pane" id="tractorRegStepPane4">
+                    <h3 class="wizard-step-question" data-i18n="regHeadingReview">4. समीक्षा व नियम स्वीकार करें *</h3>
+                    <p class="wizard-step-desc" data-i18n="regStepDescReview">कृपया भरी हुई जानकारी जांचें और नियम स्वीकार कर ट्रैक्टर जोड़ें:</p>
 
-                <button type="submit" class="btn btn-primary btn-submit-reg" data-i18n="regSubmitBtn">
-                    🚜 ट्रैक्टर सफलतापूर्वक जोड़ें
-                </button>
+                    <div class="wizard-review-box">
+                        <div class="wizard-review-row">
+                            <div class="wizard-review-left">
+                                <span class="wizard-review-label" data-i18n="regReviewOwnerLabel">मालिक व संपर्क:</span>
+                                <span class="wizard-review-val" id="regReviewOwnerVal">-</span>
+                            </div>
+                            <button type="button" class="wizard-review-edit-btn" onclick="goToTractorRegStep(1)">
+                                ✏️ <span data-i18n="wizardBtnEdit">बदलें</span>
+                            </button>
+                        </div>
+                        <div class="wizard-review-row">
+                            <div class="wizard-review-left">
+                                <span class="wizard-review-label" data-i18n="regReviewTractorLabel">ट्रैक्टर व किराया दर:</span>
+                                <span class="wizard-review-val" id="regReviewTractorVal">-</span>
+                            </div>
+                            <button type="button" class="wizard-review-edit-btn" onclick="goToTractorRegStep(2)">
+                                ✏️ <span data-i18n="wizardBtnEdit">बदलें</span>
+                            </button>
+                        </div>
+                        <div class="wizard-review-row">
+                            <div class="wizard-review-left">
+                                <span class="wizard-review-label" data-i18n="regReviewToolsLabel">उपलब्ध औजार:</span>
+                                <span class="wizard-review-val" id="regReviewToolsVal">-</span>
+                            </div>
+                            <button type="button" class="wizard-review-edit-btn" onclick="goToTractorRegStep(3)">
+                                ✏️ <span data-i18n="wizardBtnEdit">बदलें</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="terms-agree-box" style="margin: 16px 0;">
+                        <label class="check-box-label" style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                            <input type="checkbox" id="agreeTerms" required style="width: 22px; height: 22px; accent-color: #2e7d32;">
+                            <span style="font-size: 0.9375rem; font-weight: 700;"><span data-i18n="regAgreeText">मैं प्रोजेक्ट ट्रैक्टर के सभी</span> <a href="#"
+                                    onclick="openTermsModal(event)" data-i18n="regTermsLink" style="color: #2e7d32; text-decoration: underline;">नियम व नीतियों (Terms)</a>
+                                <span data-i18n="regAgreeSuffix">से सहमत हूँ।</span></span>
+                        </label>
+                    </div>
+
+                    <div id="tractorRegStepError4" class="wizard-step-error"></div>
+
+                    <button type="submit" class="btn btn-primary btn-submit-reg" id="btnSubmitTractorReg" data-i18n="regSubmitBtn">
+                        🚜 ट्रैक्टर सफलतापूर्वक जोड़ें
+                    </button>
+
+                    <div class="wizard-nav-row" style="margin-top: 10px;">
+                        <button type="button" class="btn btn-secondary btn-wizard-back" onclick="prevTractorRegStep()">
+                            ← <span data-i18n="wizardBtnBack">पीछे</span>
+                        </button>
+                    </div>
+                </div>
             </form>
         </div>
     </div>

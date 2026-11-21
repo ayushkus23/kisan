@@ -20,17 +20,17 @@
             </div>
         </div>
 
-        <div class="admin-nav-actions" id="adminNavActions" style="display: none;">
-            <a href="index.html" class="btn btn-switch-farmer" style="padding: 6px 12px; font-size: 13px;" title="किसान पोर्टल">
+        <div class="admin-nav-actions" id="adminNavActions" style="display: none; gap: 8px;">
+            <a href="index.html" class="btn btn-switch-farmer" style="padding: 10px 14px; min-height: 48px; min-width: 48px; font-size: 15px; display: inline-flex; align-items: center;" title="किसान पोर्टल">
                 🌾 <span class="hide-mobile">किसान पोर्टल</span>
             </a>
-            <a href="owner.html" class="btn btn-switch-farmer" style="padding: 6px 12px; font-size: 13px;" title="मालिक पोर्टल">
+            <a href="owner.html" class="btn btn-switch-farmer" style="padding: 10px 14px; min-height: 48px; min-width: 48px; font-size: 15px; display: inline-flex; align-items: center;" title="मालिक पोर्टल">
                 🚜 <span class="hide-mobile">मालिक पोर्टल</span>
             </a>
-            <button type="button" class="btn btn-refresh-quick" onclick="refreshAdminData()" style="padding: 6px 12px; font-size: 13px;" title="रीफ्रेश">
+            <button type="button" class="btn btn-refresh-quick" onclick="refreshAdminData()" style="padding: 10px 14px; min-height: 48px; min-width: 48px; font-size: 15px;" title="रीफ्रेश" aria-label="रीफ्रेश">
                 🔄 रीफ्रेश
             </button>
-            <button type="button" class="btn btn-owner-logout" onclick="adminLogout()" style="padding: 6px 12px; font-size: 13px;" title="लॉगआउट">
+            <button type="button" class="btn btn-owner-logout" onclick="adminLogout()" style="padding: 10px 14px; min-height: 48px; min-width: 48px; font-size: 15px;" title="लॉगआउट" aria-label="लॉगआउट">
                 🚪 लॉगआउट
             </button>
         </div>
@@ -41,24 +41,24 @@
         <div class="admin-login-card">
             <div class="admin-login-icon">🛡️</div>
             <h2 style="margin: 0 0 6px; color: #0f2d18;">एडमिन लॉगिन</h2>
-            <p style="color: #607d8b; font-size: 13.5px; margin: 0 0 20px;">
+            <p style="color: #37474f; font-size: 15px; margin: 0 0 20px;">
                 प्रोजेक्ट ट्रैक्टर पोर्टल का एडमिन कंट्रोल रूम। केवल अधिकृत एडमिन के लिए।
             </p>
 
             <form id="adminLoginForm" onsubmit="handleAdminLogin(event)">
                 <div class="form-group" style="text-align: left; margin-bottom: 14px;">
-                    <label for="adminEmail" style="font-size: 13px; font-weight: 700; color: #263238;">एडमिन यूजरनेम या ईमेल *</label>
-                    <input type="text" id="adminEmail" placeholder="यूजरनेम दर्ज करें" autocomplete="off" required style="width: 100%; box-sizing: border-box; padding: 10px 12px; border: 1.5px solid #c8d8c2; border-radius: 8px;">
+                    <label for="adminEmail" style="font-size: 16px; font-weight: 700; color: #1f2937;">एडमिन यूजरनेम या ईमेल *</label>
+                    <input type="text" id="adminEmail" placeholder="यूजरनेम दर्ज करें" autocomplete="username" required style="width: 100%; box-sizing: border-box; min-height: 48px; font-size: 16px; padding: 12px 14px; border: 1.5px solid #c8d8c2; border-radius: 8px;">
                 </div>
 
                 <div class="form-group" style="text-align: left; margin-bottom: 18px;">
-                    <label for="adminPassword" style="font-size: 13px; font-weight: 700; color: #263238;">एडमिन पासवर्ड (Password) *</label>
-                    <input type="password" id="adminPassword" placeholder="अपना पासवर्ड दर्ज करें" required style="width: 100%; box-sizing: border-box; padding: 10px 12px; border: 1.5px solid #c8d8c2; border-radius: 8px;">
+                    <label for="adminPassword" style="font-size: 16px; font-weight: 700; color: #1f2937;">एडमिन पासवर्ड (Password) *</label>
+                    <input type="password" id="adminPassword" placeholder="अपना पासवर्ड दर्ज करें" autocomplete="current-password" required style="width: 100%; box-sizing: border-box; min-height: 48px; font-size: 16px; padding: 12px 14px; border: 1.5px solid #c8d8c2; border-radius: 8px;">
                 </div>
 
                 <div id="adminLoginMsg" class="message-box" style="display: none; margin-bottom: 14px;"></div>
 
-                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px; font-size: 15px; font-weight: 800;">
+                <button type="submit" class="btn btn-primary" style="width: 100%; min-height: 56px; padding: 14px; font-size: 18px; font-weight: 800;">
                     🔐 सुरक्षित एडमिन लॉगिन
                 </button>
             </form>
