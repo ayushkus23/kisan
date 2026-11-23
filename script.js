@@ -218,6 +218,7 @@ const translations = {
         menuLanguage: "भाषा बदलें (हिंदी / English)",
         menuTerms: "नियम व नीतियां (Terms & Policy)",
         menuHelpline: "किसान सहायता केंद्र (Call & WhatsApp)",
+        drawerOwnerSectionTitle: "ट्रैक्टर मालिकों के लिए / For tractor owners",
         drawerFooterTag: "किसान भाइयों का सच्चा साथी",
         navAttachBtn: "ट्रैक्टर जोड़ें",
 
@@ -609,6 +610,7 @@ const translations = {
         menuLanguage: "Change Language (हिंदी / English)",
         menuTerms: "Terms & Policies",
         menuHelpline: "Farmer Support Center (Call & WhatsApp)",
+        drawerOwnerSectionTitle: "For Tractor Owners / ट्रैक्टर मालिकों के लिए",
         drawerFooterTag: "Trusted Companion of Farmers",
         navAttachBtn: "Attach Tractor",
 
@@ -927,7 +929,7 @@ const translations = {
         errPasswordLength: "Password must be at least 4 characters long.",
         forgotAlert: "Please contact farmer support to reset your password.",
         signupAlert: "New registration starting soon! You can login directly now.",
-        langTag: "English",
+        langTag: "EN",
 
         // Create Account & Tab Auth
         tabLogin: "Login",

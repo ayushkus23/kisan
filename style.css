@@ -1,14 +1,29 @@
-* {
+*, *::before, *::after {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+html, body {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
 }
 
 body {
     background: #f1f6ec;
     color: #263238;
     min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    -webkit-text-size-adjust: 100%;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
 }
 
 /* Navbar */
@@ -18,7 +33,13 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px 24px;
+    padding: 0 16px;
+    height: 60px;
+    min-height: 56px;
+    max-height: 64px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
     position: sticky;
     top: 0;
@@ -28,24 +49,29 @@ body {
 .nav-left {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 10px;
+    min-width: 0;
+    flex: 1 1 auto;
 }
 
-/* 3-Line Hamburger Menu Button */
+/* 3-Line Hamburger Menu Button (48x48 tap area) */
 .hamburger-btn {
     background: transparent;
     border: none;
     cursor: pointer;
-    width: 40px;
-    height: 40px;
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    min-height: 48px;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     gap: 5px;
-    padding: 6px;
+    padding: 10px;
     border-radius: 8px;
     transition: background 0.2s;
+    flex-shrink: 0;
 }
 
 .hamburger-btn:hover {
@@ -61,18 +87,33 @@ body {
 }
 
 .navbar .logo {
-    font-size: 21px;
+    font-size: 18px;
     font-weight: 700;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     user-select: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+}
+
+.navbar .logo span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .navbar .nav-right {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.desktop-nav-item {
+    display: none;
 }
 
 .btn-nav-owner {
@@ -89,6 +130,7 @@ body {
     gap: 6px;
     transition: all 0.2s ease;
     box-shadow: 0 2px 8px rgba(232, 185, 49, 0.35);
+    min-height: 48px;
 }
 
 .btn-nav-owner:hover {
@@ -106,6 +148,22 @@ body {
     background: #fef6de !important;
 }
 
+.btn-nav-bookings {
+    background: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    font-weight: 700;
+    font-size: 13.5px;
+    padding: 8px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+    min-height: 48px;
+}
+
 .btn-nav-attach {
     background: #e8b931;
     color: #1f5130;
@@ -120,6 +178,7 @@ body {
     gap: 6px;
     transition: all 0.2s ease;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    min-height: 48px;
 }
 
 .btn-nav-attach:hover {
@@ -127,23 +186,50 @@ body {
     transform: translateY(-1px);
 }
 
-.nav-call-icon {
-    background: rgba(255, 255, 255, 0.15);
-    border: none;
-    color: #ffffff;
-    font-size: 16px;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    display: flex;
+.nav-lang-btn {
+    min-height: 48px;
+    min-width: 48px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 700;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: 4px;
+    background: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.25);
     cursor: pointer;
+    white-space: nowrap;
     transition: background 0.2s;
 }
 
-.nav-call-icon:hover {
+.nav-lang-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+.nav-call-icon {
     background: #25d366;
+    border: none;
+    color: #ffffff;
+    font-size: 18px;
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    min-height: 48px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.15s, background 0.2s;
+    flex-shrink: 0;
+}
+
+.nav-call-icon:hover {
+    background: #20ba59;
+    transform: scale(1.05);
 }
 
 /* =========================================
@@ -153,7 +239,8 @@ body {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100vw;
+    width: 100%;
+    max-width: 100%;
     height: 100vh;
     background: rgba(10, 25, 15, 0.65);
     backdrop-filter: blur(4px);
@@ -173,7 +260,7 @@ body {
     top: 0;
     left: 0;
     width: 320px;
-    max-width: 85vw;
+    max-width: 85%;
     height: 100vh;
     background: #ffffff;
     z-index: 9999;
@@ -258,7 +345,8 @@ body {
     display: flex;
     align-items: center;
     gap: 14px;
-    padding: 14px 20px;
+    padding: 12px 20px;
+    min-height: 48px;
     color: #2e4d36;
     text-decoration: none;
     font-size: 15px;
@@ -270,6 +358,18 @@ body {
     cursor: pointer;
     transition: background 0.2s, padding-left 0.2s;
     border-bottom: 1px solid #f2f6ee;
+}
+
+.drawer-section-divider {
+    padding: 12px 20px 6px;
+    margin-top: 10px;
+    border-top: 1.5px solid #e2e8f0;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #475569;
+    background: #f8fafc;
 }
 
 .drawer-item:hover {
@@ -334,8 +434,10 @@ body {
    ========================================= */
 .main-content {
     max-width: 1140px;
-    margin: 25px auto 50px auto;
-    padding: 0 20px;
+    width: 100%;
+    margin: 20px auto 40px auto;
+    padding: 0 16px;
+    box-sizing: border-box;
 }
 
 /* Hero Banner: Simplified, Direct & Action-First */
@@ -507,12 +609,15 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
+    gap: 8px 12px;
     margin-bottom: 20px;
 }
 
 .fleet-header h3 {
     color: #1f5130;
     font-size: 20px;
+    margin: 0;
 }
 
 .fleet-count {
@@ -522,12 +627,15 @@ body {
     border-radius: 14px;
     font-size: 13px;
     font-weight: 700;
+    white-space: nowrap;
 }
 
 .fleet-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 24px;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 /* Machine Card with Real Photographs */
@@ -834,7 +942,6 @@ body {
 .daily-info-body .weather-advisory-card {
     margin-bottom: 0;
 }
-}
 
 /* Callout Section */
 .help-callout-card {
@@ -922,7 +1029,8 @@ body {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100vw;
+    width: 100%;
+    max-width: 100%;
     height: 100vh;
     background: rgba(15, 34, 21, 0.72);
     backdrop-filter: blur(5px);
@@ -930,7 +1038,8 @@ body {
     align-items: center;
     justify-content: center;
     z-index: 9999;
-    padding: 20px;
+    padding: 16px;
+    box-sizing: border-box;
     animation: fadeIn 0.25s ease-out;
 }
 
@@ -3148,33 +3257,18 @@ body {
     }
 }
 
-/* Responsive Media Queries */
+/* Desktop & Tablet Navigation ( > 600px ) */
+@media (min-width: 601px) {
+    .desktop-nav-item {
+        display: inline-flex !important;
+    }
+}
+
+/* Responsive Media Queries: Tablet ( <= 768px ) */
 @media (max-width: 768px) {
     .navbar {
-        padding: 10px 16px;
-    }
-
-    .navbar .logo {
-        font-size: 18px;
-    }
-
-    .btn-nav-owner span,
-    .btn-nav-attach span {
-        display: none;
-    }
-
-    .btn-nav-owner,
-    .btn-nav-attach {
-        padding: 6px 10px;
-        font-size: 16px;
-    }
-
-    .btn-nav-bookings span {
-        display: none;
-    }
-
-    .btn-nav-bookings {
-        padding: 6px 9px;
+        padding: 0 16px;
+        height: 60px;
     }
 
     .weather-advisory-card {
@@ -3285,6 +3379,87 @@ body {
         flex: 1;
         text-align: center;
         justify-content: center;
+    }
+}
+
+/* Mobile Screens ( <= 600px ): Strict Single-Row Header & Overflow Prevention */
+@media (max-width: 600px) {
+    .desktop-nav-item,
+    .btn-nav-owner {
+        display: none !important;
+    }
+
+    .navbar {
+        padding: 0 12px;
+        height: 60px;
+    }
+
+    .nav-left {
+        gap: 8px;
+    }
+
+    .navbar .logo {
+        font-size: 16px;
+        max-width: calc(100% - 48px);
+    }
+
+    .nav-right {
+        gap: 6px;
+    }
+
+    .nav-lang-btn {
+        padding: 6px 10px;
+        font-size: 13.5px;
+        min-height: 48px;
+        min-width: 48px;
+    }
+
+    .nav-call-icon {
+        width: 48px;
+        height: 48px;
+        min-width: 48px;
+        min-height: 48px;
+    }
+
+    .fleet-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .fleet-header {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 8px 12px;
+    }
+
+    .fleet-header h3 {
+        font-size: 18px;
+    }
+
+    .fleet-count {
+        font-size: 12px;
+        padding: 3px 10px;
+        white-space: nowrap;
+    }
+
+    .crop-pills-container {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+
+    .search-sort-bar {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 10px 14px;
+        gap: 10px;
+    }
+
+    .sort-select-wrap {
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 6px;
     }
 }
 
@@ -5162,7 +5337,8 @@ body {
     font-size: 1rem; /* 16px min */
     line-height: 1.5;
     color: #1f2937;
-    max-width: 100vw;
+    width: 100%;
+    max-width: 100%;
     overflow-x: hidden;
 }
 
@@ -5681,7 +5857,8 @@ button, .btn, .nav-item, .lang-switch-btn, .hamburger-btn, .modal-close-btn,
     background: #ffffff;
     border-top: 2px solid #d4e7cc;
     padding: 12px 16px;
-    margin: 16px -20px -20px;
+    margin: 16px -16px -16px;
+    box-sizing: border-box;
     border-bottom-left-radius: 16px;
     border-bottom-right-radius: 16px;
     display: flex;
@@ -5722,8 +5899,9 @@ button, .btn, .nav-item, .lang-switch-btn, .hamburger-btn, .modal-close-btn,
 @media (max-width: 480px) {
     .modal-card, .reg-modal-card {
         padding: 16px;
-        width: 95vw;
-        max-width: 100vw;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
     }
     
     .wizard-nav-row {

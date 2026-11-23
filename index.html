@@ -71,7 +71,7 @@
         <nav class="drawer-menu">
             <a href="index.html" class="drawer-item active" onclick="closeDrawer()">
                 <span class="drawer-item-icon">🏠</span>
-                <span data-i18n="menuHome">होम / डैशबोर्ड</span>
+                <span class="item-title" data-i18n="menuHome">होम / डैशबोर्ड</span>
             </a>
             <button type="button" class="drawer-item" onclick="openMyBookingsModal(); closeDrawer();">
                 <span class="drawer-item-icon">📋</span>
@@ -80,13 +80,28 @@
                     <span class="item-sub" id="drawerBookingCount">0 बुकिंग</span>
                 </div>
             </button>
-            <button type="button" class="drawer-item highlight-item" onclick="openTractorRegModal()">
-                <span class="drawer-item-icon">🚜</span>
-                <div class="item-text-group">
-                    <span class="item-title" data-i18n="menuRegTractor">अपना ट्रैक्टर जोड़ें</span>
-                    <span class="item-sub" data-i18n="menuRegTractorSub">किराये पर देकर कमाई करें</span>
-                </div>
+            <button type="button" class="drawer-item" onclick="handleCallSupport(); closeDrawer();">
+                <span class="drawer-item-icon">📞</span>
+                <span class="item-title" data-i18n="menuHelpline">किसान सहायता केंद्र (Call & WhatsApp)</span>
             </button>
+            <button type="button" class="drawer-item" onclick="openTermsModal(); closeDrawer();">
+                <span class="drawer-item-icon">📜</span>
+                <span class="item-title" data-i18n="menuTerms">नियम व नीतियां (Terms & Policy)</span>
+            </button>
+            <button type="button" class="drawer-item" onclick="openLanguageModal(); closeDrawer();">
+                <span class="drawer-item-icon">🌐</span>
+                <span class="item-title" data-i18n="menuLanguage">भाषा बदलें (हिंदी / English)</span>
+            </button>
+            <button type="button" class="drawer-item" id="drawerAuthBtn" onclick="handleDrawerAuth()">
+                <span class="drawer-item-icon" id="drawerAuthIcon">🔑</span>
+                <span class="item-title" id="drawerAuthText" data-i18n="navLogin">लॉगिन</span>
+            </button>
+
+            <!-- Divider for Tractor Owners -->
+            <div class="drawer-section-divider">
+                <span data-i18n="drawerOwnerSectionTitle">ट्रैक्टर मालिकों के लिए / For tractor owners</span>
+            </div>
+
             <a href="owner.html" class="drawer-item highlight-owner-drawer" onclick="closeDrawer()">
                 <span class="drawer-item-icon">👨‍🌾</span>
                 <div class="item-text-group">
@@ -94,21 +109,12 @@
                     <span class="item-sub" data-i18n="menuOwnerPortalSub">बुकिंग स्वीकारें व खेत का रास्ता देखें</span>
                 </div>
             </a>
-            <button type="button" class="drawer-item" onclick="openLanguageModal(); closeDrawer();">
-                <span class="drawer-item-icon">🌐</span>
-                <span data-i18n="menuLanguage">भाषा बदलें (हिंदी / English)</span>
-            </button>
-            <button type="button" class="drawer-item" onclick="openTermsModal(); closeDrawer();">
-                <span class="drawer-item-icon">📜</span>
-                <span data-i18n="menuTerms">नियम व नीतियां (Terms & Policy)</span>
-            </button>
-            <button type="button" class="drawer-item" onclick="handleCallSupport(); closeDrawer();">
-                <span class="drawer-item-icon">📞</span>
-                <span data-i18n="menuHelpline">किसान सहायता केंद्र (Call & WhatsApp)</span>
-            </button>
-            <button type="button" class="drawer-item" id="drawerAuthBtn" onclick="handleDrawerAuth()">
-                <span class="drawer-item-icon" id="drawerAuthIcon">🔑</span>
-                <span id="drawerAuthText" data-i18n="navLogin">लॉगिन</span>
+            <button type="button" class="drawer-item highlight-item" onclick="openTractorRegModal()">
+                <span class="drawer-item-icon">🚜</span>
+                <div class="item-text-group">
+                    <span class="item-title" data-i18n="menuRegTractor">अपना ट्रैक्टर जोड़ें</span>
+                    <span class="item-sub" data-i18n="menuRegTractorSub">किराये पर देकर कमाई करें</span>
+                </div>
             </button>
         </nav>
 
@@ -129,22 +135,21 @@
             <div class="logo">🚜 <span data-i18n="brandName">प्रोजेक्ट ट्रैक्टर</span></div>
         </div>
         <div class="nav-right">
-            <a href="owner.html" class="btn-nav-owner" title="ट्रैक्टर मालिक डैशबोर्ड / Owner Dashboard">
-                🚜 <span data-i18n="navOwnerPortal">मालिक डैशबोर्ड</span>
-            </a>
-            <button type="button" class="btn-nav-bookings" onclick="openMyBookingsModal()"
+            <button type="button" class="btn-nav-bookings desktop-nav-item" onclick="openMyBookingsModal()"
                 title="मेरी बुकिंग्स / My Bookings">
                 📋 <span data-i18n="navMyBookings">मेरी बुकिंग्स</span>
                 <span class="nav-booking-badge" id="navBookingBadge" style="display: none;">0</span>
             </button>
-            <button type="button" class="lang-switch-btn nav-lang-btn" onclick="openLanguageModal()"
-                title="भाषा बदलें / Change Language">
-                🌐 <span id="currentLangTag">हिंदी</span> ▾
-            </button>
-            <button type="button" class="btn-nav-attach" onclick="openTractorRegModal()">
+            <button type="button" class="btn-nav-attach desktop-nav-item" onclick="openTractorRegModal()"
+                title="अपना ट्रैक्टर जोड़ें / Add your tractor">
                 🚜 <span data-i18n="navAttachBtn">ट्रैक्टर जोड़ें</span>
             </button>
-            <button type="button" class="nav-call-icon" onclick="handleCallSupport()" title="Call & WhatsApp Support">
+            <button type="button" class="lang-switch-btn nav-lang-btn" onclick="openLanguageModal()"
+                title="भाषा बदलें / Change Language" aria-label="भाषा बदलें / Change Language">
+                🌐 <span id="currentLangTag">हिंदी</span>
+            </button>
+            <button type="button" class="nav-call-icon" onclick="handleCallSupport()"
+                title="किसान सहायता केंद्र (Call & WhatsApp)" aria-label="किसान सहायता केंद्र">
                 📞
             </button>
         </div>
