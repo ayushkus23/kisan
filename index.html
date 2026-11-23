@@ -5,18 +5,6 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Project Tractor - Kisan Portal</title>
-    <!-- First-time / Not-logged-in redirect to login page -->
-    <script>
-        (function () {
-            var user = localStorage.getItem('tractorUser');
-            var guest = sessionStorage.getItem('tractorUser');
-            var isReal = user && user !== 'null' && user !== 'undefined' && user !== 'guest' && user !== 'मेहमान किसान' && user !== 'Guest Farmer' && user.trim() !== '';
-            var isGuest = guest === 'guest';
-            if (!isReal && !isGuest) {
-                window.location.replace('login.html');
-            }
-        })();
-    </script>
     <link rel="stylesheet" href="style.css">
 </head>
 
@@ -37,6 +25,30 @@
                 <button type="button" class="lang-choice-btn" id="langBtnEn" onclick="selectLanguage('en')">
                     <span class="lang-name">English</span>
                     <span class="lang-hint">Continue</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Welcome Screen Modal (Login / Create Account / Guest) -->
+    <div id="welcomeModal" class="modal-overlay welcome-modal-overlay" style="display: none;">
+        <div class="modal-card welcome-modal-card">
+            <button type="button" class="modal-close-btn" onclick="closeWelcomeModal()" aria-label="बंद करें">&times;</button>
+            <div class="welcome-header">
+                <img src="images/dhan-tractor.jpg" alt="Project Tractor" class="welcome-brand-img">
+                <h2 class="welcome-brand-title" data-i18n="brandName">प्रोजेक्ट ट्रैक्टर</h2>
+                <p class="welcome-brand-tagline" data-i18n="welcomeTagline">फसल के टाइम पर गाड़ी, बिना एक्स्ट्रा पैसे</p>
+            </div>
+
+            <div class="welcome-actions">
+                <button type="button" class="btn btn-primary welcome-btn-primary" onclick="goToWelcomeAuth('login')">
+                    🔑 <span data-i18n="welcomeLoginBtn">लॉगिन करें</span>
+                </button>
+                <button type="button" class="btn btn-secondary welcome-btn-secondary" onclick="goToWelcomeAuth('register')">
+                    📝 <span data-i18n="welcomeRegisterBtn">नया अकाउंट बनाएं</span>
+                </button>
+                <button type="button" class="welcome-guest-link" onclick="continueAsGuestWelcome()">
+                    <span data-i18n="welcomeGuestBtn">गेस्ट बनकर आगे बढ़ें →</span>
                 </button>
             </div>
         </div>
@@ -270,7 +282,7 @@
                     <div class="mandi-ticker-bar">
                         <div class="mandi-ticker-badge">
                             <span class="pulse-dot"></span>
-                            <span data-i18n="mandiLiveTag">📊 आज के मंडी भाव (Agmarknet Live)</span>
+                            <span data-i18n="mandiLiveTag">📊 आज के मंडी भाव (अनुमानित)</span>
                         </div>
                         <div class="mandi-ticker-wrap">
                             <div class="mandi-ticker-track" id="mandiTickerContent">
@@ -296,7 +308,7 @@
                             </div>
                             <div class="weather-location-row" style="display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;">
                                 <div class="weather-location-tag">
-                                    📍 <span id="liveWeatherCity" data-i18n="weatherCity">मेरठ, उत्तर प्रदेश (पश्चिमी क्षेत्र)</span>
+                                    📍 <span id="liveWeatherCity" data-i18n="weatherCity">अपना स्थान चुनें</span>
                                 </div>
                                 <div style="display: flex; gap: 6px;">
                                     <button type="button" class="btn-weather-mini" onclick="detectWeatherByGPS()" title="GPS से अपना मौसम देखें">📍 GPS मौसम</button>
@@ -314,7 +326,7 @@
                             </p>
                             <div class="advisory-footer">
                                 <span class="badge-optimum" id="liveWeatherBadge">✅ जुताई व कटाई के लिए अनुकूल</span>
-                                <span class="advisory-time" id="liveWeatherTime" data-i18n="advisoryTime">लाइव अपडेट</span>
+                                <span class="advisory-time" id="liveWeatherTime" data-i18n="advisoryTime">आज का अपडेट</span>
                             </div>
                         </div>
                     </div>
@@ -686,7 +698,7 @@
                             <span data-i18n="breakdownDieselLabel">डीजल विकल्प (Fuel):</span>
                             <span id="breakdownFuelText" class="badge-text-green">डीजल व ड्राइवर सहित</span>
                         </div>
-                        <div class="breakdown-row">
+                        <div class="breakdown-row" style="display: none;">
                             <span data-i18n="breakdownTravelLabel">दूरी / ट्रैवल चार्ज (5 किमी तक):</span>
                             <span class="badge-text-free" data-i18n="breakdownTravelFree">₹0 (बिल्कुल मुफ्त)</span>
                         </div>
@@ -696,10 +708,10 @@
                             <strong class="total-val" id="modalTotalEstimate">₹1,200</strong>
                         </div>
                         <div class="final-rate-guarantee-note" data-i18n="noHiddenChargesNote">
-                            ✅ यही फाइनल रेट है, बाद में कोई छुपा चार्ज नहीं
+                            ℹ️ यह अनुमानित रेट है, मालिक से पुष्टि करें
                         </div>
                         <div id="guestBookingBadge" class="guest-booking-badge" style="display: none;">
-                            🔒 <span>अंतिम स्टेप: बुकिंग सुरक्षित करने के लिए अगले स्टेप पर 10 सेकंड में लॉगिन/खाता बनेगा।</span>
+                            🌾 <span data-i18n="guestBookingNotice">लॉगिन ज़रूरी नहीं है, आप गेस्ट बनकर भी बुकिंग कर सकते हैं।</span>
                         </div>
                     </div>
 
@@ -707,7 +719,7 @@
 
                     <div class="modal-action-buttons">
                         <button type="submit" class="btn btn-primary btn-confirm-booking" id="btnConfirmBooking">
-                            🚜 <span data-i18n="btnConfirmBooking">अनुरोध भेजें (बुकिंग पक्की करें)</span>
+                            🚜 <span data-i18n="btnConfirmBooking">अनुरोध भेजें</span>
                         </button>
                         <button type="button" class="btn btn-whatsapp" onclick="sendBookingViaWhatsApp()">
                             💬 <span data-i18n="btnSendWhatsApp">व्हाट्सएप पर बुकिंग भेजें</span>
@@ -1005,8 +1017,7 @@
                     <div class="term-number">2</div>
                     <div class="term-text">
                         <h4 data-i18n="term2Title">न्यूनतम बुकिंग व समय नियम (Minimum Booking) ⏱️</h4>
-                        <p data-i18n="term2Desc">कम से कम 1 या 2 घंटे की बुकिंग मान्य होगी ताकि ट्रैक्टर के आने-जाने का
-                            नुकसान न हो। 5 किमी से अधिक दूरी पर सामान्य ट्रेवल चार्ज लागू हो सकता है।</p>
+                        <p data-i18n="term2Desc">कम से कम 1 या 2 घंटे की बुकिंग मान्य होगी ताकि ट्रैक्टर के आने-जाने का नुकसान न हो। ट्रैवल चार्ज के बारे में मालिक बुकिंग पर बताएगा।</p>
                     </div>
                 </div>
 
@@ -1125,8 +1136,7 @@
 
             <!-- Real-time Live Tracking Indicator & Change Toast -->
             <div class="tracking-live-indicator" id="trackingLiveIndicator">
-                <span class="live-pulse-dot"></span>
-                <span id="trackingLiveIndicatorText">🟢 लाइव ट्रैकिंग एक्टिव (ऑटो-अपडेट ऑन)</span>
+                <span id="trackingLiveIndicatorText" data-i18n="trackingAutoUpdateText">🔄 स्टेटस अपने आप अपडेट होता है</span>
             </div>
             <div id="statusChangeToast" class="status-change-toast" style="display: none;"></div>
 

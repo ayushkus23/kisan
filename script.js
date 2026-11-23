@@ -16,6 +16,14 @@ try {
     console.warn('Supabase initialization warning:', err);
 }
 
+// Single Default Pilot Configuration for Kisan Portal (Precedence: GPS > User Choice > Config)
+const DEFAULT_PILOT_CONFIG = {
+    locationNameHi: "अपना स्थान चुनें",
+    locationNameEn: "Choose your location",
+    lat: 28.98,
+    lng: 77.70
+};
+
 // Real photo mappings for tractor brands
 const brandRealPhotos = {
     "Mahindra 575 DI (45 HP)": "images/dhan-tractor.jpg",
@@ -191,6 +199,10 @@ const translations = {
         modalSubtitle: "कृपया अपनी पसंदीदा भाषा चुनें / Please select your preferred language",
         brandName: "प्रोजेक्ट ट्रैक्टर",
         brandSubtitle: "किसान भाइयों का अपना ट्रैक्टर पोर्टल",
+        welcomeTagline: "फसल के टाइम पर गाड़ी, बिना एक्स्ट्रा पैसे",
+        welcomeLoginBtn: "लॉगिन करें",
+        welcomeRegisterBtn: "नया अकाउंट बनाएं",
+        welcomeGuestBtn: "गेस्ट बनकर आगे बढ़ें →",
 
         // Drawer Menu & Badges
         drawerVerifiedBadge: "किसान प्रोफाइल",
@@ -210,7 +222,7 @@ const translations = {
         navAttachBtn: "ट्रैक्टर जोड़ें",
 
         // Mandi Ticker
-        mandiLiveTag: "📊 आज के मंडी भाव (Agmarknet Live)",
+        mandiLiveTag: "📊 आज के मंडी भाव (अनुमानित)",
         mandiTickerItem1: "🌾 गेहूं (Wheat): ₹2,425/क्विं",
         mandiTickerItem2: "🌾 धान 1121 (Basmati): ₹3,850/क्विं",
         mandiTickerItem3: "🟡 सरसों (Mustard): ₹5,680/क्विं",
@@ -219,7 +231,7 @@ const translations = {
         mandiTickerItem6: "🌱 चना (Gram): ₹5,800/क्विं",
 
         // Weather & Advisory
-        weatherCity: "मेरठ, उत्तर प्रदेश (पश्चिमी क्षेत्र)",
+        weatherCity: "अपना स्थान चुनें",
         weatherCondition: "धूप खिली है ☀️",
         weatherHumidity: "💧 नमी: 42%",
         weatherWind: "💨 हवा: 8 km/h",
@@ -230,6 +242,7 @@ const translations = {
 
         // GPS & Booking Status (Real Tracking)
         btnDetectGPS: "GPS से खेत खोजें",
+        trackingAutoUpdateText: "🔄 स्टेटस अपने आप अपडेट होता है",
         locDetecting: "⏳ जीपीएस लोकेशन खोजी जा रही है...",
         locSuccess: "खेत की लोकेशन सेट हो गई: {loc}",
         locErr: "⚠️ लोकेशन नहीं मिल सकी। कृपया गांव का नाम टाइप करें।",
@@ -345,7 +358,7 @@ const translations = {
         stepTitleHours: "काम के घंटे",
         stepTitleFarmer: "किसान संपर्क",
         stepTitleLocation: "खेत का स्थान",
-        stepTitleReview: "समीक्षा व बुकिंग पक्की",
+        stepTitleReview: "समीक्षा व अनुरोध भेजें",
         fuelStepDesc: "चुनें कि डीजल आपका रहेगा या ट्रैक्टर मालिक का खर्च होगा:",
         slotStepDesc: "ड्राइवर आपके चुने हुए समय पर खेत पहुंचेगा:",
         slotMorningTitle: "सुबह का समय",
@@ -434,9 +447,10 @@ const translations = {
         breakdownTravelLabel: "दूरी / ट्रैवल चार्ज (5 किमी तक):",
         breakdownTravelFree: "₹0 (बिल्कुल मुफ्त)",
         breakdownTotalLabel: "कुल अंतिम राशि (Total Amount):",
-        noHiddenChargesNote: "✅ यही फाइनल रेट है, बाद में कोई छुपा चार्ज नहीं",
+        noHiddenChargesNote: "ℹ️ यह अनुमानित रेट है, मालिक से पुष्टि करें",
+        guestBookingNotice: "लॉगिन ज़रूरी नहीं है, आप गेस्ट बनकर भी बुकिंग कर सकते हैं।",
         btnSpeakEstimate: "बोल कर सुनें",
-        btnConfirmBooking: "बुकिंग पक्की करें",
+        btnConfirmBooking: "अनुरोध भेजें",
         btnSendWhatsApp: "व्हाट्सएप पर बुकिंग भेजें",
 
         // Receipt Modal
@@ -506,7 +520,7 @@ const translations = {
         term1Title: "डीजल नीति (Fuel Policy) ⛽",
         term1Desc: "किराये के रेट में डीजल और ड्राइवर शामिल माना जाएगा जब तक कि बुकिंग के समय अलग से बात तय न हुई हो।",
         term2Title: "न्यूनतम बुकिंग व समय नियम (Minimum Booking) ⏱️",
-        term2Desc: "कम से कम 1 या 2 घंटे की बुकिंग मान्य होगी ताकि ट्रैक्टर के आने-जाने का नुकसान न हो। 5 किमी से अधिक दूरी पर सामान्य ट्रेवल चार्ज लागू हो सकता है।",
+        term2Desc: "कम से कम 1 या 2 घंटे की बुकिंग मान्य होगी ताकि ट्रैक्टर के आने-जाने का नुकसान न हो। ट्रैवल चार्ज के बारे में मालिक बुकिंग पर बताएगा।",
         term3Title: "टूट-फूट व खराबी नियम (Breakdown Policy) 🛠️",
         term3Desc: "खेत में काम के दौरान अगर मशीन खराब होती है, तो मरम्मत का खर्च ट्रैक्टर मालिक का होगा। किसान से केवल उतने ही समय का पैसा लिया जाएगा जितना काम सही हुआ है।",
         term4Title: "समय की पाबंदी व अनुशासन (Discipline Policy) ❌",
@@ -576,6 +590,10 @@ const translations = {
         modalSubtitle: "Please select your preferred language / कृपया भाषा चुनें",
         brandName: "Project Tractor",
         brandSubtitle: "The Trusted Tractor Portal for Farmers",
+        welcomeTagline: "Vehicles on crop time, no extra charges",
+        welcomeLoginBtn: "Login",
+        welcomeRegisterBtn: "Create New Account",
+        welcomeGuestBtn: "Continue as Guest →",
 
         // Drawer Menu & Badges
         drawerVerifiedBadge: "Farmer Profile",
@@ -595,7 +613,7 @@ const translations = {
         navAttachBtn: "Attach Tractor",
 
         // Mandi Ticker
-        mandiLiveTag: "📊 Live Mandi Rates (Agmarknet Live)",
+        mandiLiveTag: "📊 Mandi Rates (Estimated)",
         mandiTickerItem1: "🌾 Wheat: ₹2,425/Qtl",
         mandiTickerItem2: "🌾 Paddy (Basmati 1121): ₹3,850/Qtl",
         mandiTickerItem3: "🟡 Mustard: ₹5,680/Qtl",
@@ -604,7 +622,7 @@ const translations = {
         mandiTickerItem6: "🌱 Gram (Chana): ₹5,800/Qtl",
 
         // Weather & Advisory
-        weatherCity: "Meerut, Uttar Pradesh (Western Region)",
+        weatherCity: "Choose your location",
         weatherCondition: "Sunny & Clear ☀️",
         weatherHumidity: "💧 Humidity: 42%",
         weatherWind: "💨 Wind: 8 km/h",
@@ -615,6 +633,7 @@ const translations = {
 
         // GPS & Booking Status (Real Tracking)
         btnDetectGPS: "Auto-Detect GPS",
+        trackingAutoUpdateText: "🔄 Status updates automatically",
         locDetecting: "⏳ Detecting GPS location...",
         locSuccess: "Farm GPS set: {loc}",
         locErr: "⚠️ Location could not be detected. Please type village name.",
@@ -730,7 +749,7 @@ const translations = {
         stepTitleHours: "Work Hours",
         stepTitleFarmer: "Farmer Details",
         stepTitleLocation: "Farm Location",
-        stepTitleReview: "Review & Confirm",
+        stepTitleReview: "Review & Send Request",
         fuelStepDesc: "Choose whether fuel is included or provided by the farmer:",
         slotStepDesc: "The driver will arrive at your field during this chosen slot:",
         slotMorningTitle: "Morning Slot",
@@ -816,9 +835,10 @@ const translations = {
         breakdownTravelLabel: "Travel Charge (up to 5 km):",
         breakdownTravelFree: "₹0 (Free of cost)",
         breakdownTotalLabel: "Total Amount:",
-        noHiddenChargesNote: "✅ This is the final rate, no hidden charges later",
+        noHiddenChargesNote: "ℹ️ This is an estimated rate, please confirm with the owner",
+        guestBookingNotice: "Login is not required. You can book as a guest.",
         btnSpeakEstimate: "Listen Audio",
-        btnConfirmBooking: "Confirm Booking",
+        btnConfirmBooking: "Send Request",
         btnSendWhatsApp: "Send Booking via WhatsApp",
 
         // Receipt Modal
@@ -888,7 +908,7 @@ const translations = {
         term1Title: "Fuel (Diesel) Policy ⛽",
         term1Desc: "Rental charges include diesel and driver unless agreed otherwise prior to booking.",
         term2Title: "Minimum Booking & Travel Rule ⏱️",
-        term2Desc: "A minimum of 1 or 2 hours booking applies to protect operating costs. Nominal travel charges apply for fields beyond 5 km.",
+        term2Desc: "A minimum of 1 or 2 hours booking applies to protect operating costs. Travel charges, if any, will be informed by the tractor owner upon booking.",
         term3Title: "Breakdown & Repair Policy 🛠️",
         term3Desc: "If a tractor or implement suffers mechanical failure on the field, repair costs are borne by the tractor owner. The farmer is billed strictly for actual completed work.",
         term4Title: "Punctuality & Discipline ❌",
@@ -1589,10 +1609,12 @@ function interpretWmoWeather(code, isHi = true) {
 }
 
 async function fetchLiveFarmWeather(lat, lng, locationName, bypassCache = false) {
+    const isHi = (currentLang || 'hi') === 'hi';
+    const defaultName = isHi ? DEFAULT_PILOT_CONFIG.locationNameHi : DEFAULT_PILOT_CONFIG.locationNameEn;
     if (!lat || !lng) {
-        lat = 28.98;
-        lng = 77.70;
-        locationName = locationName || 'मेरठ, उत्तर प्रदेश (पश्चिमी क्षेत्र)';
+        lat = DEFAULT_PILOT_CONFIG.lat;
+        lng = DEFAULT_PILOT_CONFIG.lng;
+        locationName = locationName || defaultName;
     }
 
     const cacheKey = 'kisan_weather_cache';
@@ -1644,21 +1666,24 @@ async function fetchLiveFarmWeather(lat, lng, locationName, bypassCache = false)
         renderFarmWeather(weatherPayload);
         return weatherPayload;
     } catch (err) {
-        console.warn('Open-Meteo live weather fetch fallback:', err);
-        const fallback = {
-            temp: 24,
-            humidity: 48,
-            wind: 8,
-            code: 0,
-            rainProb: 0,
-            locationName: locationName || 'मेरठ, उत्तर प्रदेश (पश्चिमी क्षेत्र)',
-            lat: lat,
-            lng: lng,
-            time: 'आज'
-        };
-        currentWeatherData = fallback;
-        renderFarmWeather(fallback);
-        return fallback;
+        console.warn('Open-Meteo live weather fetch error:', err);
+        const isHi = (currentLang || 'hi') === 'hi';
+        const defaultName = isHi ? DEFAULT_PILOT_CONFIG.locationNameHi : DEFAULT_PILOT_CONFIG.locationNameEn;
+        const iconEl = document.getElementById('liveWeatherIcon');
+        const tempEl = document.getElementById('liveWeatherTemp');
+        const condEl = document.getElementById('liveWeatherCondition');
+        const cityEl = document.getElementById('liveWeatherCity');
+        const advTextEl = document.getElementById('liveWeatherAdvisoryText');
+        const badgeEl = document.getElementById('liveWeatherBadge');
+        if (iconEl) iconEl.textContent = '🌦️';
+        if (tempEl) tempEl.textContent = '--';
+        if (condEl) condEl.textContent = isHi ? 'अभी जानकारी उपलब्ध नहीं है' : 'Weather data unavailable';
+        if (cityEl && (!cityEl.textContent || cityEl.textContent.includes('...'))) {
+            cityEl.textContent = locationName || defaultName;
+        }
+        if (advTextEl) advTextEl.textContent = isHi ? 'मौसम सेवा से संपर्क नहीं हो सका। कृपया रीफ्रेश बटन दबाकर दोबारा प्रयास करें।' : 'Weather service currently unreachable. Please tap refresh to retry.';
+        if (badgeEl) badgeEl.textContent = isHi ? 'ℹ️ अपडेट प्रतीक्षित' : 'ℹ️ Update Pending';
+        return null;
     }
 }
 
@@ -1698,15 +1723,18 @@ function renderFarmWeather(data) {
 }
 
 function refreshFarmWeather(force = false) {
-    const lat = currentWeatherData ? currentWeatherData.lat : 28.98;
-    const lng = currentWeatherData ? currentWeatherData.lng : 77.70;
-    const name = currentWeatherData ? currentWeatherData.locationName : 'मेरठ, उत्तर प्रदेश (पश्चिमी क्षेत्र)';
+    const isHi = (currentLang || 'hi') === 'hi';
+    const defaultName = isHi ? DEFAULT_PILOT_CONFIG.locationNameHi : DEFAULT_PILOT_CONFIG.locationNameEn;
+    const lat = currentWeatherData ? currentWeatherData.lat : DEFAULT_PILOT_CONFIG.lat;
+    const lng = currentWeatherData ? currentWeatherData.lng : DEFAULT_PILOT_CONFIG.lng;
+    const name = currentWeatherData ? currentWeatherData.locationName : defaultName;
     fetchLiveFarmWeather(lat, lng, name, force);
 }
 
 function detectWeatherByGPS() {
     const cityEl = document.getElementById('liveWeatherCity');
-    if (cityEl) cityEl.textContent = '⏳ GPS से मौसम खोज रहे हैं...';
+    const isHi = (currentLang || 'hi') === 'hi';
+    if (cityEl) cityEl.textContent = isHi ? '⏳ GPS से मौसम खोज रहे हैं...' : '⏳ Detecting GPS weather...';
 
     getUniversalLocation(
         null,
@@ -1714,13 +1742,16 @@ function detectWeatherByGPS() {
             fetchLiveFarmWeather(loc.lat, loc.lng, loc.name, true);
         },
         () => {
-            fetchLiveFarmWeather(28.98, 77.70, 'मेरठ, उत्तर प्रदेश (पश्चिमी क्षेत्र)', false);
+            const defName = isHi ? DEFAULT_PILOT_CONFIG.locationNameHi : DEFAULT_PILOT_CONFIG.locationNameEn;
+            fetchLiveFarmWeather(DEFAULT_PILOT_CONFIG.lat, DEFAULT_PILOT_CONFIG.lng, defName, false);
         }
     );
 }
 
 function initLiveFarmWeather() {
-    fetchLiveFarmWeather(28.98, 77.70, 'मेरठ, उत्तर प्रदेश (पश्चिमी क्षेत्र)', false);
+    const isHi = (currentLang || 'hi') === 'hi';
+    const defName = isHi ? DEFAULT_PILOT_CONFIG.locationNameHi : DEFAULT_PILOT_CONFIG.locationNameEn;
+    fetchLiveFarmWeather(DEFAULT_PILOT_CONFIG.lat, DEFAULT_PILOT_CONFIG.lng, defName, false);
 }
 
 function detectFarmerLocation() {
@@ -2034,7 +2065,7 @@ async function handleTractorBookingSubmit(event) {
     const resetSubmitBtn = () => {
         if (submitBtn) {
             submitBtn.disabled = false;
-            submitBtn.innerHTML = '🚜 <span data-i18n="btnConfirmBooking">' + (currentLang === 'hi' ? 'अनुरोध भेजें (बुकिंग पक्की करें)' : 'Send Request (Confirm Booking)') + '</span>';
+            submitBtn.innerHTML = '🚜 <span data-i18n="btnConfirmBooking">' + (currentLang === 'hi' ? 'अनुरोध भेजें' : 'Send Request') + '</span>';
         }
     };
     if (submitBtn) {
@@ -2072,27 +2103,6 @@ async function handleTractorBookingSubmit(event) {
     // Date validation
     if (!bookingDateVal) {
         alert(t.errInvalidDate || "कृपया तारीख चुनें।"); if (typeof resetSubmitBtn === "function") resetSubmitBtn(); return;
-    }
-
-    // GUEST USER CHECK: If user is browsing as Guest, require Login on final step!
-    if (!isRealLoggedInUser()) {
-        const draft = {
-            machineId: selectedMachine ? selectedMachine.id : null,
-            farmerName,
-            farmerPhone: phoneClean,
-            farmerVillage,
-            duration,
-            cropName: document.getElementById('workCropName') ? document.getElementById('workCropName').value.trim() : '',
-            bookingDate: bookingDateVal,
-            bookingSlot: bookingSlotVal,
-            bookingSlotText,
-            fuelOption: selectedFuelOption,
-            gpsLink: gpsLink || ''
-        };
-        sessionStorage.setItem('pendingBookingDraft', JSON.stringify(draft));
-        alert('⚠️ बुकिंग पक्की करने के लिए कृपया पहले लॉगिन करें या 10 सेकंड में नया खाता बनाएं। (लॉगिन करते ही आपकी यह बुकिंग तुरंत कन्फर्म हो जाएगी)');
-        window.location.href = `login.html?redirect=booking&phone=${phoneClean}&name=${encodeURIComponent(farmerName)}`;
-        return;
     }
 
     const machineTitle = selectedMachine.name[currentLang] || selectedMachine.name.hi;
@@ -3357,9 +3367,9 @@ function speakReceipt() {
         const strongs = totalEl.querySelectorAll('strong');
         if (strongs.length > 0) totalRaw = strongs[strongs.length - 1].textContent.replace(/[^\d]/g, '');
     }
-    const enText = `Congratulations! Tractor booking confirmed. Estimated total bill is ₹${totalRaw}. Our nearest driver team will contact you shortly and arrive at your farm.`;
+    const enText = `Farmer friend, your tractor booking request has been submitted. Estimated total bill is ₹${totalRaw}. It will be confirmed once accepted by the tractor owner. Our team will contact you shortly.`;
 
-    playVoiceMessage(audioPath, btn, 'बधाई हो किसान भाई! आपकी ट्रैक्टर बुकिंग पक्की हो गई है। हमारी टीम जल्द आपके खेत पर पहुंचेगी।', enText);
+    playVoiceMessage(audioPath, btn, 'किसान भाई, आपका ट्रैक्टर बुकिंग अनुरोध दर्ज हो गया है। मालिक के स्वीकार करने पर बुकिंग पक्की होगी, टीम जल्द आपसे संपर्क करेगी।', enText);
 }
 
 function speakBookingStatus() {
@@ -3482,26 +3492,6 @@ function sendBookingViaWhatsApp() {
     const slotSelect = document.getElementById('bookingSlot');
     const slotText = slotSelect && slotSelect.selectedOptions[0] ? slotSelect.selectedOptions[0].textContent.trim() : 'दोपहर (Day)';
 
-    // GUEST USER CHECK: Require login on final step
-    if (!isRealLoggedInUser()) {
-        const draft = {
-            machineId: selectedMachine ? selectedMachine.id : null,
-            farmerName,
-            farmerPhone: farmerPhone.replace(/\D/g, ''),
-            farmerVillage,
-            duration,
-            cropName,
-            bookingDate: dateVal,
-            bookingSlot: slotSelect ? slotSelect.value : 'day',
-            fuelOption: selectedFuelOption,
-            gpsLink: gpsLink || ''
-        };
-        sessionStorage.setItem('pendingBookingDraft', JSON.stringify(draft));
-        alert('⚠️ व्हाट्सएप पर बुकिंग भेजने के लिए कृपया पहले लॉगिन करें या नया खाता बनाएं। (लॉगिन के बाद तुरंत बुकिंग पक्की हो जाएगी)');
-        window.location.href = `login.html?redirect=booking&phone=${farmerPhone.replace(/\D/g, '')}&name=${encodeURIComponent(farmerName)}`;
-        return;
-    }
-
     const discount = selectedMachine.fuelDiscount || 200;
     const appliedRate = selectedFuelOption === 'with-fuel'
         ? selectedMachine.rate
@@ -3513,7 +3503,7 @@ function sendBookingViaWhatsApp() {
     const dateLine = dateVal ? `📅 *Tarikh (Date):* ${dateVal}\n` : '';
     const slotLine = slotText ? `⏰ *Samay Slot:* ${slotText}\n` : '';
 
-    const message = `🚜 *PROJECT TRACTOR - ADVANCE BOOKING* 🚜\n\n` +
+    const message = `🚜 *PROJECT TRACTOR - BOOKING REQUEST (बुकिंग अनुरोध)* 🚜\n\n` +
         `👤 *Kisan Ka Naam:* ${farmerName}\n` +
         `📱 *Mobile Number:* ${farmerPhone}\n` +
         `📍 *Gaon / Khet Location:* ${farmerVillage}\n` +
@@ -3524,8 +3514,8 @@ function sendBookingViaWhatsApp() {
         `🚜 *Chuni Gayi Gaadi:* ${machineTitle}\n` +
         `⛽ *Diesel Option:* ${fuelText}\n` +
         `⏱️ *Samay / Avadhi:* ${duration} ${rateUnit}\n` +
-        `💰 *Final Rate (Bina Chupa Charge):* ₹${total.toLocaleString('en-IN')}\n\n` +
-        `Kripya jaldi se tractor bhejane ki pushti karein. Shukriya!`;
+        `💰 *Estimated Total Rate (अनुमानित कुल किराया):* ₹${total.toLocaleString('en-IN')}\n\n` +
+        `Kripya booking anurodh sweekar karke tractor bhejane ki pushti karein. Shukriya!`;
 
     const encoded = encodeURIComponent(message);
     window.open(`https://api.whatsapp.com/send?text=${encoded}`, '_blank');
@@ -3604,9 +3594,12 @@ function applyLanguage(lang) {
 
 function selectLanguage(lang) {
     applyLanguage(lang);
-    localStorage.setItem('tractorLangPromptSeen', 'true');
-    sessionStorage.setItem('tractorLangPromptShown', 'true');
+    try {
+        localStorage.setItem('tractorLangPromptSeen', 'true');
+        sessionStorage.setItem('tractorLangPromptShown', 'true');
+    } catch (e) {}
     closeLanguageModal();
+    checkVisitorOnboarding();
 }
 
 function openLanguageModal() {
@@ -3615,15 +3608,73 @@ function openLanguageModal() {
 }
 
 function closeLanguageModal() {
-    localStorage.setItem('tractorLangPromptSeen', 'true');
-    sessionStorage.setItem('tractorLangPromptShown', 'true');
+    try {
+        localStorage.setItem('tractorLangPromptSeen', 'true');
+        sessionStorage.setItem('tractorLangPromptShown', 'true');
+    } catch (e) {}
     const modal = document.getElementById('languageModal');
     if (modal) modal.style.display = 'none';
+}
+
+// ==========================================
+// Welcome Screen Modal Controller
+// ==========================================
+function openWelcomeModal() {
+    const modal = document.getElementById('welcomeModal');
+    if (modal) modal.style.display = 'flex';
+}
+
+function closeWelcomeModal() {
+    const modal = document.getElementById('welcomeModal');
+    if (modal) modal.style.display = 'none';
+}
+
+function continueAsGuestWelcome() {
+    try {
+        localStorage.setItem('tractorGuestUser', 'true');
+        sessionStorage.setItem('tractorUser', 'guest');
+    } catch (e) {}
+    closeWelcomeModal();
+    updateNavSession();
+}
+
+function goToWelcomeAuth(tab) {
+    try {
+        localStorage.setItem('tractorGuestUser', 'false');
+    } catch (e) {}
+    closeWelcomeModal();
+    window.location.href = `login.html?tab=${tab || 'login'}`;
+}
+
+function checkVisitorOnboarding() {
+    let isReal = false;
+    let isGuest = false;
+    try {
+        const user = localStorage.getItem('tractorUser');
+        const guestSession = sessionStorage.getItem('tractorUser');
+        const guestLocal = localStorage.getItem('tractorGuestUser');
+        isReal = user && user !== 'null' && user !== 'undefined' && user !== 'guest' && user !== 'मेहमान किसान' && user !== 'Guest Farmer' && user.trim() !== '';
+        isGuest = guestSession === 'guest' || guestLocal === 'true';
+    } catch (e) {}
+
+    // If logged in or already chose guest, skip welcome screen
+    if (isReal || isGuest) {
+        closeWelcomeModal();
+        return;
+    }
+
+    // Only show Welcome modal if language modal is not open
+    const langModal = document.getElementById('languageModal');
+    const isLangOpen = langModal && (langModal.style.display === 'flex' || window.getComputedStyle(langModal).display === 'flex');
+    if (!isLangOpen) {
+        openWelcomeModal();
+    }
 }
 
 // Close modals when clicking overlay outside the card
 window.addEventListener('click', (e) => {
     const langModal = document.getElementById('languageModal');
+    const welcomeModal = document.getElementById('welcomeModal');
     const bookModal = document.getElementById('bookingModal');
     const receiptModal = document.getElementById('receiptModal');
     const regModal = document.getElementById('tractorRegModal');
@@ -3634,6 +3685,9 @@ window.addEventListener('click', (e) => {
 
     if (e.target === langModal) {
         closeLanguageModal();
+    }
+    if (e.target === welcomeModal) {
+        closeWelcomeModal();
     }
     if (e.target === bookModal) {
         closeBookingModal();
@@ -4335,10 +4389,13 @@ function showMessage(text, type) {
 }
 
 function logout() {
-    localStorage.removeItem('tractorUser');
-    localStorage.removeItem('tractorUserProfile');
-    sessionStorage.removeItem('tractorUser');
-    window.location.replace('login.html');
+    try {
+        localStorage.removeItem('tractorUser');
+        localStorage.removeItem('tractorUserProfile');
+        localStorage.removeItem('tractorGuestUser');
+        sessionStorage.removeItem('tractorUser');
+    } catch (e) {}
+    window.location.replace('index.html');
 }
 
 function checkAndResumePendingBooking() {
@@ -4399,7 +4456,9 @@ function checkAndResumePendingBooking() {
                 resumeAlert.id = 'bookingResumeAlert';
                 resumeAlert.className = 'status-change-toast';
                 resumeAlert.style.margin = '0 0 14px';
-                resumeAlert.innerHTML = '🎉 <strong>लॉगिन सफल!</strong> आपका विवरण सुरक्षित है, अब नीचे <u>"बुकिंग पक्की करें"</u> दबाएं।';
+                resumeAlert.innerHTML = currentLang === 'hi'
+                    ? '🎉 <strong>लॉगिन सफल!</strong> आपका विवरण सुरक्षित है, अब नीचे <u>"अनुरोध भेजें"</u> दबाएं।'
+                    : '🎉 <strong>Login successful!</strong> Details restored. Tap <u>"Send Request"</u> below.';
                 form.insertBefore(resumeAlert, form.firstChild);
             }
         }, 400);
@@ -4412,8 +4471,12 @@ function checkAndResumePendingBooking() {
 // 14. Page Initialization
 // ==========================================
 window.addEventListener('DOMContentLoaded', () => {
-    const savedLang = localStorage.getItem('tractorLang');
-    const seen = localStorage.getItem('tractorLangPromptSeen');
+    let savedLang = null;
+    let seen = null;
+    try {
+        savedLang = localStorage.getItem('tractorLang');
+        seen = localStorage.getItem('tractorLangPromptSeen');
+    } catch (e) {}
 
     // Do NOT show automatic popup if language is already chosen or user has seen it before
     if (!savedLang && !seen) {
@@ -4421,6 +4484,7 @@ window.addEventListener('DOMContentLoaded', () => {
         applyLanguage('hi');
     } else {
         applyLanguage(savedLang || 'hi');
+        checkVisitorOnboarding();
     }
 
     renderMandiTicker();

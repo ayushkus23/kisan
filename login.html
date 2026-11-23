@@ -304,6 +304,9 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             var params = new URLSearchParams(window.location.search);
+            if (params.get('tab') === 'register') {
+                switchAuthTab('register');
+            }
             var hasDraft = sessionStorage.getItem('pendingBookingDraft');
             if (params.get('redirect') === 'booking' || hasDraft) {
                 var notice = document.getElementById('bookingRedirectNotice');
