@@ -1,12 +1,224 @@
 <!DOCTYPE html>
 <html lang="hi">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>एडमिन कंट्रोल पैनल - Project Tractor</title>
-    <script>window.location.replace('/?view=admin');</script>
+    <link rel="stylesheet" href="style.css">
 </head>
-<body>
-    <p>Redirecting to Admin Portal...</p>
+
+<body class="admin-portal-body">
+
+    <!-- Top Admin Navbar -->
+    <header class="admin-navbar">
+        <div class="admin-brand">
+            <span style="font-size: 26px;">🚜</span>
+            <div>
+                <strong style="font-size: 17px; letter-spacing: -0.3px;">प्रोजेक्ट ट्रैक्टर</strong>
+                <span class="admin-badge-tag">एडमिन कंट्रोल रूम</span>
+            </div>
+        </div>
+
+        <div class="admin-nav-actions" id="adminNavActions" style="display: none; gap: 8px;">
+            <a href="index.html" class="btn btn-switch-farmer" style="padding: 10px 14px; min-height: 48px; min-width: 48px; font-size: 15px; display: inline-flex; align-items: center;" title="किसान पोर्टल">
+                🌾 <span class="hide-mobile">किसान पोर्टल</span>
+            </a>
+            <a href="owner.html" class="btn btn-switch-farmer" style="padding: 10px 14px; min-height: 48px; min-width: 48px; font-size: 15px; display: inline-flex; align-items: center;" title="मालिक पोर्टल">
+                🚜 <span class="hide-mobile">मालिक पोर्टल</span>
+            </a>
+            <button type="button" class="btn btn-refresh-quick" onclick="refreshAdminData()" style="padding: 10px 14px; min-height: 48px; min-width: 48px; font-size: 15px;" title="रीफ्रेश" aria-label="रीफ्रेश">
+                🔄 रीफ्रेश
+            </button>
+            <button type="button" class="btn btn-owner-logout" onclick="adminLogout()" style="padding: 10px 14px; min-height: 48px; min-width: 48px; font-size: 15px;" title="लॉगआउट" aria-label="लॉगआउट">
+                🚪 लॉगआउट
+            </button>
+        </div>
+    </header>
+
+    <!-- 1. Admin Authentication Screen (Shown if not authenticated) -->
+    <main class="admin-container" id="adminAuthScreen">
+        <div class="admin-login-card">
+            <div class="admin-login-icon">🛡️</div>
+            <h2 style="margin: 0 0 6px; color: #0f2d18;">एडमिन लॉगिन</h2>
+            <p style="color: #37474f; font-size: 15px; margin: 0 0 20px;">
+                प्रोजेक्ट ट्रैक्टर पोर्टल का एडमिन कंट्रोल रूम। केवल अधिकृत एडमिन के लिए।
+            </p>
+
+            <form id="adminLoginForm" onsubmit="handleAdminLogin(event)">
+                <div class="form-group" style="text-align: left; margin-bottom: 14px;">
+                    <label for="adminEmail" style="font-size: 16px; font-weight: 700; color: #1f2937;">एडमिन यूजरनेम या ईमेल *</label>
+                    <input type="text" id="adminEmail" placeholder="यूजरनेम दर्ज करें" autocomplete="username" required style="width: 100%; box-sizing: border-box; min-height: 48px; font-size: 16px; padding: 12px 14px; border: 1.5px solid #c8d8c2; border-radius: 8px;">
+                </div>
+
+                <div class="form-group" style="text-align: left; margin-bottom: 18px;">
+                    <label for="adminPassword" style="font-size: 16px; font-weight: 700; color: #1f2937;">एडमिन पासवर्ड (Password) *</label>
+                    <input type="password" id="adminPassword" placeholder="अपना पासवर्ड दर्ज करें" autocomplete="current-password" required style="width: 100%; box-sizing: border-box; min-height: 48px; font-size: 16px; padding: 12px 14px; border: 1.5px solid #c8d8c2; border-radius: 8px;">
+                </div>
+
+                <div id="adminLoginMsg" class="message-box" style="display: none; margin-bottom: 14px;"></div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%; min-height: 56px; padding: 14px; font-size: 18px; font-weight: 800;">
+                    🔐 सुरक्षित एडमिन लॉगिन
+                </button>
+            </form>
+        </div>
+    </main>
+
+    <!-- 2. Admin Dashboard (Shown after authentication) -->
+    <main class="admin-container" id="adminDashboardScreen" style="display: none;">
+
+        <!-- KPI Metrics Grid -->
+        <section class="admin-kpi-grid">
+            <div class="admin-kpi-card">
+                <div class="admin-kpi-icon" style="background: #e3f2fd; color: #1565c0;">👥</div>
+                <div class="admin-kpi-info">
+                    <span class="admin-kpi-label">कुल ट्रैक्टर मालिक</span>
+                    <strong class="admin-kpi-val" id="statAdminOwners">0</strong>
+                    <span style="font-size: 11.5px; color: #d97706; font-weight: 600;" id="statPendingOwnersLabel">⏳ 0 अप्रूवल लंबित</span>
+                </div>
+            </div>
+
+            <div class="admin-kpi-card">
+                <div class="admin-kpi-icon" style="background: #e8f5e9; color: #2e7d32;">🚜</div>
+                <div class="admin-kpi-info">
+                    <span class="admin-kpi-label">पंजीकृत ट्रैक्टर (Fleet)</span>
+                    <strong class="admin-kpi-val" id="statAdminVehicles">0</strong>
+                    <span style="font-size: 11.5px; color: #2e7d32; font-weight: 600;" id="statVerifiedFleetLabel">🟢 0 सत्यापित</span>
+                </div>
+            </div>
+
+            <div class="admin-kpi-card">
+                <div class="admin-kpi-icon" style="background: #fff8e1; color: #f59e0b;">📋</div>
+                <div class="admin-kpi-info">
+                    <span class="admin-kpi-label">कुल किसान बुकिंग्स</span>
+                    <strong class="admin-kpi-val" id="statAdminBookings">0</strong>
+                    <span style="font-size: 11.5px; color: #b45309; font-weight: 600;" id="statRequestedBookingsLabel">⏳ 0 नए अनुरोध</span>
+                </div>
+            </div>
+
+            <div class="admin-kpi-card">
+                <div class="admin-kpi-icon" style="background: #fdf2f8; color: #db2777;">💰</div>
+                <div class="admin-kpi-info">
+                    <span class="admin-kpi-label">कुल बुकिंग वॉल्यूम</span>
+                    <strong class="admin-kpi-val" id="statAdminTotalVolume">₹0</strong>
+                    <span style="font-size: 11.5px; color: #6b7280;">सभी बुकिंग्स का योग</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Navigation Tabs -->
+        <nav class="admin-tabs-nav">
+            <button type="button" class="admin-tab-btn active" id="tabOwnersBtn" onclick="switchAdminTab('owners')">
+                👥 ट्रैक्टर मालिक
+                <span class="admin-tab-badge" id="tabOwnersBadge">0</span>
+            </button>
+            <button type="button" class="admin-tab-btn" id="tabFleetBtn" onclick="switchAdminTab('fleet')">
+                🚜 फ्लीट व ट्रैक्टर सत्यापन
+                <span class="admin-tab-badge" id="tabFleetBadge">0</span>
+            </button>
+            <button type="button" class="admin-tab-btn" id="tabBookingsBtn" onclick="switchAdminTab('bookings')">
+                📋 सभी किसान बुकिंग्स
+                <span class="admin-tab-badge" id="tabBookingsBadge">0</span>
+            </button>
+        </nav>
+
+        <!-- Tab 1: Owners View -->
+        <section id="adminOwnersView" class="admin-table-card">
+            <div class="admin-table-header-bar">
+                <div>
+                    <h3 style="margin: 0 0 4px; color: #0f2d18;">👥 पंजीकृत ट्रैक्टर मालिक (Tractor Owners)</h3>
+                    <p style="margin: 0; font-size: 13px; color: #607d8b;">
+                        मालिकों को अप्रूव या रिजेक्ट करें। केवल अप्रूव्ड मालिकों को ही किसानों के बुकिंग ऑर्डर्स दिखते हैं।
+                    </p>
+                </div>
+            </div>
+            <div class="admin-table-wrap">
+                <table class="admin-data-table">
+                    <thead>
+                        <tr>
+                            <th>मालिक का नाम</th>
+                            <th>मोबाइल नंबर</th>
+                            <th>गांव व जिला</th>
+                            <th>डीएल / संदर्भ</th>
+                            <th>पंजीकरण तारीख</th>
+                            <th>स्वीकृति स्थिति</th>
+                            <th style="text-align: right;">कार्रवाई (Action)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminOwnersTableBody">
+                        <!-- Populated by admin.js -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Tab 2: Fleet Verification View -->
+        <section id="adminFleetView" class="admin-table-card" style="display: none;">
+            <div class="admin-table-header-bar">
+                <div>
+                    <h3 style="margin: 0 0 4px; color: #0f2d18;">🚜 फ्लीट व ट्रैक्टर सत्यापन (Fleet Verification)</h3>
+                    <p style="margin: 0; font-size: 13px; color: #607d8b;">
+                        सत्यापित (Verified) होने पर ही किसान पोर्टल पर 'सत्यापित' का हरा बैज दिखाई देता है।
+                    </p>
+                </div>
+            </div>
+            <div class="admin-table-wrap">
+                <table class="admin-data-table">
+                    <thead>
+                        <tr>
+                            <th>ट्रैक्टर मॉडल / ब्रांड</th>
+                            <th>मालिक</th>
+                            <th>किराया (₹/घंटा)</th>
+                            <th>स्थान / गांव</th>
+                            <th>ड्राइव</th>
+                            <th>सत्यापन स्थिति</th>
+                            <th style="text-align: right;">सत्यापन टॉगल</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminFleetTableBody">
+                        <!-- Populated by admin.js -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Tab 3: All Bookings View -->
+        <section id="adminBookingsView" class="admin-table-card" style="display: none;">
+            <div class="admin-table-header-bar">
+                <div>
+                    <h3 style="margin: 0 0 4px; color: #0f2d18;">📋 सभी किसान बुकिंग्स (All Farmer Bookings)</h3>
+                    <p style="margin: 0; font-size: 13px; color: #607d8b;">
+                        किसानों द्वारा किये गए बुकिंग अनुरोध और असाइन किया गया ट्रैक्टर।
+                    </p>
+                </div>
+            </div>
+            <div class="admin-table-wrap">
+                <table class="admin-data-table">
+                    <thead>
+                        <tr>
+                            <th>बुकिंग कोड</th>
+                            <th>किसान का नाम व नंबर</th>
+                            <th>खेत का स्थान</th>
+                            <th>तारीख व समय</th>
+                            <th>फसल व घंटे</th>
+                            <th>कुल किराया</th>
+                            <th>स्थिति</th>
+                            <th>असाइन किया ट्रैक्टर</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminBookingsTableBody">
+                        <!-- Populated by admin.js -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Supabase Client SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="admin.js"></script>
 </body>
+
 </html>

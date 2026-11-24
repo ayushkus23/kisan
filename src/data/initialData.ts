@@ -22,7 +22,7 @@ export const initialFleetData: FleetItem[] = [
   {
     id: "dhan-4wd",
     categories: ["dhan", "all"],
-    image: "images/dhan-tractor.jpg",
+    image: "/images/dhan-tractor.jpg",
     rate: 600,
     fuelDiscount: 220,
     rateUnit: { hi: "घंटा", en: "Hour" },
@@ -41,7 +41,7 @@ export const initialFleetData: FleetItem[] = [
   {
     id: "gehu-super-seeder",
     categories: ["gehu", "all"],
-    image: "images/gehu-tractor.jpg",
+    image: "/images/gehu-tractor.jpg",
     rate: 550,
     fuelDiscount: 200,
     rateUnit: { hi: "घंटा", en: "Hour" },
@@ -60,7 +60,7 @@ export const initialFleetData: FleetItem[] = [
   {
     id: "gehu-laser-leveler",
     categories: ["gehu", "dhan", "ganna", "all"],
-    image: "images/gehu-tractor.jpg",
+    image: "/images/gehu-tractor.jpg",
     rate: 750,
     fuelDiscount: 250,
     rateUnit: { hi: "घंटा", en: "Hour" },
@@ -79,7 +79,7 @@ export const initialFleetData: FleetItem[] = [
   {
     id: "ganna-heavy-hauler",
     categories: ["ganna", "all"],
-    image: "images/ganna-tractor.jpg",
+    image: "/images/ganna-tractor.jpg",
     rate: 700,
     fuelDiscount: 250,
     rateUnit: { hi: "घंटा", en: "Hour" },
@@ -98,7 +98,7 @@ export const initialFleetData: FleetItem[] = [
   {
     id: "straw-reaper",
     categories: ["gehu", "dhulai", "all"],
-    image: "images/combine-harvester.jpg",
+    image: "/images/combine-harvester.jpg",
     rate: 1100,
     fuelDiscount: 350,
     rateUnit: { hi: "एकड़", en: "Acre" },
@@ -117,7 +117,7 @@ export const initialFleetData: FleetItem[] = [
   {
     id: "sabzi-mini-tractor",
     categories: ["sabzi", "bagwani", "all"],
-    image: "images/compact-tractor.jpg",
+    image: "/images/compact-tractor.jpg",
     rate: 380,
     fuelDiscount: 140,
     rateUnit: { hi: "घंटा", en: "Hour" },
@@ -136,7 +136,7 @@ export const initialFleetData: FleetItem[] = [
   {
     id: "dhulai-trolley-tractor",
     categories: ["dhulai", "all"],
-    image: "images/dhulai-tractor.jpg",
+    image: "/images/dhulai-tractor.jpg",
     rate: 450,
     fuelDiscount: 160,
     rateUnit: { hi: "घंटा", en: "Hour" },
@@ -155,7 +155,7 @@ export const initialFleetData: FleetItem[] = [
   {
     id: "bagwani-sprayer-mini",
     categories: ["bagwani", "all"],
-    image: "images/bagwani-tractor.jpg",
+    image: "/images/bagwani-tractor.jpg",
     rate: 350,
     fuelDiscount: 130,
     rateUnit: { hi: "घंटा", en: "Hour" },
@@ -174,7 +174,7 @@ export const initialFleetData: FleetItem[] = [
   {
     id: "combine-harvester",
     categories: ["dhan", "gehu", "all"],
-    image: "images/combine-harvester.jpg",
+    image: "/images/combine-harvester.jpg",
     rate: 1400,
     fuelDiscount: 450,
     rateUnit: { hi: "एकड़", en: "Acre" },

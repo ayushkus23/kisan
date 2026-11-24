@@ -48,12 +48,12 @@ export const SideDrawer: React.FC<SideDrawerProps> = ({
         <div className="drawer-header">
           <div className="drawer-user-info">
             <img 
-              src={getSupabaseImageUrl("images/dhan-tractor.jpg")} 
+              src={getSupabaseImageUrl("/images/dhan-tractor.jpg")} 
               alt="Farmer Avatar" 
               className="drawer-real-avatar" 
               onError={(e) => {
                 const target = e.currentTarget;
-                target.src = "images/dhan-tractor.jpg";
+                target.src = "/images/dhan-tractor.jpg";
               }}
             />
             <div className="drawer-user-meta">
