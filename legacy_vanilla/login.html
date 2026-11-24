@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="hi">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Project Tractor</title>
+    <!-- Already logged-in redirect -->
+    <script>
+        (function() {
+            var owner = localStorage.getItem('tractorOwnerSession');
+            if (owner && owner !== 'null' && owner !== 'undefined') {
+                try {
+                    var parsed = JSON.parse(owner);
+                    if (parsed && parsed.id) {
+                        window.location.replace('owner.html');
+                        return;
+                    }
+                } catch (e) {}
+            }
+            var user = localStorage.getItem('tractorUser');
+            var isGuest = !user || user === 'guest' || user === 'मेहमान किसान' || user === 'Guest Farmer';
+            if (user && !isGuest && user !== 'null' && user !== 'undefined' && user.trim() !== '') {
+                window.location.replace('index.html');
+            }
+        })();
+    </script>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="login-body">
+    <!-- Language Selection Popup (Opens when page is opened) -->
+    <div id="languageModal" class="lang-modal-overlay">
+        <div class="lang-modal-card">
+            <button type="button" class="modal-close-btn" onclick="closeLanguageModal()">&times;</button>
+            <div class="lang-modal-icon">🌐</div>
+            <h2 data-i18n="modalTitle">भाषा चुनें / Choose Language</h2>
+            <p data-i18n="modalSubtitle">कृपया अपनी पसंदीदा भाषा चुनें / Please select your preferred language</p>
+
+            <div class="lang-buttons-grid">
+                <button type="button" class="lang-choice-btn" id="langBtnHi" onclick="selectLanguage('hi')">
+                    <span class="lang-name">हिंदी</span>
+                    <span class="lang-hint">आगे बढ़ें</span>
+                </button>
+                <button type="button" class="lang-choice-btn" id="langBtnEn" onclick="selectLanguage('en')">
+                    <span class="lang-name">English</span>
+                    <span class="lang-hint">Continue</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top floating language bar -->
+    <div class="login-topbar">
+        <button type="button" class="lang-switch-btn" onclick="openLanguageModal()" title="भाषा बदलें / Change Language">
+            🌐 <span id="currentLangTag">हिंदी</span> ▾
+        </button>
+    </div>
+
+    <div class="login-wrapper">
+        <div class="login-card">
+            <div class="brand-header">
+                <img src="images/dhan-tractor.jpg" alt="Real Tractor" class="login-brand-real-photo">
+                <h1 data-i18n="brandName">प्रोजेक्ट ट्रैक्टर</h1>
+                <p class="subtitle" data-i18n="brandSubtitle">किसान भाइयों का अपना ट्रैक्टर पोर्टल</p>
+            </div>
+
+            <!-- Booking Redirect Notice Banner (Shown when coming from booking final step) -->
+            <div id="bookingRedirectNotice" class="booking-redirect-notice" style="display: none;">
+                🚜 <strong>ट्रैक्टर बुकिंग पक्की करने के लिए लॉगिन करें</strong>
+                <p style="margin: 4px 0 0; font-size: 12.5px; opacity: 0.95;">लॉगिन या नया खाता बनाते ही आपका चुना हुआ ट्रैक्टर तुरंत बुक हो जाएगा।</p>
+            </div>
+
+            <!-- Auth Tabs: Login & Create Account -->
+            <div class="auth-tabs">
+                <button type="button" class="auth-tab-btn active" id="tabLoginBtn" onclick="switchAuthTab('login')">
+                    🔑 <span data-i18n="tabLogin">लॉगिन करें</span>
+                </button>
+                <button type="button" class="auth-tab-btn" id="tabRegisterBtn" onclick="switchAuthTab('register')">
+                    📝 <span data-i18n="tabRegister">नया खाता बनाएं</span>
+                </button>
+            </div>
+
+            <!-- Login Form -->
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <!-- Password Login Fields -->
+                <div id="loginPasswordFields">
+                    <div class="form-group">
+                        <label for="username" data-i18n="labelUsername">मोबाइल नंबर या यूजरनेम</label>
+                        <input type="text" id="username" data-i18n-placeholder="placeholderUsername" placeholder="जैसे: 9876543210 या kisan123" autocomplete="username">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password" data-i18n="labelPassword">पासवर्ड</label>
+                        <input type="password" id="password" data-i18n-placeholder="placeholderPassword" placeholder="अपना पासवर्ड दर्ज करें" autocomplete="current-password">
+                    </div>
+
+                    <div class="form-options">
+                        <label class="remember-me">
+                            <input type="checkbox" id="rememberMe"> <span data-i18n="rememberMe">याद रखें</span>
+                        </label>
+                        <a href="#" class="forgot-link" onclick="forgotPassword(event)" data-i18n="forgotPassword">पासवर्ड भूल गए?</a>
+                    </div>
+                </div>
+
+                <div id="loginMessage" class="message-box"></div>
+
+                <button type="submit" class="btn btn-primary login-btn" id="loginSubmitBtn" data-i18n="btnLoginWithPassword">
+                    🚜 लॉगिन करें
+                </button>
+            </form>
+
+            <div id="loginSectionFooter">
+                <div class="divider">
+                    <span data-i18n="dividerOr">या</span>
+                </div>
+
+                <button type="button" class="btn btn-guest" onclick="guestLogin()" data-i18n="guestBtn">
+                    🌾 गेस्ट के रूप में देखें
+                </button>
+
+                <div class="login-footer">
+                    <p><span data-i18n="newFarmerText">नए किसान हैं?</span> <a href="#" onclick="switchAuthTab('register'); return false;" data-i18n="createAccountLink">नया अकाउंट बनाएं</a></p>
+                    <p style="margin-top: 10px;"><a href="admin.html" style="font-size: 14px; color: #37474f; text-decoration: none; font-weight: 600;">🛡️ एडमिन कंट्रोल रूम लॉगिन</a></p>
+                </div>
+            </div>
+
+            <!-- 3. Forgot Password / Reset Password Form -->
+            <form id="forgotForm" onsubmit="handleResetPassword(event)" style="display: none;">
+                <div class="forgot-header">
+                    <span class="forgot-icon">🔒</span>
+                    <h3 data-i18n="forgotTitle">पासवर्ड रीसेट करें</h3>
+                    <p class="forgot-subtitle" data-i18n="forgotSubtitle">अपनी पहचान सत्यापित करने के लिए रजिस्ट्रेशन में दी गई जानकारी दर्ज करें</p>
+                </div>
+
+                <!-- Step 1: Verify Identity -->
+                <div id="resetStep1">
+                    <div class="form-group">
+                        <label for="resetPhone" data-i18n="labelPhone">मोबाइल नंबर (10 अंक) *</label>
+                        <input type="tel" id="resetPhone" pattern="[0-9]{10}" maxlength="10" placeholder="जैसे: 9876543210" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="resetName" data-i18n="forgotLabelName">पूरा नाम (रजिस्ट्रेशन वाला) *</label>
+                        <input type="text" id="resetName" placeholder="जैसे: रामप्रसाद यादव" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="resetVillage" data-i18n="forgotLabelVillage">गांव / जिला (रजिस्ट्रेशन वाला) *</label>
+                        <input type="text" id="resetVillage" placeholder="जैसे: मवाना, मेरठ" required>
+                    </div>
+
+                    <div id="forgotMessage" class="message-box"></div>
+
+                    <button type="button" class="btn btn-primary login-btn" onclick="verifyResetIdentity()" data-i18n="forgotBtnVerify">
+                        🔍 पहचान सत्यापित करें
+                    </button>
+                </div>
+
+                <!-- Step 2: Set New Password (hidden until verified) -->
+                <div id="resetStep2" style="display: none;">
+                    <div class="reset-verified-badge">
+                        ✅ <span data-i18n="forgotVerified">पहचान सत्यापित! अब नया पासवर्ड बनाएं</span>
+                    </div>
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label for="resetNewPassword" data-i18n="labelNewPassword">नया पासवर्ड बनाएं *</label>
+                            <input type="password" id="resetNewPassword" placeholder="कम से कम 4 अंक" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="resetConfirmPassword" data-i18n="labelConfirmPassword">पासवर्ड दोबारा डालें *</label>
+                            <input type="password" id="resetConfirmPassword" placeholder="वही पासवर्ड दोबारा" required>
+                        </div>
+                    </div>
+
+                    <div id="resetMessage" class="message-box"></div>
+
+                    <button type="submit" class="btn btn-primary login-btn" data-i18n="forgotBtnReset">
+                        🔐 नया पासवर्ड सेट करें
+                    </button>
+                </div>
+
+                <div class="login-footer" style="margin-top: 18px;">
+                    <p><a href="#" onclick="cancelForgotPassword(); return false;" data-i18n="forgotBackToLogin">← लॉगिन पर वापस जाएं</a></p>
+                </div>
+            </form>
+
+            <!-- 4. Create Account (Register) Form -->
+            <form id="registerForm" onsubmit="handleRegister(event)" style="display: none;">
+                <!-- Register Wizard Progress Indicator -->
+                <div class="wizard-header" id="regWizardProgress">
+                    <div class="wizard-progress-meta">
+                        <span class="wizard-step-badge" id="regStepBadge">कदम 1 / 3 (Step 1 of 3)</span>
+                        <span class="wizard-step-title" id="regStepTitle" data-i18n="regStepTitleName">नाम व भूमिका</span>
+                    </div>
+                    <div class="wizard-progress-track" role="progressbar" aria-valuemin="1" aria-valuemax="3" aria-valuenow="1" id="regProgressBar">
+                        <div class="wizard-progress-fill" id="regProgressFill" style="width: 33%;"></div>
+                    </div>
+                </div>
+
+                <!-- Step 1: Role & Full Name -->
+                <div class="wizard-step-pane active" id="regStepPane1">
+                    <div class="form-group">
+                        <label data-i18n="labelRole">आपकी भूमिका / Your Role *</label>
+                        <div class="role-selector-grid">
+                            <label class="role-card selected" id="roleCardFarmer">
+                                <input type="radio" name="regRole" value="farmer" checked onchange="handleRoleChange(this)">
+                                <span class="role-icon">🌾</span>
+                                <div class="role-meta">
+                                    <span class="role-title" data-i18n="roleFarmerTitle">किसान भाई</span>
+                                    <span class="role-desc" data-i18n="roleFarmerDesc">ट्रैक्टर किराये पर चाहिए</span>
+                                </div>
+                            </label>
+                            <label class="role-card" id="roleCardOwner">
+                                <input type="radio" name="regRole" value="owner" onchange="handleRoleChange(this)">
+                                <span class="role-icon">🚜</span>
+                                <div class="role-meta">
+                                    <span class="role-title" data-i18n="roleOwnerTitle">ट्रैक्टर मालिक</span>
+                                    <span class="role-desc" data-i18n="roleOwnerDesc">किराये पर कमाई करनी है</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="regFullName" data-i18n="labelFullName">पूरा नाम / Farmer Name *</label>
+                        <input type="text" id="regFullName" data-i18n-placeholder="placeholderFullName" placeholder="जैसे: रामप्रसाद यादव" required autocomplete="name">
+                    </div>
+
+                    <div id="regStepError1" class="wizard-step-error"></div>
+
+                    <div class="wizard-nav-row">
+                        <button type="button" class="btn btn-primary btn-wizard-next" onclick="nextRegisterStep()">
+                            <span data-i18n="wizardBtnNext">आगे बढ़ें (मोबाइल व पता)</span> →
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 2: Mobile & Village Location -->
+                <div class="wizard-step-pane" id="regStepPane2">
+                    <div class="form-group">
+                        <label for="regPhone" data-i18n="labelPhone">मोबाइल नंबर (10 अंक) *</label>
+                        <input type="tel" id="regPhone" pattern="[0-9]{10}" inputmode="numeric" maxlength="10" data-i18n-placeholder="placeholderPhone" placeholder="जैसे: 9876543210" required autocomplete="tel">
+                    </div>
+
+                    <div class="form-group">
+                        <div class="label-with-action">
+                            <label for="regVillage" data-i18n="labelVillage">गांव और जिला *</label>
+                            <button type="button" class="btn-gps-inline" id="btnRegGps" onclick="detectRegisterLocation()" title="GPS से अपना गांव पता करें" aria-label="GPS से अपना गांव पता करें">
+                                📍 <span data-i18n="btnGpsInline">GPS से खोजें</span>
+                            </button>
+                        </div>
+                        <input type="text" id="regVillage" data-i18n-placeholder="placeholderVillage" placeholder="जैसे: मवाना, मेरठ (उत्तर प्रदेश)" required autocomplete="address-level2">
+                        <div id="regGpsStatus" class="gps-status-pill" style="display: none; margin-top: 6px;"></div>
+                    </div>
+
+                    <div id="regStepError2" class="wizard-step-error"></div>
+
+                    <div class="wizard-nav-row">
+                        <button type="button" class="btn btn-secondary btn-wizard-back" onclick="prevRegisterStep()">
+                            ← <span data-i18n="wizardBtnBack">पीछे</span>
+                        </button>
+                        <button type="button" class="btn btn-primary btn-wizard-next" onclick="nextRegisterStep()">
+                            <span data-i18n="wizardBtnNext">आगे बढ़ें (पासवर्ड)</span> →
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 3: Password & Confirm -->
+                <div class="wizard-step-pane" id="regStepPane3">
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label for="regPassword" data-i18n="labelNewPassword">पासवर्ड बनाएं *</label>
+                            <input type="password" id="regPassword" data-i18n-placeholder="placeholderNewPassword" placeholder="कम से कम 4 अंक" required autocomplete="new-password">
+                        </div>
+                        <div class="form-group">
+                            <label for="regConfirmPassword" data-i18n="labelConfirmPassword">पासवर्ड दोबारा डालें *</label>
+                            <input type="password" id="regConfirmPassword" data-i18n-placeholder="placeholderConfirmPassword" placeholder="वही पासवर्ड दोबारा डालें" required autocomplete="new-password">
+                        </div>
+                    </div>
+
+                    <div id="regStepError3" class="wizard-step-error"></div>
+                    <div id="registerMessage" class="message-box"></div>
+
+                    <button type="submit" class="btn btn-primary login-btn" id="btnSubmitRegister" data-i18n="regBtn" style="margin-top: 10px;">
+                        ✅ खाता बनाएं और शुरू करें
+                    </button>
+
+                    <div class="wizard-nav-row" style="margin-top: 10px;">
+                        <button type="button" class="btn btn-secondary btn-wizard-back" onclick="prevRegisterStep()">
+                            ← <span data-i18n="wizardBtnBack">पीछे</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="login-footer" style="margin-top: 18px;">
+                    <p><span data-i18n="alreadyAccountText">पहले से खाता है?</span> <a href="#" onclick="switchAuthTab('login'); return false;" data-i18n="loginLink">लॉगिन करें</a></p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Supabase Cloud Client SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var params = new URLSearchParams(window.location.search);
+            if (params.get('tab') === 'register') {
+                switchAuthTab('register');
+            }
+            var hasDraft = sessionStorage.getItem('pendingBookingDraft');
+            if (params.get('redirect') === 'booking' || hasDraft) {
+                var notice = document.getElementById('bookingRedirectNotice');
+                if (notice) notice.style.display = 'block';
+
+                var phone = params.get('phone');
+                var name = params.get('name');
+                if (phone) {
+                    var uInput = document.getElementById('username');
+                    var regPhone = document.getElementById('regPhone');
+                    if (uInput && !uInput.value) uInput.value = phone;
+                    if (regPhone && !regPhone.value) regPhone.value = phone;
+                }
+                if (name) {
+                    var regName = document.getElementById('regFullName');
+                    if (regName && !regName.value) regName.value = decodeURIComponent(name);
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>
